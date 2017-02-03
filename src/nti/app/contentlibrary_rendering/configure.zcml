@@ -10,4 +10,16 @@
 
 	<include package="nti.contentlibrary_rendering" />
 
+	<subscriber handler=".subscribers._content_published"
+                for="nti.contentlibrary.interfaces.IRenderableContentPackage
+                nti.coremetadata.interfaces.IObjectPublishedEvent"/>
+
+    <subscriber handler=".subscribers._content_unpublished"
+                for="nti.contentlibrary.interfaces.IRenderableContentPackage
+                nti.coremetadata.interfaces.IObjectUnpublishedEvent"/>
+
+    <subscriber handler=".subscribers._content_updated"
+                for="nti.contentlibrary.interfaces.IRenderableContentPackage
+                     nti.externalization.interfaces.IObjectModifiedFromExternalEvent" />
+
 </configure>
