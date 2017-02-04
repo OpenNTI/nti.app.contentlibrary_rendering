@@ -11,15 +11,9 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
-from hamcrest import has_key
-from hamcrest import has_item
 from hamcrest import not_none
-from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import assert_that
-from hamcrest import greater_than
-from hamcrest import has_property
-from hamcrest import contains_string
 does_not = is_not
 
 import fudge
@@ -47,33 +41,32 @@ class TestRender(ContentlibraryRenderingLayerTest):
     @fudge.patch('nti.contentlibrary_rendering.common.find_object_with_ntiid')
     def test_render(self, mock_find_package):
         package = self._get_package()
-        mock_find_package.is_callable().returns( package )
-        meta = IContentPackageRenderMetadata( package, None )
-        assert_that( meta, not_none() )
-        assert_that( meta, has_length( 0 ))
-        assert_that( meta.mostRecentRenderJob(), none() )
+        mock_find_package.is_callable().returns(package)
+        meta = IContentPackageRenderMetadata(package, None)
+        assert_that(meta, not_none())
+        assert_that(meta, has_length(0))
+        assert_that(meta.mostRecentRenderJob(), none())
 
         # Publish, job1
         package.publish()
-        meta = IContentPackageRenderMetadata( package, None )
+        meta = IContentPackageRenderMetadata(package, None)
         job = meta.mostRecentRenderJob()
-        assert_that( meta, not_none() )
-        assert_that( meta, has_length( 1 ))
-        assert_that( job, not_none() )
-        assert_that( job.is_finished(), is_(True) )
-        assert_that( job.PackageNTIID, is_(package.ntiid) )
-        assert_that( job.JobId, not_none() )
+        assert_that(meta, not_none())
+        assert_that(meta, has_length(1))
+        assert_that(job, not_none())
+        assert_that(job.is_finished(), is_(True))
+        assert_that(job.PackageNTIID, is_(package.ntiid))
+        assert_that(job.JobId, not_none())
 
         # Publish, job2
         package.unpublish()
         package.publish()
-        meta = IContentPackageRenderMetadata( package, None )
+        meta = IContentPackageRenderMetadata(package, None)
         job2 = meta.mostRecentRenderJob()
-        assert_that( meta, not_none() )
-        assert_that( meta, has_length( 2 ))
-        assert_that( job2, not_none() )
-        assert_that( job2.is_finished(), is_(True) )
-        assert_that( job2.PackageNTIID, is_(package.ntiid) )
-        assert_that( job, is_not( job2 ))
-        assert_that( job.JobId, is_not( job2.JobId ))
-
+        assert_that(meta, not_none())
+        assert_that(meta, has_length(2))
+        assert_that(job2, not_none())
+        assert_that(job2.is_finished(), is_(True))
+        assert_that(job2.PackageNTIID, is_(package.ntiid))
+        assert_that(job, is_not(job2))
+        assert_that(job.JobId, is_not(job2.JobId))
