@@ -10,6 +10,13 @@
 
 	<include package="nti.contentlibrary_rendering" />
 
+    <!-- Decorators -->
+    <subscriber factory=".decorators._RenderablePackageEditorDecorator"
+                provides="nti.externalization.interfaces.IExternalMappingDecorator"
+                for="nti.contentlibrary.interfaces.IRenderableContentPackage
+                     pyramid.interfaces.IRequest" />
+
+    <!-- Subscribers -->
 	<subscriber handler=".subscribers._content_published"
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                 nti.coremetadata.interfaces.IObjectPublishedEvent"/>
