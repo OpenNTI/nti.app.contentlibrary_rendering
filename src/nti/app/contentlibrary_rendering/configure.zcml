@@ -29,4 +29,8 @@
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                      nti.externalization.interfaces.IObjectModifiedFromExternalEvent" />
 
+	<utility factory=".validators.ReStructuredTextValidator" /> <-- default -->
+	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
+	<utility factory=".validators.ReStructuredTextValidator" name="reStructuredText" />
+	
 </configure>
