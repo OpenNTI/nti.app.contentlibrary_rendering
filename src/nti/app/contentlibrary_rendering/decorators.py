@@ -9,12 +9,12 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from pyramid.interfaces import IRequest
-
 from zope import component
 from zope import interface
 
-from zope.location.interfaces import ILocation
+from pyramid.interfaces import IRequest
+
+from pyramid.threadlocal import get_current_request
 
 from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
 
@@ -35,9 +35,19 @@ from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
 
-def _package_url_path(package, request):
-    ds2 = request.path_info_peek()
-    path = '%s/Library/%s' % (ds2, package.ntiid)
+
+def get_ds2(request=None):
+    request = request if request else get_current_request()
+    try:
+        # e.g. /dataserver2
+        result = request.path_info_peek() if request else None
+    except AttributeError:  # in unit test we may see this
+        result = None
+    return result or u"dataserver2"
+
+
+def _package_url_path(package, request=None):
+    path = '%s/Library/%s' % (get_ds2(request), package.ntiid)
     return path
 
 
@@ -57,15 +67,16 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
         if meta is not None:
             latest_job = meta.mostRecentRenderJob()
             if latest_job is not None:
-                # Decorate the job itself along with a link to fetch job status.
+                # Decorate the job itself along with a link to fetch job
+                # status.
                 result['LatestRenderJob'] = latest_job
                 _links = result.setdefault(LINKS, [])
-                path = _package_url_path( self.context, self.request )
+                path = _package_url_path(self.context, self.request)
                 link = Link(path,
                             rel=VIEW_QUERY_JOB,
                             elements=(VIEW_QUERY_JOB,),
-                            params={'job_id': latest_job.job_id})
-                interface.alsoProvides(link, ILocation)
+                            params={'job_id': latest_job.job_id},
+                            ignore_properties_of_target=True)
                 link.__name__ = ''
                 link.__parent__ = context
                 _links.append(link)
