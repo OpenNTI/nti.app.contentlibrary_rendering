@@ -52,7 +52,10 @@ MIME_TYPE = StandardExternalFields.MIMETYPE
                name=VIEW_PUBLISH,
                permission=nauth.ACT_CONTENT_EDIT)
 class RenderableContentPackagePublishView(AbstractAuthenticatedView):
-    pass
+
+    def __call__(self):
+        self.context.publish()
+        return self.context
 
 
 @view_config(context=IRenderableContentPackage)
