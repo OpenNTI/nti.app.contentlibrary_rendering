@@ -9,19 +9,40 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-# from pyramid import httpexceptions as hexc
+from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
+from requests.structures import CaseInsensitiveDict
+
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.app.contentlibrary_rendering.views import MessageFactory as _
+
+from nti.app.externalization.error import raise_json_error
 
 from nti.app.publishing import VIEW_PUBLISH
 from nti.app.publishing import VIEW_UNPUBLISH
 
+from nti.common.string import is_true
+
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+
+from nti.contenttypes.courses.utils import content_unit_to_courses
+
 from nti.dataserver import authorization as nauth
+
+from nti.externalization.externalization import to_external_object
+from nti.externalization.externalization import StandardExternalFields
+
+from nti.links.links import Link
+
+CLASS = StandardExternalFields.CLASS
+LINKS = StandardExternalFields.LINKS
+MIME_TYPE = StandardExternalFields.MIMETYPE
 
 
 @view_config(context=IRenderableContentPackage)
@@ -41,4 +62,40 @@ class RenderableContentPackagePublishView(AbstractAuthenticatedView):
                name=VIEW_UNPUBLISH,
                permission=nauth.ACT_CONTENT_EDIT)
 class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
-    pass
+    """
+    A view to unpublish a renderable content package.
+    """
+    CONFIRM_CODE = 'RenderableContentPackageUnpublish'
+    CONFIRM_MSG = _('This content has been published to courses. Are you sure you want to unpublish?')
+
+    def _raise_conflict_error(self, code, message, courses):
+        entries = [ICourseCatalogEntry(x).ntiid for x in courses if ICourseCatalogEntry(x) is not None]
+        logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
+                    self.context.ntiid,
+                    entries)
+        params = dict( self.request.params )
+        params['force'] = True
+        links = (
+            Link(self.request.path, rel='confirm',
+                 params=params, method='POST'),
+        )
+        raise_json_error(self.request,
+                         hexc.HTTPConflict,
+                         {
+                            CLASS: 'DestructiveChallenge',
+                            u'message': message,
+                            u'code': code,
+                            LINKS: to_external_object(links),
+                            MIME_TYPE: 'application/vnd.nextthought.destructivechallenge'
+                         },
+                         None)
+
+    def __call__(self):
+        courses = content_unit_to_courses()
+        params = CaseInsensitiveDict( self.request.params )
+        force = is_true( params.get( 'force' ) )
+        if not courses or force:
+            self.context.unpublish()
+        else:
+            self._raise_conflict_error(self.CONFIRM_CODE, self.CONFIRM_MSG, courses)
+        return self.context
