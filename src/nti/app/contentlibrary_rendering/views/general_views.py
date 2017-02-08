@@ -26,7 +26,22 @@ from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
+from nti.contentlibrary_rendering.utils import render_package
+
 from nti.dataserver import authorization as nauth
+
+
+@view_config(context=IRenderableContentPackage)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               name="render",
+               permission=nauth.ACT_CONTENT_EDIT)
+class RenderContentPackageView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        job = render_package(self.context, self.remoteUser)
+        return job
 
 
 @view_config(context=IRenderableContentPackage)
@@ -43,26 +58,26 @@ class QueryJobView(AbstractAuthenticatedView):
 
     def __call__(self):
         params = CaseInsensitiveDict(self.request.params)
-        job_id = params.get( 'JobId' ) or params.get( 'job' ) or params.get( 'job_id' )
-        meta = IContentPackageRenderMetadata( self.context, None )
+        job_id = params.get('JobId') or params.get('job') or params.get('job_id')
+        meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
-            logger.warn( 'No meta found for content package (%s)', self.context.ntiid )
+            logger.warn(
+                'No meta found for content package (%s)',
+                self.context.ntiid)
             raise hexc.HTTPNotFound(_('Content has not been processed.'))
 
         if job_id:
             try:
                 render_job = meta[job_id]
             except KeyError:
-                logger.warn( 'No job found for content package (%s) (%s)',
-                             self.context.ntiid, job_id )
+                logger.warn('No job found for content package (%s) (%s)',
+                            self.context.ntiid, job_id)
                 raise hexc.HTTPNotFound(_('No content found for job key.'))
         else:
             render_job = meta.mostRecentRenderJob()
 
         if render_job is None:
-            logger.warn( 'No job found for content package (%s)',
-                         self.context.ntiid )
+            logger.warn('No job found for content package (%s)',
+                        self.context.ntiid)
             raise hexc.HTTPNotFound(_('Content has not been processed.'))
         return render_job
-
-
