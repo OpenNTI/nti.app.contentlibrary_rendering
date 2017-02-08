@@ -17,6 +17,7 @@ from pyramid.interfaces import IRequest
 from pyramid.threadlocal import get_current_request
 
 from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
+from nti.app.contentlibrary_rendering import LIBRARY_ADAPTER
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
@@ -47,7 +48,7 @@ def get_ds2(request=None):
 
 
 def _package_url_path(package, request=None):
-    path = '/%s/Library/%s' % (get_ds2(request), package.ntiid)
+    path = '/%s/%s/%s' % (get_ds2(request), LIBRARY_ADAPTER, package.ntiid)
     return path
 
 

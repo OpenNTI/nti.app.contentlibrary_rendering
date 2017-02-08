@@ -9,4 +9,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from nti.app.contentlibrary import LIBRARY_ADAPTER
+
+#: Render job
 VIEW_QUERY_JOB = 'QueryRenderJob'
