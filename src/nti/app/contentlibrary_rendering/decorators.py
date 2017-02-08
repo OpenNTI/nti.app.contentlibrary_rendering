@@ -71,7 +71,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
                 # status.
                 result['LatestRenderJob'] = latest_job
                 _links = result.setdefault(LINKS, [])
-                path = _package_url_path(self.context, self.request)
+                path = _package_url_path(context, self.request)
                 link = Link(path,
                             rel=VIEW_QUERY_JOB,
                             elements=(VIEW_QUERY_JOB,),
