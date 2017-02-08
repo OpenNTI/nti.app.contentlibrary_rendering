@@ -9,12 +9,12 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from requests.structures import CaseInsensitiveDict
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-
-from requests.structures import CaseInsensitiveDict
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
@@ -71,12 +71,18 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
     CONFIRM_CODE = 'RenderableContentPackageUnpublish'
     CONFIRM_MSG = _('This content has been published to courses. Are you sure you want to unpublish?')
 
+    def _entries(self, courses):
+        for course in courses or ():
+            entry = ICourseCatalogEntry(course, None)
+            if entry is not None:
+                yield entry
+
     def _raise_conflict_error(self, code, message, courses):
-        entries = [ICourseCatalogEntry(x).ntiid for x in courses if ICourseCatalogEntry(x) is not None]
+        entries = [x.ntiid for x in self._entries(courses)]
         logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
                     self.context.ntiid,
                     entries)
-        params = dict( self.request.params )
+        params = dict(self.request.params)
         params['force'] = True
         links = (
             Link(self.request.path, rel='confirm',
@@ -85,20 +91,22 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
         raise_json_error(self.request,
                          hexc.HTTPConflict,
                          {
-                            CLASS: 'DestructiveChallenge',
-                            u'message': message,
-                            u'code': code,
-                            LINKS: to_external_object(links),
-                            MIME_TYPE: 'application/vnd.nextthought.destructivechallenge'
+                             CLASS: 'DestructiveChallenge',
+                             u'message': message,
+                             u'code': code,
+                             LINKS: to_external_object(links),
+                             MIME_TYPE: 'application/vnd.nextthought.destructivechallenge'
                          },
                          None)
 
     def __call__(self):
-        courses = content_unit_to_courses()
-        params = CaseInsensitiveDict( self.request.params )
-        force = is_true( params.get( 'force' ) )
+        courses = content_unit_to_courses(self.context)
+        params = CaseInsensitiveDict(self.request.params)
+        force = is_true(params.get('force'))
         if not courses or force:
             self.context.unpublish()
         else:
-            self._raise_conflict_error(self.CONFIRM_CODE, self.CONFIRM_MSG, courses)
+            self._raise_conflict_error(self.CONFIRM_CODE,
+                                       self.CONFIRM_MSG,
+                                       courses)
         return self.context
