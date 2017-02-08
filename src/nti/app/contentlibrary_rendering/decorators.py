@@ -47,7 +47,7 @@ def get_ds2(request=None):
 
 
 def _package_url_path(package, request=None):
-    path = '%s/Library/%s' % (get_ds2(request), package.ntiid)
+    path = '/%s/Library/%s' % (get_ds2(request), package.ntiid)
     return path
 
 
