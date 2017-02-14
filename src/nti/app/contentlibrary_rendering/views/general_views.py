@@ -22,6 +22,10 @@ from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
+from nti.common.string import is_true
+
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
@@ -37,10 +41,18 @@ from nti.dataserver import authorization as nauth
                request_method='POST',
                name="render",
                permission=nauth.ACT_CONTENT_EDIT)
-class RenderContentPackageView(AbstractAuthenticatedView):
+class RenderContentPackageView(AbstractAuthenticatedView,
+                               ModeledContentUploadRequestUtilsMixin):
+
+    def readInput(self, value=None):
+        result = super(RenderContentPackageView, self).readInput(self, value=value)
+        return CaseInsensitiveDict(result)
 
     def __call__(self):
-        job = render_package(self.context, self.remoteUser)
+        data = self.readInput()
+        value = data.get('mark_rendered') or data.get('MarkRendered') or 'True'
+        mark_rendered = is_true(value)
+        job = render_package(self.context, self.remoteUser, mark_rendered)
         return job
 
 
@@ -61,9 +73,8 @@ class QueryJobView(AbstractAuthenticatedView):
         job_id = params.get('JobId') or params.get('job') or params.get('job_id')
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
-            logger.warn(
-                'No meta found for content package (%s)',
-                self.context.ntiid)
+            logger.warn('No meta found for content package (%s)',
+                        self.context.ntiid)
             raise hexc.HTTPNotFound(_('Content has not been processed.'))
 
         if job_id:
