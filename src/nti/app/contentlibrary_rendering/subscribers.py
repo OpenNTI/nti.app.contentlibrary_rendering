@@ -17,6 +17,8 @@ from nti.app.authentication import get_remote_user
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
+from nti.contentlibrary_rendering.unpublish import unpublish_package
+
 from nti.contentlibrary_rendering.utils import render_package
 
 from nti.coremetadata.interfaces import IObjectPublishedEvent
@@ -37,8 +39,4 @@ def _content_published(package, event):
 
 @component.adapter(IRenderableContentPackage, IObjectUnpublishedEvent)
 def _content_unpublished(package, event):
-    """
-    When a persistent content library is unpublished, push
-    it into our processing factory
-    """
-    # TODO: implement
+    unpublish_package(package)
