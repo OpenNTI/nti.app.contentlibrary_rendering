@@ -25,10 +25,6 @@
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                      nti.coremetadata.interfaces.IObjectUnpublishedEvent"/>
 
-    <subscriber handler=".subscribers._content_updated"
-                for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     nti.externalization.interfaces.IObjectModifiedFromExternalEvent" />
-
     <!-- default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
