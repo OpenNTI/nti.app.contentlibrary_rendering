@@ -16,11 +16,17 @@ from hamcrest import has_length
 from hamcrest import assert_that
 does_not = is_not
 
+import os
 import fudge
+
+from zope import component
 
 from nti.contentlibrary.zodb import RenderableContentPackage
 
+from nti.contentlibrary_rendering.interfaces import IContentTransformer
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
+
+from nti.contentlibrary_rendering._render import render_document
 
 from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
 
@@ -39,7 +45,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
         return package
 
     @fudge.patch('nti.contentlibrary_rendering.common.find_object_with_ntiid')
-    def test_render(self, mock_find_package):
+    def test_render_job(self, mock_find_package):
         package = self._get_package()
         mock_find_package.is_callable().returns(package)
         meta = IContentPackageRenderMetadata(package, None)
@@ -70,3 +76,25 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(job2.PackageNTIID, is_(package.ntiid))
         assert_that(job, is_not(job2))
         assert_that(job.JobId, is_not(job2.JobId))
+
+    def _get_rst_data(self, filename='sample.rst'):
+        path = os.path.join(os.path.dirname(__file__), filename)
+        with open(path, 'r') as f:
+            result = f.read()
+        return result
+
+    def _get_rst_dom(self, rst_source):
+        transformer = component.getUtility(IContentTransformer, 'rst')
+        return transformer.transform(rst_source, context=None)
+
+    def test_render_basic(self):
+        new_content = self._get_rst_data('basic.rst')
+        rst_dom = self._get_rst_dom( new_content )
+        tex_dom = render_document(rst_dom, jobname='wowza_working')
+        output_dir = tex_dom.userdata['working-dir']
+
+    def test_render_sample(self):
+        new_content = self._get_rst_data('sample.rst')
+        rst_dom = self._get_rst_dom( new_content )
+        tex_dom = render_document(rst_dom, jobname='wowza_sample')
+        output_dir = tex_dom.userdata['working-dir']

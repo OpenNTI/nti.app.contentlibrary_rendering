@@ -25,7 +25,6 @@ from nti.coremetadata.interfaces import IObjectUnpublishedEvent
 
 from nti.externalization.interfaces import IObjectModifiedFromExternalEvent
 
-
 @component.adapter(IRenderableContentPackage, IObjectPublishedEvent)
 def _content_published(package, event):
     """
