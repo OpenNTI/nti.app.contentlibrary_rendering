@@ -29,9 +29,8 @@ class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
     set_up_packages = ('nti.containers',
                        'nti.contentlibrary',
                        'nti.externalization',
-                       'nti.contentlibrary_rendering',
-                       'nti.app.contentlibrary_rendering',
-                       'nti.contenttypes.presentation')
+                       'nti.contenttypes.presentation'
+                       'nti.app.contentlibrary_rendering')
 
     @classmethod
     def setUp(cls):
