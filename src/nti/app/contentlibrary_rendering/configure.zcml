@@ -30,6 +30,4 @@
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
 	<utility factory=".validators.ReStructuredTextValidator" name="reStructuredText" />
 
-	<utility factory=".transformers.RSTToPlastexDocumentTranslator" />
-
 </configure>
