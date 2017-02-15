@@ -50,9 +50,10 @@ class RenderContentPackageView(AbstractAuthenticatedView,
 
     def __call__(self):
         data = self.readInput()
+        provider = data.get('provider') or 'NTI'
         value = data.get('mark_rendered') or data.get('MarkRendered') or 'True'
         mark_rendered = is_true(value)
-        job = render_package(self.context, self.remoteUser, mark_rendered)
+        job = render_package(self.context, self.remoteUser, provider, mark_rendered)
         return job
 
 

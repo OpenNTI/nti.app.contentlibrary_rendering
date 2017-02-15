@@ -18,12 +18,12 @@ from nti.app.authentication import get_remote_user
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary_rendering.utils import render_package
-from nti.contentlibrary_rendering.utils import render_modified_package
 
 from nti.coremetadata.interfaces import IObjectPublishedEvent
 from nti.coremetadata.interfaces import IObjectUnpublishedEvent
 
-from nti.externalization.interfaces import IObjectModifiedFromExternalEvent
+from nti.ntiids.ntiids import get_provider
+
 
 @component.adapter(IRenderableContentPackage, IObjectPublishedEvent)
 def _content_published(package, event):
@@ -31,17 +31,8 @@ def _content_published(package, event):
     When a renderable content package is published, render it.
     """
     user = get_remote_user()
-    render_package(package, user)
-
-
-@component.adapter(IRenderableContentPackage, IObjectModifiedFromExternalEvent)
-def _content_updated(package, event):
-    """
-    When a persistent content library is modified, update it.
-    """
-    user = get_remote_user()
-    # TODO: Check fields before re-rendering? New event.
-    render_modified_package(package, user)
+    provider = get_provider(package.ntiid)
+    render_package(package, user, provider)
 
 
 @component.adapter(IRenderableContentPackage, IObjectUnpublishedEvent)
