@@ -11,6 +11,7 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import has_item
 from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
@@ -21,6 +22,8 @@ import fudge
 
 from zope import component
 
+from nti.common.file import safe_filename
+
 from nti.contentlibrary.zodb import RenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentTransformer
@@ -29,6 +32,10 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 from nti.contentlibrary_rendering._render import render_document
 
 from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
+
+from nti.ntiids.ntiids import TYPE_HTML
+from nti.ntiids.ntiids import make_ntiid
+from nti.ntiids.ntiids import make_specific_safe
 
 
 class TestRender(ContentlibraryRenderingLayerTest):
@@ -87,14 +94,37 @@ class TestRender(ContentlibraryRenderingLayerTest):
         transformer = component.getUtility(IContentTransformer, 'rst')
         return transformer.transform(rst_source, context=None)
 
+    def _get_page_filename(self, job_name, page_name):
+        specific = make_specific_safe( '%s %s' % (job_name, page_name))
+        ntiid = make_ntiid(provider='NTI', nttype=TYPE_HTML, specific=specific)
+        filename = safe_filename(ntiid)
+        # Rendering also obscures periods/commas.
+        filename = filename.replace('.','_')
+        filename = filename.replace(',','_')
+        filename = '%s.html' % filename
+        return filename
+
     def test_render_basic(self):
         new_content = self._get_rst_data('basic.rst')
         rst_dom = self._get_rst_dom( new_content )
-        tex_dom = render_document(rst_dom, jobname='wowza_working')
+        job_name = 'wowza_basic'
+        page_name = 'Inline Styles'.lower()
+        page_file = self._get_page_filename(job_name, page_name)
+
+        tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
+        output_files = os.listdir( output_dir )
+        assert_that( output_files, has_item( 'index.html' ))
+        assert_that( output_files, has_item( 'eclipse-toc.xml' ))
+        assert_that( output_files, has_item( page_file ))
 
     def test_render_sample(self):
         new_content = self._get_rst_data('sample.rst')
         rst_dom = self._get_rst_dom( new_content )
-        tex_dom = render_document(rst_dom, jobname='wowza_sample')
+        job_name = 'wowza_sample'
+
+        tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
+        output_files = os.listdir( output_dir )
+        assert_that( output_files, has_item( 'index.html' ))
+        assert_that( output_files, has_item( 'eclipse-toc.xml' ))
