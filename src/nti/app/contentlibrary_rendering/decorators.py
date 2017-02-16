@@ -63,7 +63,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
         return  self._is_authenticated \
             and has_permission(ACT_CONTENT_EDIT, context, self.request)
 
-    def _do_decorate_external(self, context, result):
+    def _render_job_link(self, context, result):
         meta = IContentPackageRenderMetadata(context, None)
         if meta is not None:
             latest_job = meta.mostRecentRenderJob()
@@ -81,3 +81,18 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
                 link.__name__ = ''
                 link.__parent__ = context
                 _links.append(link)
+
+    def _render_link(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        path = _package_url_path(context, self.request)
+        link = Link(path,
+                    rel="render",
+                    elements=("render",),
+                    ignore_properties_of_target=True)
+        link.__name__ = ''
+        link.__parent__ = context
+        _links.append(link)
+
+    def _do_decorate_external(self, context, result):
+        self._render_link(context, result)
+        self._render_job_link(context, result)
