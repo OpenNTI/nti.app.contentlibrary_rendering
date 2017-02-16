@@ -51,9 +51,12 @@ class RenderContentPackageView(AbstractAuthenticatedView,
     def __call__(self):
         data = self.readInput()
         provider = data.get('provider') or 'NTI'
-        value = data.get('mark_rendered') or data.get('MarkRendered') or 'True'
-        mark_rendered = is_true(value)
-        job = render_package(self.context, self.remoteUser, provider, mark_rendered)
+        mark_rendered = data.get('MarkRendered') \
+                     or data.get('mark_rendered') or 'True'
+        job = render_package(self.context,
+                             self.remoteUser,
+                             provider,
+                             is_true(mark_rendered))
         return job
 
 
@@ -71,7 +74,8 @@ class QueryJobView(AbstractAuthenticatedView):
 
     def __call__(self):
         params = CaseInsensitiveDict(self.request.params)
-        job_id = params.get('JobId') or params.get('job') or params.get('job_id')
+        job_id = params.get('JobId') or params.get(
+            'job') or params.get('job_id')
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
             logger.warn('No meta found for content package (%s)',
