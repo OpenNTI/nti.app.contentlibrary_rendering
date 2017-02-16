@@ -13,6 +13,8 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
+from zope.intid.interfaces import IIntIdRemovedEvent
+
 from nti.app.authentication import get_remote_user
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
@@ -20,6 +22,7 @@ from nti.contentlibrary.interfaces import IRenderableContentPackage
 from nti.contentlibrary_rendering.unpublish import unpublish_package
 
 from nti.contentlibrary_rendering.utils import render_package
+from nti.contentlibrary_rendering.utils import remove_renderered_package
 
 from nti.coremetadata.interfaces import IObjectPublishedEvent
 from nti.coremetadata.interfaces import IObjectUnpublishedEvent
@@ -40,3 +43,8 @@ def _content_published(package, event):
 @component.adapter(IRenderableContentPackage, IObjectUnpublishedEvent)
 def _content_unpublished(package, event):
     unpublish_package(package)
+
+
+@component.adapter(IRenderableContentPackage, IIntIdRemovedEvent)
+def _content_removed(package, event):
+    remove_renderered_package(package)
