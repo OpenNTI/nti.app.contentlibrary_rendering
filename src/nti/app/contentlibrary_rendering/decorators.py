@@ -23,6 +23,7 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 
 from nti.appserver.pyramid_authorization import has_permission
 
+from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
@@ -96,3 +97,4 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
     def _do_decorate_external(self, context, result):
         self._render_link(context, result)
         self._render_job_link(context, result)
+        result['isRendered'] = IContentRendered.providedBy(context)
