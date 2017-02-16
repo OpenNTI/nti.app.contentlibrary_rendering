@@ -15,6 +15,7 @@ from hamcrest import has_item
 from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
+from hamcrest import contains_string
 does_not = is_not
 
 import os
@@ -108,7 +109,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
         new_content = self._get_rst_data('basic.rst')
         rst_dom = self._get_rst_dom( new_content )
         job_name = 'wowza_basic'
-        page_name = 'Inline Styles'.lower()
+        page_name = 'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
@@ -118,13 +119,56 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that( output_files, has_item( 'eclipse-toc.xml' ))
         assert_that( output_files, has_item( page_file ))
 
+        with open('%s/%s' % (output_dir, page_file), 'r') as f:
+            page_contents = f.read()
+
+        assert_that(page_contents, contains_string('Section Title'))
+        assert_that(page_contents, contains_string('SubSection1'))
+        assert_that(page_contents, contains_string('SubSection2'))
+        assert_that(page_contents, contains_string('SubsubSection1'))
+        assert_that(page_contents, contains_string('SubsubSection2'))
+        assert_that(page_contents, contains_string('basic text'))
+
     def test_render_sample(self):
         new_content = self._get_rst_data('sample.rst')
         rst_dom = self._get_rst_dom( new_content )
         job_name = 'wowza_sample'
+        page_name = 'Section Title'.lower()
+        page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
         output_files = os.listdir( output_dir )
         assert_that( output_files, has_item( 'index.html' ))
         assert_that( output_files, has_item( 'eclipse-toc.xml' ))
+        assert_that( output_files, has_item( page_file ))
+
+        with open('%s/%s' % (output_dir, page_file), 'r') as f:
+            page_contents = f.read()
+
+        # Requirements
+        # 1. headers
+        assert_that(page_contents, contains_string('SubSection1'))
+        assert_that(page_contents, contains_string('SubSection2'))
+        assert_that(page_contents, contains_string('SubsubSection1'))
+        assert_that(page_contents, contains_string('SubsubSection2'))
+        # 2. paragraphs
+        assert_that(page_contents, contains_string('<p class="par"'))
+        # 3. bold
+        assert_that(page_contents, contains_string('<b class="bfseries">bold</b>'))
+        # 4. italic
+        assert_that(page_contents, contains_string('<i class="itshape">italics</i>'))
+        # 5. underlines
+        # 6. unordered list
+        assert_that(page_contents, contains_string('<ul'))
+        assert_that(page_contents, contains_string('<li>'))
+        assert_that(page_contents, contains_string('Bullet List Item 1'))
+        # 7. ordered list
+        assert_that(page_contents, contains_string('<ol'))
+        assert_that(page_contents, contains_string('Ordered List Item 1'))
+        assert_that(page_contents, contains_string('<ol'))
+        assert_that(page_contents, contains_string('Ordered List Item 1'))
+        # 8. images/figures
+        # 9. video embed
+        # 10. links
+
