@@ -9,44 +9,42 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-import sys
+import six
 
-from docutils import frontend
-
-from docutils import nodes
+from docutils.frontend import OptionParser
 
 from docutils.parsers.rst import Parser
-
-from docutils.utils import new_reporter
 
 from zope import interface
 
 from nti.contentlibrary.interfaces import IContentValidator
 
-from nti.contentlibrary_rendering.validators import ValidationError
-from nti.contentlibrary_rendering.validators import EmptyContentError
+from nti.contentlibrary_rendering.docutils import publish_doctree
+
+from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
+
 
 @interface.implementer(IContentValidator)
 class ReStructuredTextValidator(object):
 
-    settings = frontend.OptionParser(
-        components=(Parser,)).get_default_values()
+    def _get_settings(self):
+        settings = OptionParser(components=(Parser,)).get_default_values()
+        settings.halt_level = 2  # stop at warning
+        settings.report_level = 2  # warnings
+        settings.traceback = True
+        settings.warning_stream = six.StringIO()
+        return settings
 
     def _do_validate(self, content, context=None):
+        settings = self._get_settings()
         try:
-            parser = Parser()  # XXX: NTI directives should be included
-            reporter = new_reporter("contents", self.settings)
-            document = nodes.document(self.settings,
-                                      reporter,
-                                      source='contents')
-            parser.parse(content, document)
+            publish_doctree(content, settings=settings)
         except Exception as e:
-            exct = ValidationError("Invalid reStructuredText", e)
-            exct.exc_info = sys.exc_info()
+            settings.warning_stream.seek(0)
+            warnings = settings.warning_stream.read()
+            exct = RSTContentValidationError(str(e), warnings)
             raise exct
 
     def validate(self, content=b'', context=None):
         if content:
             self._do_validate(content)
-        else:
-            raise EmptyContentError("Empty content")
