@@ -36,9 +36,11 @@ class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
     def setUp(cls):
         setHooks()  # in case something already tore this down
         cls.setUpPackages()
+        cls.old_cache = os.getenv('CHAMELEON_CACHE')
         cls.old_data_dir = os.getenv('DATASERVER_DATA_DIR')
         cls.new_data_dir = tempfile.mkdtemp(dir="/tmp")
         os.environ['DATASERVER_DATA_DIR'] = cls.new_data_dir
+        os.environ['CHAMELEON_CACHE'] = cls.new_data_dir
 
     @classmethod
     def tearDown(cls):
@@ -52,6 +54,7 @@ class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
         annotations = component.getUtility(IContentUnitAnnotationUtility)
         annotations.annotations.clear()
         shutil.rmtree(cls.new_data_dir, True)
+        os.environ['CHAMELEON_CACHE'] = cls.old_cache
         os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
 
     @classmethod
