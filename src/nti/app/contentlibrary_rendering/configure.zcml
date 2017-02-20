@@ -34,7 +34,4 @@
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
 	<utility factory=".validators.ReStructuredTextValidator" name="reStructuredText" />
 
-	<!-- Directives / Roles -->
-	<include package=".docutils" />
-
 </configure>
