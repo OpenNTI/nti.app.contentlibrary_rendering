@@ -25,7 +25,7 @@ from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
 from nti.app.contentfolder.utils import is_cf_io_href
 from nti.app.contentfolder.utils import get_file_from_cf_io_url
 
-from nti.app.contentlibrary_rendering.doctuils import nodes
+from nti.app.contentlibrary_rendering.docutils import nodes
 
 from nti.cabinet.filer import transfer_to_native_file
 
