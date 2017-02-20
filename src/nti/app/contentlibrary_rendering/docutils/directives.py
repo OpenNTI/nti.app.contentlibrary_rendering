@@ -79,6 +79,8 @@ class CourseAsset(Figure):
             return [figure_node]
 
         course_asset_node = nodes.course_asset('', figure_node)
+        # when this directive runs the we assume the directory to save the resource
+        # has been set
         course_asset_node['uri'] = save_to_disk(asset)
         return [course_asset_node]
 
