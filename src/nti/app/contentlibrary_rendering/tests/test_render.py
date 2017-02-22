@@ -96,28 +96,28 @@ class TestRender(ContentlibraryRenderingLayerTest):
         return transformer.transform(rst_source, context=None)
 
     def _get_page_filename(self, job_name, page_name):
-        specific = make_specific_safe( '%s %s' % (job_name, page_name))
+        specific = make_specific_safe('%s %s' % (job_name, page_name))
         ntiid = make_ntiid(provider='NTI', nttype=TYPE_HTML, specific=specific)
         filename = safe_filename(ntiid)
         # Rendering also obscures periods/commas.
-        filename = filename.replace('.','_')
-        filename = filename.replace(',','_')
+        filename = filename.replace('.', '_')
+        filename = filename.replace(',', '_')
         filename = '%s.html' % filename
         return filename
 
     def test_render_basic(self):
         new_content = self._get_rst_data('basic.rst')
-        rst_dom = self._get_rst_dom( new_content )
+        rst_dom = self._get_rst_dom(new_content)
         job_name = 'wowza_basic'
         page_name = 'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
-        output_files = os.listdir( output_dir )
-        assert_that( output_files, has_item( 'index.html' ))
-        assert_that( output_files, has_item( 'eclipse-toc.xml' ))
-        assert_that( output_files, has_item( page_file ))
+        output_files = os.listdir(output_dir)
+        assert_that(output_files, has_item('index.html'))
+        assert_that(output_files, has_item('eclipse-toc.xml'))
+        assert_that(output_files, has_item(page_file))
 
         with open('%s/%s' % (output_dir, page_file), 'r') as f:
             page_contents = f.read()
@@ -131,17 +131,17 @@ class TestRender(ContentlibraryRenderingLayerTest):
 
     def test_render_sample(self):
         new_content = self._get_rst_data('sample.rst')
-        rst_dom = self._get_rst_dom( new_content )
+        rst_dom = self._get_rst_dom(new_content)
         job_name = 'wowza_sample'
         page_name = 'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
-        output_files = os.listdir( output_dir )
-        assert_that( output_files, has_item( 'index.html' ))
-        assert_that( output_files, has_item( 'eclipse-toc.xml' ))
-        assert_that( output_files, has_item( page_file ))
+        output_files = os.listdir(output_dir)
+        assert_that(output_files, has_item('index.html'))
+        assert_that(output_files, has_item('eclipse-toc.xml'))
+        assert_that(output_files, has_item(page_file))
 
         with open('%s/%s' % (output_dir, page_file), 'r') as f:
             page_contents = f.read()
@@ -155,7 +155,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
         # 2. paragraphs
         assert_that(page_contents, contains_string('<p class="par"'))
         # 3. bold
-        assert_that(page_contents, contains_string('<b class="bfseries">bold</b>'))
+        assert_that(page_contents,
+                    contains_string('<b class="bfseries">bold</b>'))
         # 4. italic
         assert_that(page_contents, contains_string('<em>italics</em>'))
         # 5. underlines
@@ -171,4 +172,3 @@ class TestRender(ContentlibraryRenderingLayerTest):
         # 8. images/figures
         # 9. video embed
         # 10. links
-
