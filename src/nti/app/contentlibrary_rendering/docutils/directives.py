@@ -61,7 +61,7 @@ class NTICard(Directive):
         if not self.options.get('label'):
             self.options['label'] = os.path.split(reference)[1]
         if not self.options.get('title'):
-            self.options['title'] = self.options['label'] 
+            self.options['title'] = self.options['label']
 
         image = directives.uri(self.options.get('image'))
         if image:
@@ -80,6 +80,10 @@ class NTICard(Directive):
 
         # create node
         nticard_node = nticard(self.block_text, **self.options)
+        nticard_node['image'] = image
+        nticard_node['href'] = reference
+
+        # process caption
         if self.content:
             node = nodes.Element()  # anonymous container for parsing
             self.state.nested_parse(self.content, self.content_offset, node)
