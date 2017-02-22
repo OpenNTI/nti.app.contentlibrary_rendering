@@ -11,8 +11,6 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import interface
 
-from docutils.nodes import TextElement
-
 from nti.base._compat import unicode_
 
 from nti.contentlibrary_rendering.docutils.translators import TranslatorMixin
@@ -58,16 +56,8 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
 
         # process caption /description
         if rst_node.children:
-            texts = []
             par = rst_node.children[0]
-            texts.append(unicode_(par.as_text()))
-            for node in par.children or ():
-                if isinstance(node, TextElement):
-                    texts.append(unicode_(par.as_text()))
-
-            description = incoming_sources_as_plain_text(texts)
+            text = unicode_(par.astext())
+            description = incoming_sources_as_plain_text([text])
             result.description = description
-
-        # process label
-        
         return result
