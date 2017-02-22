@@ -26,6 +26,8 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 class TestTranslators(ApplicationLayerTest):
 
+    URL = 'https://en.wikipedia.org/wiki/Ichigo_Kurosaki'
+
     def _ichigo_asset(self):
         result = SourceFile(name="ichigo.png")
         name = os.path.join(os.path.dirname(__file__), 'data/ichigo.png')
@@ -59,9 +61,11 @@ class TestTranslators(ApplicationLayerTest):
             os.chdir(current_dir)
         return document
 
-    @fudge.patch('nti.app.contentlibrary_rendering.docutils.utils.is_dataserver_asset',
-                 'nti.app.contentlibrary_rendering.docutils.utils.get_dataserver_asset' )
-    def test_nticard(self, mock_isca, mock_gca):
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.directives.validate_reference',
+                 'nti.app.contentlibrary_rendering.docutils.directives.is_dataserver_asset',
+                 'nti.app.contentlibrary_rendering.docutils.directives.get_dataserver_asset')
+    def test_nticard(self, mock_val, mock_isca, mock_gca):
+        mock_val.is_callable().with_args().returns(self.URL)
         mock_isca.is_callable().with_args().returns(True)
         mock_gca.is_callable().with_args().returns(self._ichigo_asset())
         self._generate_from_file('nticard.rst')

@@ -21,13 +21,34 @@ from docutils.parsers.rst import directives
 
 from nti.app.contentlibrary_rendering.docutils.nodes import nticard
 
-from nti.app.contentlibrary_rendering.docutils.utils import is_datasever_asset
-from nti.app.contentlibrary_rendering.docutils.utils import get_datasever_asset
+from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
+from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
+
+
+def validate_reference(self):
+    reference = directives.uri(self.arguments[0])
+    if is_dataserver_asset(reference):
+        asset = get_dataserver_asset(reference)
+        if asset is None:
+            raise self.error(
+                'Error in "%s" directive: asset "%" is missing'
+                % (self.name, reference))
+        # when this directive runs the we assume the directory
+        # to save the resource has been set
+        reference = save_to_course_assets(asset)
+    else:
+        comps = urlparse(reference)
+        if comps.scheme not in ('http', 'https'):
+            raise self.error(
+                'Error in "%s" directive: "%" is not a supported uri'
+                % (self.name, reference))
+    return reference
 
 
 class NTICard(Directive):
 
+    has_content = True
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
@@ -37,22 +58,7 @@ class NTICard(Directive):
                    'creator': directives.unchanged}
 
     def run(self):
-        reference = directives.uri(self.arguments[0])
-        if is_datasever_asset(reference):
-            asset = get_datasever_asset(reference)
-            if asset is None:
-                raise self.error(
-                    'Error in "%s" directive: asset "%" is missing'
-                    % (self.name, reference))
-            # when this directive runs the we assume the directory
-            # to save the resource has been set
-            reference = save_to_course_assets(asset)
-        else:
-            comps = urlparse(reference)
-            if comps.scheme not in ('http', 'https'):
-                raise self.error(
-                    'Error in "%s" directive: "%" is not a supported uri'
-                    % (self.name, reference))
+        reference = validate_reference(self)
 
         # set values for options
         self.options['href'] = reference
@@ -65,17 +71,17 @@ class NTICard(Directive):
 
         image = directives.uri(self.options.get('image'))
         if image:
-            if is_datasever_asset(image):
-                asset = get_datasever_asset(image)
+            if is_dataserver_asset(image):
+                asset = get_dataserver_asset(image)
                 if asset is None:
                     raise self.error(
                         'Error in "%s" directive: asset "%" is missing'
                         % (self.name, image))
+                image = save_to_course_assets(asset)
             else:
                 raise self.error(
                     'Error in "%s" directive: asset "%" cannot be retrieved'
                     % (self.name, image))
-            image = save_to_course_assets(image)
             self.options['image'] = image
 
         # create node

@@ -29,9 +29,12 @@
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                      zope.intid.interfaces.IIntIdRemovedEvent"/>
 
-    <!-- default -->
+    <!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
 	<utility factory=".validators.ReStructuredTextValidator" name="reStructuredText" />
+
+	<!-- docutils -->
+	<include package=".docutils" />
 
 </configure>
