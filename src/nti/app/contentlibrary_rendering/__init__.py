@@ -11,5 +11,5 @@ logger = __import__('logging').getLogger(__name__)
 
 from nti.app.contentlibrary import LIBRARY_ADAPTER
 
-#: Render job
+#: Fetch the latest render job
 VIEW_QUERY_JOB = 'QueryRenderJob'

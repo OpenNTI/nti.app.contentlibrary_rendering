@@ -74,8 +74,9 @@ class QueryJobView(AbstractAuthenticatedView):
 
     def __call__(self):
         params = CaseInsensitiveDict(self.request.params)
-        job_id = params.get('JobId') or params.get(
-            'job') or params.get('job_id')
+        job_id = params.get('JobId') \
+              or params.get('job') \
+              or params.get('job_id')
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
             logger.warn('No meta found for content package (%s)',

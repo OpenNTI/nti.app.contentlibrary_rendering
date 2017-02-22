@@ -21,10 +21,6 @@
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                      nti.coremetadata.interfaces.IObjectPublishedEvent"/>
 
-    <subscriber handler=".subscribers._content_unpublished"
-                for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     nti.coremetadata.interfaces.IObjectUnpublishedEvent"/>
-
     <subscriber handler=".subscribers._content_removed"
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                      zope.intid.interfaces.IIntIdRemovedEvent"/>
