@@ -26,11 +26,11 @@ from nti.contentrendering.plastexpackages.ntilatexmacros import ntiincludeannota
 COURSE_ASSETS = 'Images/CourseAssets'
 
 
-def is_datasever_asset(uri):
+def is_dataserver_asset(uri):
     return is_cf_io_href(uri) or is_oid_external_link(uri)
 
 
-def get_datasever_asset(uri):
+def get_dataserver_asset(uri):
     if is_cf_io_href(uri):
         return get_file_from_cf_io_url(uri)
     return get_file_from_oid_external_link(uri)
