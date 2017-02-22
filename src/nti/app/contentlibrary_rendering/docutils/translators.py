@@ -46,6 +46,7 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
             result.title = rst_node.attributes['title']
         if not result.creator:
             result.title = rst_node.attributes['creator']
+        result.id = rst_node.attributes['label']
 
         # process image
         if result.image is None and rst_node['image']:
@@ -67,4 +68,6 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
             description = incoming_sources_as_plain_text(texts)
             result.description = description
 
+        # process label
+        
         return result

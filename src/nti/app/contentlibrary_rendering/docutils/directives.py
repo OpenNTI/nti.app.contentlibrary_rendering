@@ -59,7 +59,7 @@ class NTICard(Directive):
         if not self.options.get('creator'):
             self.options['creator'] = 'system'
         if not self.options.get('label'):
-            self.options['label'] = os.path.split(reference)[1]
+            self.options['label'] = 'nticard_%s' % os.path.split(reference)[1]
         if not self.options.get('title'):
             self.options['title'] = self.options['label']
 
