@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
+from urlparse import urlparse
 
 from zope import interface
 
@@ -19,6 +20,10 @@ from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 
 from nti.app.contentlibrary_rendering.docutils.nodes import nticard
+
+from nti.app.contentlibrary_rendering.docutils.utils import is_datasever_asset
+from nti.app.contentlibrary_rendering.docutils.utils import get_datasever_asset
+from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 
 
 class NTICard(Directive):
@@ -31,10 +36,27 @@ class NTICard(Directive):
 
     def run(self):
         reference = directives.uri(self.arguments[0])
+        if is_datasever_asset(reference):
+            asset = get_datasever_asset(reference)
+            if asset is None:
+                raise self.error(
+                    'Error in "%s" directive: asset "%" is missing'
+                    % (self.name, reference))
+            # when this directive runs the we assume the directory
+            # to save the resource has been set
+            reference = save_to_course_assets(asset)
+        else:
+            comps = urlparse(reference)
+            if comps.scheme not in ('http', 'https'):
+                raise self.error(
+                    'Error in "%s" directive: "%" is not a supported uri'
+                    % (self.name, reference))
+
         self.options['uri'] = reference
         self.options['creator'] = self.options.get('creator') or 'system'
         if not self.options.get('label'):
             self.options['label'] = os.path.split(reference)[1]
+
         nticard_node = nticard(self.block_text, **self.options)
         if self.content:
             node = nodes.Element()  # anonymous container for parsing
