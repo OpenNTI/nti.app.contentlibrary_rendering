@@ -45,7 +45,6 @@ class TestTranslators(ApplicationLayerTest):
             name = os.path.join(os.path.dirname(__file__), 'data/%s' % source)
             with open(name, "rb") as fp:
                 source_doc = publish_doctree(fp.read())
-            return
             # render
             document = render_document(source_doc,
                                        outfile_dir=tex_dir,
