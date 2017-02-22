@@ -32,6 +32,8 @@ class NTICard(Directive):
     optional_arguments = 0
     final_argument_whitespace = True
     option_spec = {'label': directives.unchanged,
+                   'title': directives.unchanged,
+                   'image': directives.unchanged,
                    'creator': directives.unchanged}
 
     def run(self):
@@ -52,11 +54,31 @@ class NTICard(Directive):
                     'Error in "%s" directive: "%" is not a supported uri'
                     % (self.name, reference))
 
-        self.options['uri'] = reference
-        self.options['creator'] = self.options.get('creator') or 'system'
+        # set values for options
+        self.options['href'] = reference
+        if not self.options.get('creator'):
+            self.options['creator'] = 'system'
         if not self.options.get('label'):
             self.options['label'] = os.path.split(reference)[1]
+        if not self.options.get('title'):
+            self.options['title'] = self.options['label'] 
 
+        image = directives.uri(self.options.get('image'))
+        if image:
+            if is_datasever_asset(image):
+                asset = get_datasever_asset(image)
+                if asset is None:
+                    raise self.error(
+                        'Error in "%s" directive: asset "%" is missing'
+                        % (self.name, image))
+            else:
+                raise self.error(
+                    'Error in "%s" directive: asset "%" cannot be retrieved'
+                    % (self.name, image))
+            image = save_to_course_assets(image)
+            self.options['image'] = image
+
+        # create node
         nticard_node = nticard(self.block_text, **self.options)
         if self.content:
             node = nodes.Element()  # anonymous container for parsing
