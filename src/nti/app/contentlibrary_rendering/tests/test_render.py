@@ -112,14 +112,18 @@ class TestRender(ContentlibraryRenderingLayerTest):
         page_name = 'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
+#         filename = '/Users/jzuech/basic_render_test2'
+#         from IPython.terminal.debugger import set_trace;set_trace()
+#         tex_dom = render_document(rst_dom, jobname=job_name, outfile_dir=filename)
+
         tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
         output_files = os.listdir(output_dir)
         assert_that(output_files, has_item('index.html'))
         assert_that(output_files, has_item('eclipse-toc.xml'))
-        assert_that(output_files, has_item(page_file))
+        assert_that(output_files, does_not(has_item(page_file)))
 
-        with open('%s/%s' % (output_dir, page_file), 'r') as f:
+        with open('%s/%s' % (output_dir, 'index.html'), 'r') as f:
             page_contents = f.read()
 
         assert_that(page_contents, contains_string('Section Title'))
@@ -141,9 +145,9 @@ class TestRender(ContentlibraryRenderingLayerTest):
         output_files = os.listdir(output_dir)
         assert_that(output_files, has_item('index.html'))
         assert_that(output_files, has_item('eclipse-toc.xml'))
-        assert_that(output_files, has_item(page_file))
+        assert_that(output_files, does_not(has_item(page_file)))
 
-        with open('%s/%s' % (output_dir, page_file), 'r') as f:
+        with open('%s/%s' % (output_dir, 'index.html'), 'r') as f:
             page_contents = f.read()
 
         # Requirements
