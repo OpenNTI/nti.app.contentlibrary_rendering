@@ -53,7 +53,7 @@ def save_to_course_assets(asset, out_dir=None):
     return result
 
 
-def process_rst_figure(self, rst_node, tex_doc):
+def process_rst_figure(rst_node, tex_doc):
     result = tex_doc.createElement('figure')
 
     # attribute settings
