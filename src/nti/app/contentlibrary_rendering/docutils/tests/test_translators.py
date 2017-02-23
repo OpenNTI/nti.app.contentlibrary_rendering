@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 
 from hamcrest import is_
 from hamcrest import assert_that
+from hamcrest import contains_string
 
 import os
 import fudge
@@ -51,6 +52,9 @@ class TestTranslators(ApplicationLayerTest):
                                        jobname="sample")
             index = os.path.join(tex_dir, 'index.html')
             assert_that(os.path.exists(index), is_(True))
+            with open(index, "r") as fp:
+                index = fp.read()
+            return (index, document)
         except Exception:
             print('Exception %s, %s' % (source, tex_dir))
             raise
@@ -58,7 +62,6 @@ class TestTranslators(ApplicationLayerTest):
             shutil.rmtree(tex_dir)
         finally:
             os.chdir(current_dir)
-        return document
 
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.directives.validate_reference',
                  'nti.app.contentlibrary_rendering.docutils.directives.is_dataserver_asset',
@@ -67,4 +70,6 @@ class TestTranslators(ApplicationLayerTest):
         mock_val.is_callable().with_args().returns(self.URL)
         mock_isca.is_callable().with_args().returns(True)
         mock_gca.is_callable().with_args().returns(self._ichigo_asset())
-        self._generate_from_file('nticard.rst')
+        index, _ = self._generate_from_file('nticard.rst')
+        assert_that(index, contains_string('<object class="nticard"'))
+        assert_that(index, contains_string('<span class="description">Bankai last form</span>'))
