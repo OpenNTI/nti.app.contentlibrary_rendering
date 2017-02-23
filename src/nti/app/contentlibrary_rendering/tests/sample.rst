@@ -28,6 +28,8 @@ Paragraph with an escaped \* in emphasis *Italics \* and a astrick*
 
 Since the above format doesn't work and there is no support for underline, which while not necessarily that useful is expected by most users. We can use roles to also style text. Some roles like :emphasis:`emphasis`, :strong:`strong`, and :math:`math`; are built in. You can also define some custom roles, which we might need to do for all permutations of bold, italic, and underlined. For example :bolditalic:`bolditalic`, :boldunderlined:`boldunderline`, :italicunderlined:`italicunderlined`, :bolditalicunderlined:`bolditalicunderlined`.
 
+:underline:`underlined text`
+
 ++++++++++
 References
 ++++++++++

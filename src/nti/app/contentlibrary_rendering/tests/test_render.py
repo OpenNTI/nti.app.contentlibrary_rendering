@@ -112,10 +112,6 @@ class TestRender(ContentlibraryRenderingLayerTest):
         page_name = 'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
-#         filename = '/Users/jzuech/basic_render_test2'
-#         from IPython.terminal.debugger import set_trace;set_trace()
-#         tex_dom = render_document(rst_dom, jobname=job_name, outfile_dir=filename)
-
         tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
         output_files = os.listdir(output_dir)
@@ -164,6 +160,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
         # 4. italic
         assert_that(page_contents, contains_string('<em>italics</em>'))
         # 5. underlines
+        assert_that(page_contents, contains_string('<span class="underline">underlined text</span>'))
         # 6. unordered list
         assert_that(page_contents, contains_string('<ul'))
         assert_that(page_contents, contains_string('<li>'))
