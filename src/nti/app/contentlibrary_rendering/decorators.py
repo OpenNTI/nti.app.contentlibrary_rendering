@@ -26,6 +26,7 @@ from nti.appserver.pyramid_authorization import has_permission
 from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
+from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
@@ -77,7 +78,6 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
                 link = Link(path,
                             rel=VIEW_QUERY_JOB,
                             elements=(VIEW_QUERY_JOB,),
-                            params={'job_id': latest_job.job_id},
                             ignore_properties_of_target=True)
                 link.__name__ = ''
                 link.__parent__ = context
@@ -98,3 +98,24 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
         self._render_link(context, result)
         self._render_job_link(context, result)
         result['isRendered'] = IContentRendered.providedBy(context)
+
+
+@interface.implementer(IExternalMappingDecorator)
+@component.adapter(IContentPackageRenderJob, IRequest)
+class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
+    """
+    Decorates IRenderableContentPackage with render info.
+    """
+
+    def _do_decorate_external(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        package = IRenderableContentPackage(context)
+        path = _package_url_path(package, self.request)
+        link = Link(path,
+                    rel=VIEW_QUERY_JOB,
+                    elements=(VIEW_QUERY_JOB,),
+                    params={'job_id': context.job_id},
+                    ignore_properties_of_target=True)
+        link.__name__ = ''
+        link.__parent__ = context
+        _links.append(link)
