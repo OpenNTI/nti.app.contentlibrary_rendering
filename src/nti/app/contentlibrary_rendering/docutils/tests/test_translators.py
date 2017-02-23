@@ -37,6 +37,7 @@ class TestTranslators(ApplicationLayerTest):
         return result
 
     def _generate_from_file(self, source):
+        index = document = None
         current_dir = os.getcwd()
         try:
             # change directory early
@@ -54,7 +55,6 @@ class TestTranslators(ApplicationLayerTest):
             assert_that(os.path.exists(index), is_(True))
             with open(index, "r") as fp:
                 index = fp.read()
-            return (index, document)
         except Exception:
             print('Exception %s, %s' % (source, tex_dir))
             raise
@@ -62,6 +62,7 @@ class TestTranslators(ApplicationLayerTest):
             shutil.rmtree(tex_dir)
         finally:
             os.chdir(current_dir)
+        return (index, document)
 
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.directives.validate_reference',
                  'nti.app.contentlibrary_rendering.docutils.directives.is_dataserver_asset',
@@ -72,4 +73,5 @@ class TestTranslators(ApplicationLayerTest):
         mock_gca.is_callable().with_args().returns(self._ichigo_asset())
         index, _ = self._generate_from_file('nticard.rst')
         assert_that(index, contains_string('<object class="nticard"'))
-        assert_that(index, contains_string('<span class="description">Bankai last form</span>'))
+        assert_that(index,
+                    contains_string('<span class="description">Bankai last form</span>'))
