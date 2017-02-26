@@ -64,13 +64,13 @@ class TestTranslators(ApplicationLayerTest):
             os.chdir(current_dir)
         return (index, document)
 
-    @fudge.patch('nti.app.contentlibrary_rendering.docutils.directives.validate_reference',
-                 'nti.app.contentlibrary_rendering.docutils.directives.is_dataserver_asset',
-                 'nti.app.contentlibrary_rendering.docutils.directives.get_dataserver_asset')
-    def test_nticard(self, mock_val, mock_isca, mock_gca):
-        mock_val.is_callable().with_args().returns(self.URL)
-        mock_isca.is_callable().with_args().returns(True)
-        mock_gca.is_callable().with_args().returns(self._ichigo_asset())
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.is_href_a_dataserver_asset',
+                 'nti.app.contentlibrary_rendering.docutils.translators.is_image_a_dataserver_asset',
+                 'nti.app.contentlibrary_rendering.docutils.translators.get_dataserver_asset')
+    def test_nticard(self, mock_href, mock_image, mock_get):
+        mock_href.is_callable().with_args().returns(False)
+        mock_image.is_callable().with_args().returns(True)
+        mock_get.is_callable().with_args().returns(self._ichigo_asset())
         index, _ = self._generate_from_file('nticard.rst')
         assert_that(index, contains_string('<object class="nticard"'))
         assert_that(index,
