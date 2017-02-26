@@ -9,13 +9,14 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from urlparse import urlparse
+import os
 
 from zope import interface
 
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
+from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
 
 from nti.base._compat import unicode_
 
@@ -23,12 +24,10 @@ from nti.contentlibrary_rendering.docutils.translators import TranslatorMixin
 
 from nti.contentlibrary_rendering.docutils.interfaces import IRSTToPlastexNodeTranslator
 
-from nti.contentrendering.plastexpackages.graphicx import includegraphics
+from nti.contentrendering.plastexpackages.nticard import nticard
+from nti.contentrendering.plastexpackages.nticard import process_image_data
+from nti.contentrendering.plastexpackages.nticard import incoming_sources_as_plain_text
 
-from nti.contentrendering.plastexpackages.ntilatexmacros import nticard
-from nti.contentrendering.plastexpackages.ntilatexmacros import incoming_sources_as_plain_text
-
-from nti.externalization.proxy import removeAllProxies
 
 def get_asset(href):
     return get_dataserver_asset(href)
@@ -48,49 +47,59 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
     __name__ = "nticard"
 
     def process_reference(self, rst_node, nticard):
-        href = rst_node['href']
+        original = href = rst_node['href']
         if is_href_a_dataserver_asset(href):
+            # download asset and validate
             asset = get_asset(href)
             if asset is None:
                 raise ValueError(
                     'Error in "%s" directive: asset "%" is missing'
                     % (self.__name__, href))
+            # save to local disk
             href = save_to_course_assets(asset)
+        # set href to auto-populate field
         nticard.href = href
         nticard.setAttribute('href', href)
         nticard.setAttribute('nti-requirements', None)
-        # check if the href points to a local file
+        # populate data from remote or local
         if not nticard.proces_local_href():
             nticard.auto_populate()
+        # restore orinal href since dataserve r
+        # may serve content
+        nticard.href = original
+        nticard.setAttribute('href', original)
+        # clean up
+        if original != href:
+            os.remove(href)
 
     def process_image(self, rst_node, nticard):
         image = rst_node['image']
-        if image:
-            if is_image_a_dataserver_asset(image):
-                asset = get_asset(image)
-                if asset is None:
-                    raise ValueError(
-                        'Error in "%s" directive: asset "%" is missing'
-                        % (self.__name__, image))
-                image = save_to_course_assets(asset)
-
-                result = includegraphics()
-                result.setAttribute('file', image)
-                result.setAttribute('options', None)
-                nticard.append(result)  # Add it for BWC
-                nticard.image = result
-                result.process_image()
-            else:
-                comps = urlparse(image)
-                if comps.scheme not in ('http', 'https', 'file'):
-                    raise ValueError(
-                        'Error in "%s" directive: "%s" is not a supported uri'
-                        % (self.name, image))
+        if is_image_a_dataserver_asset(image):
+            # download asset and validate
+            asset = get_asset(image)
+            if asset is None:
+                raise ValueError(
+                    'Error in "%s" directive: asset "%" is missing'
+                    % (self.__name__, image))
+            # save to local disk
+            local = save_to_course_assets(asset)
+            # get image info
+            with open(local, "rb") as fp:
+                process_image_data(nticard,
+                                   url=image,
+                                   data=fp.read())
+            # clean up
+            os.remove(local)
+        else:
+            if not is_supported_remote_scheme(image):
+                raise ValueError(
+                    'Error in "%s" directive: "%s" is not a supported uri'
+                    % (self.__name__, image))
 
     def do_translate(self, rst_node, tex_doc, tex_parent):
         # create and set ownership early
         result = nticard()
-        result.ownerDocument = removeAllProxies(tex_doc)
+        result.ownerDocument = tex_doc
 
         # process reference/href content
         self.process_reference(rst_node, result)

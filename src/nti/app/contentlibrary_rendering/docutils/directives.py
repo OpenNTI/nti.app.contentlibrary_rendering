@@ -10,7 +10,6 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
-from urlparse import urlparse
 
 from zope import interface
 
@@ -22,6 +21,7 @@ from docutils.parsers.rst import directives
 from nti.app.contentlibrary_rendering.docutils.nodes import nticard
 
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
+from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
 
 
 class NTICard(Directive):
@@ -36,15 +36,15 @@ class NTICard(Directive):
                    'creator': directives.unchanged}
 
     def run(self):
+        # validate reference/href value
         reference = directives.uri(self.arguments[0])
-        if not is_dataserver_asset(reference):
-            comps = urlparse(reference)
-            if comps.scheme not in ('http', 'https'):
+        if      not is_dataserver_asset(reference) \
+            and not is_supported_remote_scheme(reference):
                 raise self.error(
                     'Error in "%s" directive: "%s" is not a supported uri'
                     % (self.name, reference))
 
-        # set values for options
+        # set default values for options
         self.options['href'] = reference
         if not self.options.get('creator'):
             self.options['creator'] = 'system'
@@ -55,10 +55,12 @@ class NTICard(Directive):
             self.options['title'] = self.options['label']
 
         # create node
-        image = directives.uri(self.options.get('image') or u'')
         nticard_node = nticard(self.block_text, **self.options)
-        nticard_node['image'] = image
         nticard_node['href'] = reference
+
+        # save image href
+        image = directives.uri(self.options.get('image') or u'')
+        nticard_node['image'] = image
 
         # process caption
         if self.content:
