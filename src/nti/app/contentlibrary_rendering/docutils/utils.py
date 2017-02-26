@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
+from urlparse import urlparse
 
 from nti.app.contentfile.view_mixins import is_oid_external_link
 from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
@@ -19,11 +20,18 @@ from nti.app.contentfolder.utils import get_file_from_cf_io_url
 
 from nti.cabinet.filer import transfer_to_native_file
 
+from nti.contentrendering.plastexpackages.ntiexternalgraphics import ntiexternalgraphics
+
 from nti.contentrendering.plastexpackages.ntilatexmacros import ntiincludeannotationgraphics
 
 
 #: Content package course assets relative directory
 COURSE_ASSETS = 'Images/CourseAssets'
+
+
+def is_supported_remote_scheme(uri):
+    comps = urlparse(uri)
+    return comps.scheme in ('http', 'https')
 
 
 def is_dataserver_asset(uri):
@@ -53,38 +61,51 @@ def save_to_course_assets(asset, out_dir=None):
     return result
 
 
-def process_rst_figure(rst_node, tex_doc):
-    result = tex_doc.createElement('figure')
+def process_rst_figure(rst_node, tex_doc, figure=None):
+    uri = rst_node['uri']
+    figure = figure or tex_doc.createElement('figure')
 
-    # attribute settings
     options = dict()
-    grphx = ntiincludeannotationgraphics()
-    grphx.setAttribute('file', rst_node['uri'])
-    grphx.setAttribute('options', options)
+    if not is_supported_remote_scheme(uri):
+        grphx = ntiincludeannotationgraphics()
+        grphx.setAttribute('file', uri)
+        grphx.setAttribute('options', options)
+    else:
+        grphx = ntiexternalgraphics()
+        grphx.setAttribute('url', uri)
+        grphx.setAttribute('options', options)
 
     # alternative text settings
     value = rst_node.attributes.get('alt', None)
     if value:  # alttext
         grphx.setAttribute('alttext', value)
-        result.setAttribute('title', value)
+        figure.setAttribute('title', value)
 
-    # dimension settings
-    value = rst_node.attributes.get('scale', None)
+    # image size
+    value = rst_node.attributes.get('size', None)
     if value:
-        options['scale'] = value if value <= 1 else value / 100.0
-    else:
+        options['size'] = value
+
+    # stlye & dimension settings
+    value = rst_node.attributes.get('style', None)
+    if not value:
+        value = rst_node.attributes.get('scale', None)
+        if value:
+            options['scale'] = value if value <= 1 else value / 100.0
+
         for name in ('height', 'width'):
             value = rst_node.attributes.get(name, None)
             if value:
-                try:
-                    float(value)  # unitless
-                    options[name] = '%spx' % (value)
-                except (ValueError):
-                    options[name] = value
+                options[name] = value
+    else:
+        options['style'] = value
 
     # add to set lineage
-    result.append(grphx)
+    figure.append(grphx)
 
     # process image and return
-    grphx.process_image()
-    return [result, grphx]
+    if not is_supported_remote_scheme(uri):
+        grphx.process_image()
+    else:
+        grphx.process_options()
+    return [figure, grphx]
