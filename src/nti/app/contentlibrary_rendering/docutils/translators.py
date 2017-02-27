@@ -13,8 +13,8 @@ import os
 
 from zope import interface
 
-from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset,\
-    has_access
+from nti.app.contentlibrary_rendering.docutils.utils import has_access
+from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
