@@ -23,8 +23,6 @@ import fudge
 
 from zope import component
 
-from nti.common.file import safe_filename
-
 from nti.contentlibrary.zodb import RenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentTransformer
@@ -33,6 +31,8 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 from nti.contentlibrary_rendering._render import render_document
 
 from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
+
+from nti.namedfile.file import safe_filename
 
 from nti.ntiids.ntiids import TYPE_HTML
 from nti.ntiids.ntiids import make_ntiid
