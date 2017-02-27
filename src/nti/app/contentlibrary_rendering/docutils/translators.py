@@ -13,7 +13,8 @@ import os
 
 from zope import interface
 
-from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
+from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset,\
+    has_access
 from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
@@ -55,6 +56,11 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
             if asset is None:
                 raise ValueError(
                     'Error in "%s" directive: asset "%" is missing'
+                    % (self.__name__, href))
+                
+            if not has_access(asset):
+                raise TypeError(
+                    'Error in "%s" directive: access to asset "%" is forbidden'
                     % (self.__name__, href))
             # save to local disk
             href = save_to_course_assets(asset)
