@@ -26,6 +26,7 @@ from nti.contentlibrary_rendering.docutils.interfaces import IRSTToPlastexNodeTr
 
 from nti.contentrendering.plastexpackages.nticard import nticard
 from nti.contentrendering.plastexpackages.nticard import process_image_data
+from nti.contentrendering.plastexpackages.nticard import process_remote_image
 from nti.contentrendering.plastexpackages.nticard import incoming_sources_as_plain_text
 
 
@@ -95,7 +96,8 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
                 raise ValueError(
                     'Error in "%s" directive: "%s" is not a supported uri'
                     % (self.__name__, image))
-
+            process_remote_image(nticard, image)
+            
     def do_translate(self, rst_node, tex_doc, tex_parent):
         # create and set ownership early
         result = nticard()
