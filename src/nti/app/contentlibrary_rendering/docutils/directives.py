@@ -19,6 +19,7 @@ from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 
 from nti.app.contentlibrary_rendering.docutils.nodes import nticard
+from nti.app.contentlibrary_rendering.docutils.nodes import ntivideo
 
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
@@ -28,7 +29,7 @@ class NTICard(Directive):
 
     has_content = True
     required_arguments = 1
-    optional_arguments = 0
+    optional_arguments = 4
     final_argument_whitespace = True
     option_spec = {'label': directives.unchanged,
                    'title': directives.unchanged,
@@ -39,10 +40,10 @@ class NTICard(Directive):
         # validate reference/href value
         reference = directives.uri(self.arguments[0])
         if      not is_dataserver_asset(reference) \
-            and not is_supported_remote_scheme(reference):
-                raise self.error(
-                    'Error in "%s" directive: "%s" is not a supported uri'
-                    % (self.name, reference))
+                and not is_supported_remote_scheme(reference):
+            raise self.error(
+                'Error in "%s" directive: "%s" is not a supported uri'
+                % (self.name, reference))
 
         # set default values for options
         self.options['href'] = reference
@@ -87,8 +88,60 @@ class NTICard(Directive):
         return [nticard_node]
 
 
+class NTIVideo(Directive):
+
+    has_content = True
+    required_arguments = 2
+    optional_arguments = 2
+    final_argument_whitespace = True
+    option_spec = {'title': directives.unchanged,
+                   'creator': directives.unchanged}
+
+    supported_services = ('html5', 'kaltura', 'vimeo', 'youtube')
+
+    def run(self):
+        service = directives.choice(self.arguments[0], self.supported_services)
+        video_id = directives.single_char_or_unicode(self.arguments[1])
+
+        title = self.options.get('title') or (service + ':' + video_id)
+        self.options['title'] = title
+
+        creator = self.options.get('creator') or 'system'
+        self.options['creator'] = creator
+
+        # create node
+        ntivideo_node = ntivideo(self.block_text, **self.options)
+        ntivideo_node['service'] = service
+        ntivideo_node['id'] = video_id
+            
+        # process caption
+        if self.content:
+            node = nodes.Element()  # anonymous container for parsing
+            self.state.nested_parse(self.content, self.content_offset, node)
+            first_node = node[0]
+            if isinstance(first_node, nodes.paragraph):
+                caption = nodes.caption(first_node.rawsource, '',
+                                        *first_node.children)
+                caption.source = first_node.source
+                caption.line = first_node.line
+                ntivideo_node += caption
+            elif isinstance(first_node, nodes.comment) or len(first_node) == 0:
+                raise self.error(
+                    'ntivideo caption must be a paragraph.',
+                    nodes.literal_block(self.block_text, self.block_text),
+                    line=self.lineno)
+
+            if len(node) > 1:
+                raise self.error(
+                    'ntivideo does not accept mulitple caption paragraphs',
+                    nodes.literal_block(self.block_text, self.block_text),
+                    line=self.lineno)
+        return [ntivideo_node]
+
+
 def register_directives():
     directives.register_directive("nticard", NTICard)
+    directives.register_directive("ntivideo", NTIVideo)
 register_directives()
 
 from nti.contentlibrary_rendering.docutils.interfaces import IDirectivesModule

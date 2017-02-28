@@ -15,3 +15,7 @@ from docutils.nodes import General
 
 class nticard(General, Element):
     pass
+
+
+class ntivideo(General, Element):
+    pass
