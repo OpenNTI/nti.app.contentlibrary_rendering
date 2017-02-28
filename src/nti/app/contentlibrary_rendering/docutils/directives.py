@@ -148,5 +148,6 @@ def register_directives():
     directives.register_directive("ntivideo", NTIVideo)
 register_directives()
 
+
 from nti.contentlibrary_rendering.docutils.interfaces import IDirectivesModule
 interface.moduleProvides(IDirectivesModule)
