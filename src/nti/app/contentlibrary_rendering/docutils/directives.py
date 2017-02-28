@@ -149,13 +149,17 @@ class NTIVideoRef(Directive):
 
     has_content = False
     required_arguments = 1
-
+    optional_arguments = 1
+    option_spec = {'visibility': directives.unchanged}
+                    
     def run(self):
         ntiid = directives.unchanged_required(self.arguments[0])
         if not is_valid_ntiid_string(ntiid):
             raise self.error(
                 'Error in "%s" directive: "%s" is not a valid NTIID'
                 % (self.name, ntiid))
+        visibility = self.options.get('visibility') or 'everyone'
+        self.options['visibility'] = visibility
         node = ntivideoref('', **self.options)
         node['ntiid'] = ntiid
         return [node]

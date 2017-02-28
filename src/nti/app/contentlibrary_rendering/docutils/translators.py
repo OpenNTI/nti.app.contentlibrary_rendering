@@ -31,6 +31,11 @@ from nti.contentrendering.plastexpackages.nticard import process_remote_image
 from nti.contentrendering.plastexpackages.nticard import incoming_sources_as_plain_text
 
 from nti.contentrendering.plastexpackages.ntimedia import ntivideo
+from nti.contentrendering.plastexpackages.ntimedia import ntivideoref
+
+from nti.contenttypes.presentation.interfaces import INTIVideo
+
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 
 def get_asset(href):
@@ -137,6 +142,9 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
         return result
 
 
+# ntivideo
+
+
 @interface.implementer(IRSTToPlastexNodeTranslator)
 class NTIVideoToPlastexNodeTranslator(TranslatorMixin):
 
@@ -167,4 +175,25 @@ class NTIVideoToPlastexNodeTranslator(TranslatorMixin):
             text = unicode_(result.title)
             description = incoming_sources_as_plain_text([text])
         result.description = description
+        return result
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
+
+    __name__ = "ntivideoref"
+
+    def do_translate(self, rst_node, tex_doc, tex_parent):
+        ntiid = rst_node['ntiid']
+        video = find_object_with_ntiid(ntiid)
+        if not INTIVideo.providedBy(video):
+            raise ValueError(
+                'Error in "%s" directive: video with ntiid "%" is missing'
+                % (self.__name__, ntiid))
+
+        result = ntivideoref()
+        result.media = video
+        result.poster = None
+        result.to_render = False
+        result.visibility = rst_node.attributes['visibility']
         return result

@@ -16,4 +16,7 @@
 	<utility factory=".translators.NTIVideoToPlastexNodeTranslator" 
 			 name="ntivideo" />
 
+	<utility factory=".translators.NTIVideoRefToPlastexNodeTranslator" 
+			 name="ntivideoref" />
+
 </configure>
