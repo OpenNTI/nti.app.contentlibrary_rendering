@@ -19,6 +19,7 @@ from requests.structures import CaseInsensitiveDict
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
+from nti.app.contentlibrary_rendering import VIEW_RENDER_JOBS
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
@@ -33,6 +34,14 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 from nti.contentlibrary_rendering.utils import render_package
 
 from nti.dataserver import authorization as nauth
+
+from nti.externalization.externalization import StandardExternalFields
+
+from nti.externalization.interfaces import LocatedExternalDict
+
+ITEMS = StandardExternalFields.ITEMS
+NTIID = StandardExternalFields.NTIID
+ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
 @view_config(context=IRenderableContentPackage)
@@ -75,8 +84,8 @@ class QueryJobView(AbstractAuthenticatedView):
     def __call__(self):
         params = CaseInsensitiveDict(self.request.params)
         job_id = params.get('JobId') \
-              or params.get('job') \
-              or params.get('job_id')
+            or params.get('job') \
+            or params.get('job_id')
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
             logger.warn('No meta found for content package (%s)',
@@ -98,3 +107,29 @@ class QueryJobView(AbstractAuthenticatedView):
                         self.context.ntiid)
             raise hexc.HTTPNotFound(_('Content has not been processed.'))
         return render_job
+
+
+@view_config(context=IRenderableContentPackage)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='GET',
+               name=VIEW_RENDER_JOBS,
+               permission=nauth.ACT_CONTENT_EDIT)
+class RenderJobsView(AbstractAuthenticatedView):
+    """
+    Fetch all render jobs for the contextual `IContentPackage`
+    """
+
+    def __call__(self):
+        meta = IContentPackageRenderMetadata(self.context, None)
+        if meta is None:
+            logger.warn('No meta found for content package (%s)',
+                        self.context.ntiid)
+            raise hexc.HTTPNotFound(_('Content has not been processed.'))
+
+        result = LocatedExternalDict()
+        result[NTIID] = self.context.ntiid
+        result[ITEMS] = items = []
+        for job in sorted(meta.render_jobs):
+            items.append(job)
+        return result

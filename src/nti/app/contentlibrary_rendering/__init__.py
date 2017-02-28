@@ -13,3 +13,6 @@ from nti.app.contentlibrary import LIBRARY_ADAPTER
 
 #: Fetch the latest render job
 VIEW_QUERY_JOB = 'QueryRenderJob'
+
+#: Render jobs
+VIEW_RENDER_JOBS = 'RenderJobs'
