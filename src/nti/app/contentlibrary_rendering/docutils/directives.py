@@ -20,9 +20,12 @@ from docutils.parsers.rst import directives
 
 from nti.app.contentlibrary_rendering.docutils.nodes import nticard
 from nti.app.contentlibrary_rendering.docutils.nodes import ntivideo
+from nti.app.contentlibrary_rendering.docutils.nodes import ntivideoref
 
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
+
+from nti.ntiids.ntiids import is_valid_ntiid_string
 
 
 class NTICard(Directive):
@@ -40,15 +43,14 @@ class NTICard(Directive):
         # validate reference/href value
         reference = directives.uri(self.arguments[0])
         if      not is_dataserver_asset(reference) \
-                and not is_supported_remote_scheme(reference):
+            and not is_supported_remote_scheme(reference):
             raise self.error(
                 'Error in "%s" directive: "%s" is not a supported uri'
                 % (self.name, reference))
 
         # set default values for options
         self.options['href'] = reference
-        if not self.options.get('creator'):
-            self.options['creator'] = 'system'
+        self.options['creator'] = self.options.get('creator') or 'system'
         if not self.options.get('label'):
             label = os.path.split(reference)[1]
             self.options['label'] = 'nticard_%s' % label
@@ -143,9 +145,26 @@ class NTIVideo(Directive):
         return [ntivideo_node]
 
 
+class NTIVideoRef(Directive):
+
+    has_content = False
+    required_arguments = 1
+
+    def run(self):
+        ntiid = directives.unchanged_required(self.arguments[0])
+        if not is_valid_ntiid_string(ntiid):
+            raise self.error(
+                'Error in "%s" directive: "%s" is not a valid NTIID'
+                % (self.name, ntiid))
+        node = ntivideoref('', **self.options)
+        node['ntiid'] = ntiid
+        return [node]
+
+
 def register_directives():
     directives.register_directive("nticard", NTICard)
     directives.register_directive("ntivideo", NTIVideo)
+    directives.register_directive("ntivideoref", NTIVideoRef)
 register_directives()
 
 

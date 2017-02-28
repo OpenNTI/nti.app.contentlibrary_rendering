@@ -19,3 +19,7 @@ class nticard(General, Element):
 
 class ntivideo(General, Element):
     pass
+
+
+class ntivideoref(General, Element):
+    pass
