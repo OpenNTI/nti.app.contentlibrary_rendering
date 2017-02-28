@@ -30,6 +30,8 @@ from nti.contentrendering.plastexpackages.nticard import process_image_data
 from nti.contentrendering.plastexpackages.nticard import process_remote_image
 from nti.contentrendering.plastexpackages.nticard import incoming_sources_as_plain_text
 
+from nti.contentrendering.plastexpackages.ntimedia import ntivideo
+
 
 def get_asset(href):
     return get_dataserver_asset(href)
@@ -57,7 +59,7 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
                 raise ValueError(
                     'Error in "%s" directive: asset "%" is missing'
                     % (self.__name__, href))
-                
+
             if not has_access(asset):
                 raise TypeError(
                     'Error in "%s" directive: access to asset "%" is forbidden'
@@ -103,7 +105,7 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
                     'Error in "%s" directive: "%s" is not a supported uri'
                     % (self.__name__, image))
             process_remote_image(nticard, image)
-            
+
     def do_translate(self, rst_node, tex_doc, tex_parent):
         # create and set ownership early
         result = nticard()
@@ -132,4 +134,32 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
 
         # target ntiid
         result.process_target_ntiid()
+        return result
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NTIVideoToPlastexNodeTranslator(TranslatorMixin):
+
+    __name__ = "ntivideo"
+
+    def do_translate(self, rst_node, tex_doc, tex_parent):
+        result = ntivideo()
+        result.ownerDocument = tex_doc
+        source = ntivideo.ntivideosource()
+        source.attributes = {'id': rst_node['id'],
+                             'service': rst_node['service']}
+        result.append(source)
+        source.process_options()
+
+        result.id = rst_node.attributes['label']
+        result.title = rst_node.attributes['title']
+        result.creator = rst_node.attributes['creator']
+
+        # process caption /description
+        if rst_node.children:
+            par = rst_node.children[0]
+            text = unicode_(par.astext())
+            description = incoming_sources_as_plain_text([text])
+            result.description = description
+
         return result

@@ -92,9 +92,10 @@ class NTIVideo(Directive):
 
     has_content = True
     required_arguments = 2
-    optional_arguments = 2
+    optional_arguments = 3
     final_argument_whitespace = True
-    option_spec = {'title': directives.unchanged,
+    option_spec = {'label': directives.unchanged,
+                   'title': directives.unchanged,
                    'creator': directives.unchanged}
 
     supported_services = ('html5', 'kaltura', 'vimeo', 'youtube')
@@ -108,6 +109,9 @@ class NTIVideo(Directive):
 
         creator = self.options.get('creator') or 'system'
         self.options['creator'] = creator
+
+        label = self.options.get('label') or video_id
+        self.options['label'] = label
 
         # create node
         ntivideo_node = ntivideo(self.block_text, **self.options)

@@ -13,4 +13,7 @@
 	<utility factory=".translators.NTICardToPlastexNodeTranslator" 
 			 name="nticard" />
 
+	<utility factory=".translators.NTIVideoToPlastexNodeTranslator" 
+			 name="ntivideo" />
+
 </configure>
