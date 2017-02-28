@@ -102,7 +102,7 @@ class NTIVideo(Directive):
 
     def run(self):
         service = directives.choice(self.arguments[0], self.supported_services)
-        video_id = directives.single_char_or_unicode(self.arguments[1])
+        video_id = directives.unchanged_required(self.arguments[1])
 
         title = self.options.get('title') or (service + ':' + video_id)
         self.options['title'] = title

@@ -146,8 +146,10 @@ class NTIVideoToPlastexNodeTranslator(TranslatorMixin):
         result = ntivideo()
         result.ownerDocument = tex_doc
         source = ntivideo.ntivideosource()
-        source.attributes = {'id': rst_node['id'],
-                             'service': rst_node['service']}
+        source.attributes.update({
+            'id': rst_node['id'],
+            'service': rst_node['service']
+        })
         result.append(source)
         source.process_options()
 
