@@ -161,5 +161,8 @@ class NTIVideoToPlastexNodeTranslator(TranslatorMixin):
             text = unicode_(par.astext())
             description = incoming_sources_as_plain_text([text])
             result.description = description
-
+        else:
+            text = unicode_(result.title)
+            description = incoming_sources_as_plain_text([text])
+        result.description = description
         return result
