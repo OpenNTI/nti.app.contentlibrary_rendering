@@ -26,3 +26,4 @@ class TestDirectives(ApplicationLayerTest):
         from nti.app.contentlibrary_rendering.docutils import directives
         assert_that(directives, validly_provides(IDirectivesModule))
         assert_that(docutils_directive('nticard', None, None), is_(not_none()))
+        assert_that(docutils_directive('ntivideo', None, None), is_(not_none()))
