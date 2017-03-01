@@ -22,6 +22,8 @@ from nti.contentlibrary_rendering._render import render_document
 
 from nti.contentlibrary_rendering.docutils import publish_doctree
 
+from nti.contenttypes.presentation.media import NTIVideo
+
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 
@@ -84,3 +86,19 @@ class TestTranslators(ApplicationLayerTest):
         assert_that(index, contains_string('type="application/vnd.nextthought.videosource"'))
         assert_that(index, contains_string('<param name="service" value="kaltura"'))
         assert_that(index, contains_string('<param name="source" value="1500101:0_udtp5zmz"'))
+        
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
+    def test_ntivideoref(self, mock_fon):
+        media = NTIVideo()
+        media.creator = 'Tite Kubo'
+        media.title = 'Ichigo vs Aizen'
+        media.ntiid = 'tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen'
+        mock_fon.is_callable().with_args().returns(media)
+        index, _ = self._generate_from_file('ntivideoref.rst')
+        assert_that(index, contains_string('<object class="ntivideoref"'))
+        assert_that(index, contains_string('<param name="visibility" value="everyone"'))
+        assert_that(index, contains_string('<param name="label" value="Ichigo vs Aizen"'))
+        assert_that(index, 
+                    contains_string('<param name="mimeType" value="application/vnd.nextthought.ntivideo"'))
+        assert_that(index, 
+                    contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
