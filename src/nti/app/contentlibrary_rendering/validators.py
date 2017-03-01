@@ -9,7 +9,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-import six
+from six import StringIO
 
 from docutils.frontend import OptionParser
 
@@ -32,7 +32,7 @@ class ReStructuredTextValidator(object):
         settings.halt_level = 2  # stop at warning
         settings.report_level = 2  # warnings
         settings.traceback = True
-        settings.warning_stream = six.StringIO()
+        settings.warning_stream = StringIO()
         return settings
 
     def _do_validate(self, content, context=None):
