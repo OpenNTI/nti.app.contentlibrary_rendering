@@ -38,4 +38,7 @@
 	<!-- docutils -->
 	<include package=".docutils" />
 
+	<!-- Locating -->
+    <utility factory=".locators.FilesystemLocator" />
+    
 </configure>
