@@ -25,12 +25,12 @@ from nti.dataserver.interfaces import IRedisClient
 from nti.property.property import Lazy
 
 
-def redis(self):
+def redis():
     return component.getUtility(IRedisClient)
 
 
 def acquire(blocking=True):
-    lock = redis.lock(SYNC_LOCK_NAME, LOCK_TIMEOUT)
+    lock = redis().lock(SYNC_LOCK_NAME, LOCK_TIMEOUT)
     try:
         acquired = lock.acquire(blocking=blocking)
         if acquired:
@@ -47,17 +47,16 @@ def release(lock=None):
     except Exception:
         logger.exception("Error while releasing Sync lock")
 
-
+import functools
 def needs_lock(func):
-    def decorator(func):
-        def wrapper(self, *args, **kw):
-            lock = acquire()
-            try:
-                return func(self, *args, **kw)
-            finally:
-                release(lock)
-        return wrapper
-    return decorator
+    @functools.wraps(func)
+    def wrapper(self, *args, **kw):
+        lock = acquire()
+        try:
+            return func(self, *args, **kw)
+        finally:
+            release(lock)
+    return wrapper
 
 
 class FilesystemLocator(BaseFilesystemLocator):
