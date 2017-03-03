@@ -170,6 +170,20 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents, contains_string('Ordered List Item 1'))
         assert_that(page_contents, contains_string('<ol'))
         assert_that(page_contents, contains_string('Ordered List Item 1'))
-        # 8. images/figures
-        # 9. video embed
-        # 10. links
+        # 8. boldunderline
+        assert_that(page_contents, contains_string('<b class="bfseries"><span class="underline">boldunderline</span></b>'))
+        assert_that(page_contents, contains_string('<b class="bfseries"><span class="underline">boldunderlined</span></b>'))
+        # 9. bolditalic
+        assert_that(page_contents, contains_string('<b class="bfseries"><em>bolditalic</em></b>'))
+        # 10. italicunderline
+        assert_that(page_contents, contains_string('<em><span class="underline">italicunderline</span></em>'))
+        assert_that(page_contents, contains_string('<em><span class="underline">italicunderlined</span></em>'))
+        # 11. bolditalicunderline
+        assert_that(page_contents,
+                    contains_string('<b class="bfseries"><em><span class="underline">bolditalicunderline</span></em></b>'))
+        assert_that(page_contents,
+                    contains_string('<b class="bfseries"><em><span class="underline">bolditalicunderlined</span></em></b>'))
+
+        # images/figures
+        # video embed
+        # links
