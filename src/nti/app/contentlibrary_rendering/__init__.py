@@ -21,4 +21,4 @@ VIEW_RENDER_JOBS = 'RenderJobs'
 SYNC_LOCK_NAME = '/var/libraries/Lock/locator'
 
 #: The amount of time for which we will hold the lock during location
-LOCK_TIMEOUT = 10 * 60  # 10 minutes
+LOCK_TIMEOUT = 5 * 60  # 5 minutes
