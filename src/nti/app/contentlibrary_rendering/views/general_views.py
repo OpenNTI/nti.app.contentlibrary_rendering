@@ -54,7 +54,7 @@ class RenderContentPackageView(AbstractAuthenticatedView,
                                ModeledContentUploadRequestUtilsMixin):
 
     def readInput(self, value=None):
-        result = super(RenderContentPackageView, self).readInput(self, value=value)
+        result = super(RenderContentPackageView, self).readInput(value=value)
         return CaseInsensitiveDict(result)
 
     def __call__(self):
