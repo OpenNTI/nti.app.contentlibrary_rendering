@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import functools
 
 from zope import component
 
@@ -47,7 +48,6 @@ def release(lock=None):
     except Exception:
         logger.exception("Error while releasing Sync lock")
 
-import functools
 def needs_lock(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kw):
