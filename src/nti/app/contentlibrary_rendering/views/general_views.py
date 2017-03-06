@@ -21,6 +21,7 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
 from nti.app.contentlibrary_rendering import VIEW_RENDER_JOBS
 
+from nti.app.contentlibrary_rendering.views import validate_content
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
@@ -58,6 +59,7 @@ class RenderContentPackageView(AbstractAuthenticatedView,
         return CaseInsensitiveDict(result)
 
     def __call__(self):
+        validate_content(self.context, self.request)
         data = self.readInput()
         provider = data.get('provider') or 'NTI'
         mark_rendered = data.get('MarkRendered') \

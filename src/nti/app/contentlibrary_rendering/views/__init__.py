@@ -9,4 +9,44 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import sys
+
+from pyramid import httpexceptions as hexc
+
+from zope import component
+
 from nti.app.contentlibrary import MessageFactory
+
+from nti.app.externalization.error import raise_json_error
+
+from nti.contentlibrary.interfaces import IContentValidator
+from nti.contentlibrary.interfaces import IContentValidationError
+
+from nti.externalization.externalization import to_external_object
+
+
+def validate_content(package, request):
+    """
+    Validate the given contents.
+    """
+    content = package.contents
+    content_type = package.contentType
+    validator = component.queryUtility(IContentValidator,
+                                       name=content_type)
+    if validator is not None:
+        try:
+            validator.validate(content)
+        except Exception as e:
+            exc_info = sys.exc_info()
+            data = {
+                u'code': 'ContentValidationError',
+            }
+            if IContentValidationError.providedBy(e):
+                error = to_external_object(e, decorate=False)
+                data.update(error)
+            else:
+                data['message'] = str(e)
+            raise_json_error(request,
+                             hexc.HTTPUnprocessableEntity,
+                             data,
+                             exc_info[2])

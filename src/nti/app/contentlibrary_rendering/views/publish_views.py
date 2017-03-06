@@ -18,6 +18,7 @@ from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.contentlibrary_rendering.views import validate_content
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
 from nti.app.externalization.error import raise_json_error
@@ -54,6 +55,7 @@ MIME_TYPE = StandardExternalFields.MIMETYPE
 class RenderableContentPackagePublishView(AbstractAuthenticatedView):
 
     def __call__(self):
+        validate_content(self.context, self.request)
         self.context.publish()
         return self.context
 
