@@ -24,11 +24,15 @@
     <!-- Subscribers -->
 	<subscriber handler=".subscribers._content_published"
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     nti.coremetadata.interfaces.IObjectPublishedEvent"/>
+                     nti.coremetadata.interfaces.IObjectPublishedEvent "/>
 
     <subscriber handler=".subscribers._content_removed"
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     zope.intid.interfaces.IIntIdRemovedEvent"/>
+                     zope.intid.interfaces.IIntIdRemovedEvent "/>
+
+    <subscriber handler=".subscribers._content_location_changed"
+                for="nti.contentlibrary.interfaces.IRenderableContentPackage
+                     nti.contentlibrary.interfaces.IContentPackageLocationChanged "/>
 
     <!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
