@@ -42,6 +42,7 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='GET',
+               name="RenderableContentPackages",
                permission=nauth.ACT_NTI_ADMIN)
 class RenderableContentPackagesView(AbstractAuthenticatedView, BatchingUtilsMixin):
 
