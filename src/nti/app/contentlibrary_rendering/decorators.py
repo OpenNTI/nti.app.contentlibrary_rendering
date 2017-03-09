@@ -77,7 +77,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
                 path = _package_url_path(context, self.request)
                 link = Link(path,
                             rel=VIEW_QUERY_JOB,
-                            elements=(VIEW_QUERY_JOB,),
+                            elements=('@@' + VIEW_QUERY_JOB,),
                             ignore_properties_of_target=True)
                 link.__name__ = ''
                 link.__parent__ = context
@@ -88,7 +88,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
         path = _package_url_path(context, self.request)
         link = Link(path,
                     rel="render",
-                    elements=("render",),
+                    elements=("@@render",),
                     ignore_properties_of_target=True)
         link.__name__ = ''
         link.__parent__ = context
@@ -113,7 +113,7 @@ class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
         path = _package_url_path(package, self.request)
         link = Link(path,
                     rel=VIEW_QUERY_JOB,
-                    elements=(VIEW_QUERY_JOB,),
+                    elements=('@@' + VIEW_QUERY_JOB,),
                     params={'job_id': context.job_id},
                     ignore_properties_of_target=True)
         link.__name__ = ''
