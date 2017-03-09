@@ -16,7 +16,13 @@ from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.externalization.view_mixins import BatchingUtilsMixin
+
 from nti.app.contentlibrary.views import LibraryPathAdapter
+
+from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
+
+from nti.contentlibrary.utils import get_content_packages
 
 from nti.contentlibrary_rendering import QUEUE_NAMES
 
@@ -30,6 +36,28 @@ from nti.externalization.interfaces import StandardExternalFields
 ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='GET',
+               permission=nauth.ACT_NTI_ADMIN)
+class RenderableContentPackagesView(AbstractAuthenticatedView, BatchingUtilsMixin):
+
+    _DEFAULT_BATCH_SIZE = 20
+    _DEFAULT_BATCH_START = 0
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
+        items = list(packages or ())
+        result['TotalItemCount'] = len(items)
+        self._batch_items_iterable(result, items)
+        result[ITEM_COUNT] = len(result[ITEMS])
+        return result
 
 
 @view_config(name='RenderJobs')
