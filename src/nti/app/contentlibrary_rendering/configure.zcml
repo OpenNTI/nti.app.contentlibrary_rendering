@@ -30,6 +30,10 @@
                 for="nti.contentlibrary.interfaces.IRenderableContentPackage
                      zope.intid.interfaces.IIntIdRemovedEvent "/>
 
+    <subscriber handler=".subscribers._content_location_changed"
+                for="nti.contentlibrary.interfaces.IRenderableContentPackage
+                     nti.contentlibrary.interfaces.IContentPackageLocationChanged "/>
+
     <!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
