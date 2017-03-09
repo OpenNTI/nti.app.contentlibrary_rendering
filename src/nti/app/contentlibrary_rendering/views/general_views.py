@@ -26,6 +26,7 @@ from nti.app.contentlibrary_rendering import VIEW_RENDER_JOBS
 from nti.app.contentlibrary_rendering.views import validate_content
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
+from nti.app.externalization.view_mixins import BatchingUtilsMixin
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
 from nti.common.string import is_true
@@ -57,13 +58,20 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
                renderer='rest',
                request_method='GET',
                permission=nauth.ACT_CONTENT_EDIT)
-class RenderableContentPackagesView(AbstractAuthenticatedView):
+class RenderableContentPackagesView(AbstractAuthenticatedView, BatchingUtilsMixin):
+
+    _DEFAULT_BATCH_SIZE = 20
+    _DEFAULT_BATCH_START = 0
 
     def __call__(self):
         result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
         packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
-        result[ITEMS] = items = list(packages or ())
-        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        items = list(packages or ())
+        result['TotalItemCount'] = len(items)
+        self._batch_items_iterable(result, items)
+        result[ITEM_COUNT] = len(result[ITEMS])
         return result
 
 
