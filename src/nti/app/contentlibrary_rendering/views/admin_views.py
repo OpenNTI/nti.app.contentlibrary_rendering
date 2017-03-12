@@ -9,6 +9,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from zope import component
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -23,6 +25,9 @@ from nti.app.contentlibrary.views import LibraryPathAdapter
 from nti.app.contentlibrary_rendering.views import perform_content_validation
 
 from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
+
+from nti.contentlibrary.interfaces import IContentPackageLibrary
+from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary.utils import get_content_packages
 
@@ -53,7 +58,7 @@ def get_renderable_packages():
                request_method='GET',
                name="RenderableContentPackages",
                permission=nauth.ACT_NTI_ADMIN)
-class RenderableContentPackagesView(AbstractAuthenticatedView, 
+class RenderableContentPackagesView(AbstractAuthenticatedView,
                                     BatchingUtilsMixin):
 
     _DEFAULT_BATCH_SIZE = 20
@@ -93,6 +98,29 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
             else:
                 job = render_package(package, self.remoteUser)
                 items[ntiid] = job
+        result[ITEM_COUNT] = len(items)
+        return result
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               name="RemoveInvalidContentPackages",
+               permission=nauth.ACT_NTI_ADMIN)
+class RemoveInvalidContentPackagesView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        library = component.getUtility(IContentPackageLibrary)
+        result[ITEMS] = items = {}
+        packages = get_renderable_packages()
+        for package in packages:
+            if not IRenderableContentPackage.providedBy(package):
+                items[package.ntiid] = package
+                library.remove(package, event=True, unregister=True)
         result[ITEM_COUNT] = len(items)
         return result
 
