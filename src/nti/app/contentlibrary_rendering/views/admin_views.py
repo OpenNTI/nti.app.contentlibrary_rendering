@@ -91,7 +91,7 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
                 data, _ = error
                 items[ntiid] = data
             else:
-                job = render_package(self.context, self.remoteUser,)
+                job = render_package(package, self.remoteUser)
                 items[ntiid] = job
         result[ITEM_COUNT] = len(items)
         return result
