@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -27,11 +27,7 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
-from nti.dataserver.metadata_index import IX_MIMETYPE
-
 from nti.intid.common import removeIntId
-
-from nti.metadata import dataserver_metadata_catalog
 
 from nti.traversal.traversal import find_interface
 
@@ -44,7 +40,7 @@ class MockDataserver(object):
     def get_by_oid(self, oid, ignore_creator=False):
         resolver = component.queryUtility(IOIDResolver)
         if resolver is None:
-            logger.warn("sing dataserver without a proper ISiteManager.")
+            logger.warn("Using dataserver without a proper ISiteManager.")
         else:
             return resolver.get_object_by_oid(oid, ignore_creator=ignore_creator)
         return None
@@ -67,14 +63,8 @@ def do_evolve(context):
         lsm = ds_folder.getSiteManager()
         intids = lsm.getUtility(IIntIds)
 
-        catalog = dataserver_metadata_catalog()
-        mimeType = u'application/vnd.nextthought.content.packagerenderjob'
-        query = {
-            IX_MIMETYPE: {'any_of': (mimeType,)}
-        }
         metas = set()
-        for uid in catalog.apply(query) or ():
-            item = intids.queryObject(uid)
+        for uid, item in list(intids.items()):
             if not IContentPackageRenderJob.providedBy(item):
                 continue
             library = find_interface(item,
