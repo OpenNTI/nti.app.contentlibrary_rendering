@@ -20,6 +20,8 @@ from nti.app.externalization.view_mixins import BatchingUtilsMixin
 
 from nti.app.contentlibrary.views import LibraryPathAdapter
 
+from nti.app.contentlibrary_rendering.views import perform_content_validation
+
 from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
 
 from nti.contentlibrary.utils import get_content_packages
@@ -27,6 +29,8 @@ from nti.contentlibrary.utils import get_content_packages
 from nti.contentlibrary_rendering import QUEUE_NAMES
 
 from nti.contentlibrary_rendering.processing import get_job_queue
+
+from nti.contentlibrary_rendering.utils import render_package
 
 from nti.dataserver import authorization as nauth
 
@@ -38,13 +42,19 @@ TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
+def get_renderable_packages():
+    packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
+    return packages
+
+
 @view_config(context=LibraryPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='GET',
                name="RenderableContentPackages",
                permission=nauth.ACT_NTI_ADMIN)
-class RenderableContentPackagesView(AbstractAuthenticatedView, BatchingUtilsMixin):
+class RenderableContentPackagesView(AbstractAuthenticatedView, 
+                                    BatchingUtilsMixin):
 
     _DEFAULT_BATCH_SIZE = 20
     _DEFAULT_BATCH_START = 0
@@ -53,11 +63,37 @@ class RenderableContentPackagesView(AbstractAuthenticatedView, BatchingUtilsMixi
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
-        packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
-        items = list(packages or ())
-        result['TotalItemCount'] = len(items)
-        self._batch_items_iterable(result, items)
+        packages = get_renderable_packages()
+        result['TotalItemCount'] = len(packages)
+        self._batch_items_iterable(result, packages)
         result[ITEM_COUNT] = len(result[ITEMS])
+        return result
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               name="RenderAllContentPackages",
+               permission=nauth.ACT_NTI_ADMIN)
+class RenderAllContentPackagesView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        result[ITEMS] = items = {}
+        packages = get_renderable_packages()
+        for package in packages:
+            ntiid = package.nttid
+            error = perform_content_validation(package)
+            if error is not None:
+                data, _ = error
+                items[ntiid] = data
+            else:
+                job = render_package(self.context, self.remoteUser,)
+                items[ntiid] = job
+        result[ITEM_COUNT] = len(items)
         return result
 
 
