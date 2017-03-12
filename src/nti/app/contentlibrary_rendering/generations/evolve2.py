@@ -19,17 +19,16 @@ from zope.component.hooks import setHooks
 
 from zope.intid.interfaces import IIntIds
 
-from nti.contentlibrary.interfaces import IContentPackageLibrary
+from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
 
-from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
+from nti.contentlibrary.utils import get_content_packages
+
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
-from nti.intid.common import removeIntId
-
-from nti.traversal.traversal import find_interface
+from nti.metadata import metadata_queue
 
 
 @interface.implementer(IDataserver)
@@ -44,6 +43,11 @@ class MockDataserver(object):
         else:
             return resolver.get_object_by_oid(oid, ignore_creator=ignore_creator)
         return None
+
+
+def get_renderable_packages():
+    packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
+    return packages
 
 
 def do_evolve(context):
@@ -63,26 +67,25 @@ def do_evolve(context):
         lsm = ds_folder.getSiteManager()
         intids = lsm.getUtility(IIntIds)
 
-        metas = set()
-        for uid, item in list(intids.items()):
-            if not IContentPackageRenderJob.providedBy(item):
-                continue
-            library = find_interface(item,
-                                     IContentPackageLibrary,
-                                     strict=False)
-            if library is None:
-                removeIntId(item) # unindex
-                meta = find_interface(item,
-                                      IContentPackageRenderMetadata,
-                                      strict=False)
-                if meta is not None:
-                    metas.add(meta)
+        queue = metadata_queue()
 
-        for meta in metas:
-            meta.clear()  # clear jobs
+        def add_2_queue(uid):
+            try:
+                queue.add(uid)
+            except TypeError:
+                pass
+
+        for package in get_renderable_packages():
+            meta = IContentPackageRenderMetadata(package, None)
+            if meta is None:
+                continue
             uid = intids.queryId(meta)
             if uid is not None:
-                removeIntId(meta)
+                add_2_queue.add(uid)
+            for job in meta.render_jobs:
+                uid = intids.queryId(job)
+                if uid is not None:
+                    add_2_queue.add(uid)
 
     component.getGlobalSiteManager().unregisterUtility(mock_ds, IDataserver)
     logger.info('Dataserver evolution %s done.', generation)
@@ -90,6 +93,6 @@ def do_evolve(context):
 
 def evolve(context):
     """
-    Evolve to gen 2 by removing possible leaks
+    Evolve to gen 2 by indexing render job objects
     """
     do_evolve(context)
