@@ -114,7 +114,7 @@ class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
         link = Link(path,
                     rel=VIEW_QUERY_JOB,
                     elements=('@@' + VIEW_QUERY_JOB,),
-                    params={'job_id': context.job_id},
+                    params={'jobId': context.job_id},
                     ignore_properties_of_target=True)
         link.__name__ = ''
         link.__parent__ = context
