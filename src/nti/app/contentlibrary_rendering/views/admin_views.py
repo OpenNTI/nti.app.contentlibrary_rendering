@@ -27,7 +27,6 @@ from nti.app.contentlibrary_rendering.views import perform_content_validation
 from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
-from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary.utils import get_content_packages
 
@@ -106,9 +105,9 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='POST',
-               name="RemoveInvalidContentPackages",
+               name="RemoveAllRenderableContentPackages",
                permission=nauth.ACT_NTI_ADMIN)
-class RemoveInvalidContentPackagesView(AbstractAuthenticatedView):
+class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
 
     def __call__(self):
         result = LocatedExternalDict()
@@ -118,9 +117,8 @@ class RemoveInvalidContentPackagesView(AbstractAuthenticatedView):
         result[ITEMS] = items = {}
         packages = get_renderable_packages()
         for package in packages:
-            if not IRenderableContentPackage.providedBy(package):
-                items[package.ntiid] = package
-                library.remove(package, event=True, unregister=True)
+            items[package.ntiid] = package
+            library.remove(package, event=True, unregister=True)
         result[ITEM_COUNT] = len(items)
         return result
 
