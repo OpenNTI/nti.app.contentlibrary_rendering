@@ -97,7 +97,7 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
             else:
                 job = render_package(package, self.remoteUser)
                 items[ntiid] = job
-        result[ITEM_COUNT] = len(items)
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
 
@@ -119,7 +119,7 @@ class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
         for package in packages:
             items[package.ntiid] = package
             library.remove(package, event=True, unregister=True)
-        result[ITEM_COUNT] = len(items)
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
 
