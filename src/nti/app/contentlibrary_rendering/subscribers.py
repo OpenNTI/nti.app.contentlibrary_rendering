@@ -20,6 +20,8 @@ from nti.app.authentication import get_remote_user
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 from nti.contentlibrary.interfaces import IContentPackageLocationChanged
 
+from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
+
 from nti.contentlibrary_rendering.utils import render_package
 from nti.contentlibrary_rendering.utils import remove_renderered_package
 
@@ -41,6 +43,9 @@ def _content_published(package, event):
 @component.adapter(IRenderableContentPackage, IIntIdRemovedEvent)
 def _content_removed(package, event):
     remove_renderered_package(package)
+    meta = IContentPackageRenderMetadata(package, None)
+    if meta is not None:
+        meta.clear()
 
 
 @component.adapter(IRenderableContentPackage, IContentPackageLocationChanged)
