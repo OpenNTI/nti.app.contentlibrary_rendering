@@ -10,6 +10,10 @@
 
 	<include package="nti.contentlibrary_rendering" />
 
+	<utility factory=".generations.install._SchemaManager"
+			 name="nti.dataserver-app-contentlibrary-rendering"
+			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
+
     <!-- Decorators -->
     <subscriber factory=".decorators._RenderablePackageEditorDecorator"
                 provides="nti.externalization.interfaces.IExternalMappingDecorator"
