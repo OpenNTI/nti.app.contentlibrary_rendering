@@ -85,7 +85,7 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
         result[ITEMS] = items = {}
         packages = get_renderable_packages()
         for package in packages:
-            ntiid = package.nttid
+            ntiid = package.ntiid
             error = perform_content_validation(package)
             if error is not None:
                 data, _ = error
