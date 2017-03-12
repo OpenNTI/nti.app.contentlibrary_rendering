@@ -118,7 +118,7 @@ class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
         packages = get_renderable_packages()
         for package in packages:
             items[package.ntiid] = package
-            library.remove(package, event=True, unregister=True)
+            library.remove(package, event=True)
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
