@@ -18,6 +18,7 @@ from zope.intid.interfaces import IIntIdRemovedEvent
 from nti.app.authentication import get_remote_user
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
+from nti.contentlibrary.interfaces import IContentPackageRemovedEvent
 from nti.contentlibrary.interfaces import IContentPackageLocationChanged
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
@@ -46,6 +47,11 @@ def _content_removed(package, event):
     meta = IContentPackageRenderMetadata(package, None)
     if meta is not None:
         meta.clear()
+
+
+@component.adapter(IRenderableContentPackage, IContentPackageRemovedEvent)
+def _content_package_removed(package, event):
+    _content_removed(package)
 
 
 @component.adapter(IRenderableContentPackage, IContentPackageLocationChanged)

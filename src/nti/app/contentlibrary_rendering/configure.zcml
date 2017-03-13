@@ -7,46 +7,50 @@
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
 	<include package="zope.security" />
-
+	
 	<include package="nti.contentlibrary_rendering" />
-
+	
 	<utility factory=".generations.install._SchemaManager"
 			 name="nti.dataserver-app-contentlibrary-rendering"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
-
-    <!-- Decorators -->
-    <subscriber factory=".decorators._RenderablePackageEditorDecorator"
-                provides="nti.externalization.interfaces.IExternalMappingDecorator"
-                for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     pyramid.interfaces.IRequest" />
-
-    <subscriber factory=".decorators._RenderJobDecorator"
-                provides="nti.externalization.interfaces.IExternalMappingDecorator"
-                for="nti.contentlibrary_rendering.interfaces.IContentPackageRenderJob
-                     pyramid.interfaces.IRequest" />
-
-    <!-- Subscribers -->
+	
+	<!-- Decorators -->
+	<subscriber factory=".decorators._RenderablePackageEditorDecorator"
+	            provides="nti.externalization.interfaces.IExternalMappingDecorator"
+	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
+	                 pyramid.interfaces.IRequest" />
+	
+	<subscriber factory=".decorators._RenderJobDecorator"
+	            provides="nti.externalization.interfaces.IExternalMappingDecorator"
+	            for="nti.contentlibrary_rendering.interfaces.IContentPackageRenderJob
+	                 pyramid.interfaces.IRequest" />
+	
+	<!-- Subscribers -->
 	<subscriber handler=".subscribers._content_published"
-                for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     nti.coremetadata.interfaces.IObjectPublishedEvent "/>
-
-    <subscriber handler=".subscribers._content_removed"
-                for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     zope.intid.interfaces.IIntIdRemovedEvent "/>
-
-    <subscriber handler=".subscribers._content_location_changed"
-                for="nti.contentlibrary.interfaces.IRenderableContentPackage
-                     nti.contentlibrary.interfaces.IContentPackageLocationChanged "/>
-
-    <!-- Default -->
+	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
+	                 nti.coremetadata.interfaces.IObjectPublishedEvent "/>
+	
+	<subscriber handler=".subscribers._content_removed"
+	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
+	                 zope.intid.interfaces.IIntIdRemovedEvent "/>
+	
+	<subscriber handler=".subscribers._content_package_removed"
+	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
+	                 nti.contentlibrary.interfaces.IContentPackageRemovedEvent "/>
+	
+	<subscriber handler=".subscribers._content_location_changed"
+	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
+	                 nti.contentlibrary.interfaces.IContentPackageLocationChanged "/>
+	
+	<!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
 	<utility factory=".validators.ReStructuredTextValidator" name="reStructuredText" />
-
+	
 	<!-- docutils -->
 	<include package=".docutils" />
-
+	
 	<!-- Locating -->
-    <utility factory=".locators.FilesystemLocator" />
+	<utility factory=".locators.FilesystemLocator" />
     
 </configure>
