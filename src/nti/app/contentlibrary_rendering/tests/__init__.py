@@ -37,7 +37,7 @@ class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
                        'nti.externalization',
                        'nti.contenttypes.presentation',
                        'nti.app.contentlibrary_rendering')
-    
+
     @classmethod
     def setUp(cls):
         setHooks()  # in case something already tore this down
