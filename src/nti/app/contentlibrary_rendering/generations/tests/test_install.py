@@ -10,18 +10,14 @@ __docformat__ = "restructuredtext en"
 from hamcrest import has_key
 from hamcrest import assert_that
 
-import unittest
-
-from nti.app.contentlibrary.tests import SharedConfiguringTestLayer
+from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
 
 from nti.dataserver.tests import mock_dataserver
 
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 
-class TestFunctionalInstall(unittest.TestCase):
-
-    layer = SharedConfiguringTestLayer
+class TestFunctionalInstall(ContentlibraryRenderingLayerTest):
 
     @WithMockDSTrans
     def test_installed(self):

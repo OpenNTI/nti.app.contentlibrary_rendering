@@ -19,19 +19,25 @@ import zope.testing.cleanup
 
 from nti.contentlibrary.interfaces import IContentUnitAnnotationUtility
 
+from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
+
+from nti.testing.layers import find_test
+from nti.testing.layers import GCLayerMixin
 from nti.testing.layers import ZopeComponentLayer
 from nti.testing.layers import ConfiguringLayerMixin
 
 
 class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
-                                       ConfiguringLayerMixin):
+                                       GCLayerMixin,
+                                       ConfiguringLayerMixin,
+                                       DSInjectorMixin):
 
-    set_up_packages = ('nti.containers',
+    set_up_packages = ('nti.dataserver',
                        'nti.contentlibrary',
                        'nti.externalization',
                        'nti.contenttypes.presentation',
                        'nti.app.contentlibrary_rendering')
-
+    
     @classmethod
     def setUp(cls):
         setHooks()  # in case something already tore this down
@@ -49,6 +55,7 @@ class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
 
     @classmethod
     def testSetUp(cls, test=None):
+        cls.setUpTestDS(test)
         # If we installed any annotations, clear them, since
         # they are tracked by NTIID and would otherwise persist
         annotations = component.getUtility(IContentUnitAnnotationUtility)
