@@ -42,7 +42,7 @@ def _content_published(package, event):
 
 
 @component.adapter(IRenderableContentPackage, IIntIdRemovedEvent)
-def _content_removed(package, event):
+def _content_removed(package, event=None):
     remove_renderered_package(package)
     meta = IContentPackageRenderMetadata(package, None)
     if meta is not None:
@@ -50,7 +50,7 @@ def _content_removed(package, event):
 
 
 @component.adapter(IRenderableContentPackage, IContentPackageRemovedEvent)
-def _content_package_removed(package, event):
+def _content_package_removed(package, event=None):
     _content_removed(package)
 
 
