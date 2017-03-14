@@ -33,6 +33,7 @@ class ReStructuredTextValidator(object):
         settings.report_level = 2  # warnings
         settings.traceback = True
         settings.warning_stream = StringIO()
+        settings.character_level_inline_markup = True
         return settings
 
     def _do_validate(self, content, context=None):
