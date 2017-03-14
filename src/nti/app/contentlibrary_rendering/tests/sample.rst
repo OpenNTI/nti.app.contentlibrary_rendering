@@ -6,6 +6,14 @@ Document Title
 Section Title
 =============
 
+===============
+Duplicate Title
+===============
+
+===============
+Duplicate Title
+===============
+
 -----------
 SubSection1
 -----------

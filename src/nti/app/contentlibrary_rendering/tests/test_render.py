@@ -146,6 +146,9 @@ class TestRender(ContentlibraryRenderingLayerTest):
         with open('%s/%s' % (output_dir, 'index.html'), 'r') as f:
             page_contents = f.read()
 
+        assert_that(page_contents,
+                    does_not(contains_string('Duplicate implicit target')))
+
         # Requirements
         # 1. headers
         assert_that(page_contents, contains_string('SubSection1'))
