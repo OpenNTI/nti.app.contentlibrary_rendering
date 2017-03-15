@@ -27,10 +27,13 @@ from nti.app.contentlibrary_rendering.views import perform_content_validation
 from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
+from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary.utils import get_content_packages
 
 from nti.contentlibrary_rendering import QUEUE_NAMES
+
+from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.contentlibrary_rendering.processing import get_job_queue
 
@@ -49,7 +52,6 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 def get_renderable_packages():
     packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
     return packages
-
 
 @view_config(context=LibraryPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
@@ -121,6 +123,45 @@ class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
             library.remove(package, event=True)
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
+
+
+@view_config(name="clear_jobs")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=IRenderableContentPackage,
+               permission=nauth.ACT_NTI_ADMIN)
+class ClearContentPackageRenderJobsView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        meta = IContentPackageRenderMetadata(self.context)
+        items = result[ITEMS] = list(meta.render_jobs)
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        meta.clear()  # clear container
+        return result
+
+
+@view_config(name="RemoveAllRenderContentJobs")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=LibraryPathAdapter,
+               permission=nauth.ACT_NTI_ADMIN)
+class RemoveAllContentPackageRenderJobsView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        packages = get_renderable_packages()
+        for package in packages:
+            meta = IContentPackageRenderMetadata(package, None)
+            if meta:
+                meta.clear()
+        return hexc.HTTPNoContent()
+
+
+# queue views
 
 
 @view_config(name='RenderJobs')
