@@ -29,8 +29,7 @@ from nti.app.publishing import VIEW_UNPUBLISH
 from nti.common.string import is_true
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
-
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.contentlibrary.interfaces import resolve_content_unit_associations
 
 from nti.contenttypes.courses.utils import content_unit_to_courses
 
@@ -73,17 +72,19 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
     CONFIRM_CODE = 'RenderableContentPackageUnpublish'
     CONFIRM_MSG = _('This content has been published to courses. Are you sure you want to unpublish?')
 
-    def _entries(self, courses):
-        for course in courses or ():
-            entry = ICourseCatalogEntry(course, None)
-            if entry is not None:
-                yield entry
+    def _ntiids(self, associations):
+        for x in associations or ():
+            try:
+                yield x.ntiid
+            except AttributeError:
+                pass
 
     def _raise_conflict_error(self, code, message, courses):
-        entries = [x.ntiid for x in self._entries(courses)]
+        associations = resolve_content_unit_associations(self.context)
+        associations = [x.ntiid for x in self._ntiids(associations)]
         logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
                     self.context.ntiid,
-                    entries)
+                    associations)
         params = dict(self.request.params)
         params['force'] = True
         links = (
