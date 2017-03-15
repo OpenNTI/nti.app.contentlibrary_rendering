@@ -7,6 +7,8 @@ This is a title\, with punctuation\.
 
 .. fakesection:: This is a section title\.
 
-.. fakesubsection:: Paragraph title
+.. fakesubsection:: SubSection title
+
+.. fakeparagraph:: Paragraph title
 
 Body Texts

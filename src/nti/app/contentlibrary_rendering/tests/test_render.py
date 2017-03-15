@@ -129,6 +129,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents.count('This is a title, with punctuation.</div>'), is_(1))
         assert_that(page_contents, contains_string('This is a section title.'))
         assert_that(page_contents.count('This is a section title.</div>'), is_(1))
+        assert_that(page_contents, contains_string('Paragraph title'))
+        assert_that(page_contents.count('Paragraph title</div>'), is_(1))
 
     def test_render_basic(self):
         new_content = self._get_rst_data('basic.rst')
