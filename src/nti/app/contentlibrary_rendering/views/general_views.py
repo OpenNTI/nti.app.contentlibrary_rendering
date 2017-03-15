@@ -126,7 +126,6 @@ class RenderJobsView(AbstractAuthenticatedView):
             logger.warn('No meta found for content package (%s)',
                         self.context.ntiid)
             raise hexc.HTTPNotFound(_('Content has not been processed.'))
-
         result = LocatedExternalDict()
         result[NTIID] = self.context.ntiid
         result[ITEMS] = items = []

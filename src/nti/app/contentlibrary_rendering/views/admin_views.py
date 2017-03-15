@@ -53,6 +53,7 @@ def get_renderable_packages():
     packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
     return packages
 
+
 @view_config(context=LibraryPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
