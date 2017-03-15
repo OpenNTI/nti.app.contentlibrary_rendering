@@ -81,7 +81,7 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
 
     def _raise_conflict_error(self, code, message, courses):
         associations = resolve_content_unit_associations(self.context)
-        associations = [x.ntiid for x in self._ntiids(associations)]
+        associations = [x for x in self._ntiids(associations)]
         logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
                     self.context.ntiid,
                     associations)
