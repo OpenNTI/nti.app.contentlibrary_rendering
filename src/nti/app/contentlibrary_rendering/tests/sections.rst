@@ -5,10 +5,14 @@
 This is a title\, with punctuation\.
 ************************************
 
-.. fakesection:: This is a section title\.
+.. fakesection:: This is a section title.
 
 .. fakesubsection:: SubSection title
 
 .. fakeparagraph:: Paragraph title
+
+.. fakesubsection:: literals ' " , . - _ ! \ / [ ]*+=#(){}<>@|^&
+
+.. fakeparagraph:: literals ' " , . - _ ! \ / [ ]*+=#(){}<>@|^&
 
 Body Texts

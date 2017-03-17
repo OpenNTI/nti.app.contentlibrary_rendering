@@ -132,10 +132,6 @@ Enumerated List
 Directives
 ----------
 
-.. testdirective::
-    test directive
-
-
 -----------------
 Filler for Length
 -----------------

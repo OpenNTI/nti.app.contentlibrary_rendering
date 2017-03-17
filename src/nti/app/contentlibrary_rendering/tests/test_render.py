@@ -112,9 +112,6 @@ class TestRender(ContentlibraryRenderingLayerTest):
         page_name = 'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
-#         outdir = '/Users/jzuech/basic_render_test'
-#         tex_dom = render_document(rst_dom, jobname=job_name, outfile_dir=outdir)
-
         tex_dom = render_document(rst_dom, jobname=job_name)
         output_dir = tex_dom.userdata['working-dir']
         output_files = os.listdir(output_dir)
@@ -131,6 +128,10 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents.count('This is a section title.</div>'), is_(1))
         assert_that(page_contents, contains_string('Paragraph title'))
         assert_that(page_contents.count('Paragraph title</div>'), is_(1))
+        assert_that(page_contents,
+                    contains_string('<div class="subsection title" id="5">literals \' " , . - _ ! \ / [ ]*+=#(){}&lt;&gt;@|^&amp;'))
+        assert_that(page_contents,
+                    contains_string('<div class="paragraph title" id="6">literals \' " , . - _ ! \ / [ ]*+=#(){}&lt;&gt;@|^&amp;'))
 
     def test_render_basic(self):
         new_content = self._get_rst_data('basic.rst')
