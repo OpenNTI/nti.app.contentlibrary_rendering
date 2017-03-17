@@ -14,6 +14,10 @@
 			 name="nti.dataserver-app-contentlibrary-rendering"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
 	
+	<!-- ACLs -->
+	<adapter factory=".acl.ContentPackageRenderJobACLProvider" />
+	<adapter factory=".acl.ContentPackageRenderMetadataACLProvider" />
+
 	<!-- Decorators -->
 	<subscriber factory=".decorators._RenderablePackageEditorDecorator"
 	            provides="nti.externalization.interfaces.IExternalMappingDecorator"
