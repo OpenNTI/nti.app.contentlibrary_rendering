@@ -120,8 +120,42 @@ class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
         result[ITEMS] = items = {}
         packages = get_renderable_packages()
         for package in packages:
+            logger.info('Removing renderable package (%s)', package.ntiid)
             items[package.ntiid] = package
             library.remove(package, event=True)
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               name="RemoveInvalidRenderableContentPackages",
+               permission=nauth.ACT_NTI_ADMIN)
+class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
+    """
+    Remove all `authored` content packages that are not
+    IRenderableContentPackages.
+    """
+
+    def _is_renderable_path(self, package):
+        return package.root.name.startswith('_authored_')
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        library = component.getUtility(IContentPackageLibrary)
+        result[ITEMS] = items = {}
+        for package in library.contentPackages:
+            if      not IRenderableContentPackage.providedBy(package) \
+                and self._is_renderable_path(package):
+                logger.info('Removing invalid renderable package (%s) (%s)',
+                            package.ntiid,
+                            package.root.name)
+                items[package.ntiid] = package
+                library.remove(package, event=True)
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
