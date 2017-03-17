@@ -156,6 +156,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents, contains_string('SubsubSection1'))
         assert_that(page_contents, contains_string('SubsubSection2'))
         assert_that(page_contents, contains_string('basic text'))
+        assert_that(page_contents, does_not(contains_string('comment')))
 
     def test_render_sample(self):
         new_content = self._get_rst_data('sample.rst')
