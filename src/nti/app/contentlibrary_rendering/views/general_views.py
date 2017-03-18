@@ -30,6 +30,7 @@ from nti.common.string import is_true
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
+from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.contentlibrary_rendering.utils import render_package
@@ -132,3 +133,15 @@ class RenderJobsView(AbstractAuthenticatedView):
         for job in sorted(meta.render_jobs):
             items.append(job)
         return result
+
+
+@view_config(context=IContentPackageRenderJob)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='DELETE',
+               permission=nauth.ACT_DELETE)
+class RenderJobDeleteView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        del self.context.__parent__[self.context.__name__]
+        return hexc.HTTPNoContent()
