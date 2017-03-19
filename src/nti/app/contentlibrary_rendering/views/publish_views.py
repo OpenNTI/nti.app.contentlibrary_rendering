@@ -31,8 +31,6 @@ from nti.common.string import is_true
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 from nti.contentlibrary.interfaces import resolve_content_unit_associations
 
-from nti.contenttypes.courses.utils import content_unit_to_courses
-
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.externalization import to_external_object
@@ -103,13 +101,13 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
                          None)
 
     def __call__(self):
-        courses = content_unit_to_courses(self.context)
+        associations = resolve_content_unit_associations(self.context)
         params = CaseInsensitiveDict(self.request.params)
         force = is_true(params.get('force'))
-        if not courses or force:
+        if not associations or force:
             self.context.unpublish()
         else:
             self._raise_conflict_error(self.CONFIRM_CODE,
                                        self.CONFIRM_MSG,
-                                       courses)
+                                       associations)
         return self.context
