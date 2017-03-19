@@ -36,10 +36,17 @@ class ReStructuredTextValidator(object):
         settings.character_level_inline_markup = True
         return settings
 
+    def _validate_doc(self, doc):
+        """
+        Validate the document structure
+        """
+        pass
+
     def _do_validate(self, content, context=None):
         settings = self._get_settings()
         try:
-            publish_doctree(content, settings=settings)
+            doc = publish_doctree(content, settings=settings)
+            self._validate_doc(doc)
         except Exception as e:
             settings.warning_stream.seek(0)
             warnings = settings.warning_stream.read()
