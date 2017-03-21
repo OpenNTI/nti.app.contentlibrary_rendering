@@ -203,7 +203,6 @@ class RemoveAllContentPackageRenderJobsView(AbstractAuthenticatedView):
 @view_config(name="GetAllPendingRenderJobs")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
-               request_method='POST',
                context=LibraryPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
 class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
