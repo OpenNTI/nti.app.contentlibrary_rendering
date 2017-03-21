@@ -17,6 +17,10 @@ from zope.generations.generations import SchemaManager as BaseSchemaManager
 
 from zope.generations.interfaces import IInstallableSchemaManager
 
+from zope.intid.interfaces import IIntIds
+
+from nti.contentlibrary_rendering.index import install_contentrenderjob_catalog
+
 
 @interface.implementer(IInstallableSchemaManager)
 class _SchemaManager(BaseSchemaManager):
@@ -26,13 +30,18 @@ class _SchemaManager(BaseSchemaManager):
 
     def __init__(self):
         super(_SchemaManager, self).__init__(
-              generation=generation,
-              minimum_generation=generation,
-              package_name='nti.app.contentlibrary_rendering.generations')
+            generation=generation,
+            minimum_generation=generation,
+            package_name='nti.app.contentlibrary_rendering.generations')
 
     def install(self, context):
         evolve(context)
 
 
 def evolve(context):
-    pass
+    conn = context.connection
+    root = conn.root()
+    dataserver_folder = root['nti.dataserver']
+    lsm = dataserver_folder.getSiteManager()
+    intids = lsm.getUtility(IIntIds)
+    install_contentrenderjob_catalog(dataserver_folder, intids)
