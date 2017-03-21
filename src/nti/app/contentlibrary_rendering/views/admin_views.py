@@ -22,6 +22,8 @@ from nti.app.externalization.view_mixins import BatchingUtilsMixin
 
 from nti.app.contentlibrary.views import LibraryPathAdapter
 
+from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
+
 from nti.app.contentlibrary_rendering.views import perform_content_validation
 
 from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
@@ -150,7 +152,7 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         result[ITEMS] = items = {}
         for package in library.contentPackages:
             if      not IRenderableContentPackage.providedBy(package) \
-                and self._is_renderable_path(package):
+                    and self._is_renderable_path(package):
                 logger.info('Removing invalid renderable package (%s) (%s)',
                             package.ntiid,
                             package.root.name)
@@ -194,6 +196,23 @@ class RemoveAllContentPackageRenderJobsView(AbstractAuthenticatedView):
             if meta:
                 meta.clear()
         return hexc.HTTPNoContent()
+
+
+@view_config(name="GetAllPendingRenderJobs")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=LibraryPathAdapter,
+               permission=nauth.ACT_NTI_ADMIN)
+class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        items = result[ITEMS] = get_pending_render_jobs()
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
 
 
 # queue views
