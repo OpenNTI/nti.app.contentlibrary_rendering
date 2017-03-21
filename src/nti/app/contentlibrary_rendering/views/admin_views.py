@@ -154,7 +154,7 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         result[ITEMS] = items = {}
         for package in library.contentPackages:
             if      not IRenderableContentPackage.providedBy(package) \
-                    and self._is_renderable_path(package):
+                and self._is_renderable_path(package):
                 logger.info('Removing invalid renderable package (%s) (%s)',
                             package.ntiid,
                             package.root.name)
