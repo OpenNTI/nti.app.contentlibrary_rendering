@@ -9,6 +9,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from requests.structures import CaseInsensitiveDict
+
 from zope import component
 
 from pyramid import httpexceptions as hexc
@@ -207,10 +209,12 @@ class RemoveAllContentPackageRenderJobsView(AbstractAuthenticatedView):
 class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
 
     def __call__(self):
+        data = CaseInsensitiveDict(self.request.params)
+        packages = data.get('ntiid') or data.get('package')
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
-        items = result[ITEMS] = get_pending_render_jobs()
+        items = result[ITEMS] = get_pending_render_jobs(packages=packages)
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
