@@ -51,6 +51,6 @@ def get_pending_render_jobs(sites=(), packages=()):
     for doc_id in catalog.apply(query) or ():
         context = intids.queryObject(doc_id)
         if      IContentPackageRenderJob.providedBy(context) \
-                and context.is_pending():
+            and context.is_pending():
             result.append(context)
     return result
