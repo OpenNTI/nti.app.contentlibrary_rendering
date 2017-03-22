@@ -13,7 +13,14 @@ from pyramid import httpexceptions as hexc
 
 from nti.app.externalization.error import raise_json_error
 
+from nti.contentlibrary.interfaces import IContentValidationError
+
 from nti.contentlibrary.validators import validate_content_package as perform_content_validation
+
+from nti.externalization.externalization import to_external_object
+
+from nti.externalization.interfaces import LocatedExternalDict
+
 
 def validate_content(package, request):
     """
@@ -21,7 +28,16 @@ def validate_content(package, request):
     """
     error = perform_content_validation(package)
     if error is not None:
-        data, exc_info = error
+        e, exc_info = error
+        data = LocatedExternalDict({
+            u'code': 'ContentValidationError',
+        })
+        if IContentValidationError.providedBy(e):
+            error = to_external_object(e, decorate=False)
+            data.update(error)
+        else:
+            data['message'] = str(e)
+
         raise_json_error(request,
                          hexc.HTTPUnprocessableEntity,
                          data,
