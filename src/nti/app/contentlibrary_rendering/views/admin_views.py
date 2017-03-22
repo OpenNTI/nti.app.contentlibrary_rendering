@@ -170,7 +170,7 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
                request_method='POST',
                context=IRenderableContentPackage,
                permission=nauth.ACT_NTI_ADMIN)
-class ClearContentPackageRenderJobsView(AbstractAuthenticatedView):
+class RemoveContentPackageRenderJobsView(AbstractAuthenticatedView):
 
     def __call__(self):
         result = LocatedExternalDict()
