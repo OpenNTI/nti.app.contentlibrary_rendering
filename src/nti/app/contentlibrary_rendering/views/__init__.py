@@ -9,44 +9,11 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-import sys
-
 from pyramid import httpexceptions as hexc
-
-from zope import component
-
-from nti.app.contentlibrary import MessageFactory
 
 from nti.app.externalization.error import raise_json_error
 
-from nti.contentlibrary.interfaces import IContentValidator
-from nti.contentlibrary.interfaces import IContentValidationError
-
-from nti.externalization.externalization import to_external_object
-
-from nti.externalization.interfaces import LocatedExternalDict
-
-
-def perform_content_validation(package):
-    content_type = package.contentType
-    validator = component.queryUtility(IContentValidator,
-                                       name=content_type)
-    if validator is not None:
-        try:
-            contents = package.contents
-            validator.validate(contents)
-        except Exception as e:
-            exc_info = sys.exc_info()
-            data = LocatedExternalDict({
-                u'code': 'ContentValidationError',
-            })
-            if IContentValidationError.providedBy(e):
-                error = to_external_object(e, decorate=False)
-                data.update(error)
-            else:
-                data['message'] = str(e)
-            return data, exc_info
-
+from nti.contentlibrary.validators import validate_content_package as perform_content_validation
 
 def validate_content(package, request):
     """
