@@ -11,6 +11,8 @@ logger = __import__('logging').getLogger(__name__)
 
 from pyramid import httpexceptions as hexc
 
+from nti.app.contentlibrary import MessageFactory as _
+
 from nti.app.externalization.error import raise_json_error
 
 from nti.contentlibrary.interfaces import IContentValidationError
