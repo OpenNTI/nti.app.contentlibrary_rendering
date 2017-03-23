@@ -37,6 +37,8 @@ from nti.dataserver.authorization import ACT_CONTENT_EDIT
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalMappingDecorator
 
+from nti.externalization.singleton import SingletonDecorator
+
 from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
@@ -55,6 +57,19 @@ def get_ds2(request=None):
 def _package_url_path(package, request=None):
     path = '/%s/%s/%s' % (get_ds2(request), LIBRARY_ADAPTER, package.ntiid)
     return path
+
+
+@component.adapter(IRenderableContentPackage)
+@interface.implementer(IExternalMappingDecorator)
+class _RenderablePackageDecorator(object):
+    """
+    Decorates IRenderableContentPackage.
+    """
+
+    __metaclass__ = SingletonDecorator
+
+    def decorateExternalMapping(self, context, mapping):
+        mapping['isRendered'] = IContentRendered.providedBy(context)
 
 
 @interface.implementer(IExternalMappingDecorator)
@@ -100,7 +115,6 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
     def _do_decorate_external(self, context, result):
         self._render_link(context, result)
         self._render_job_link(context, result)
-        result['isRendered'] = IContentRendered.providedBy(context)
 
 
 @interface.implementer(IExternalMappingDecorator)
