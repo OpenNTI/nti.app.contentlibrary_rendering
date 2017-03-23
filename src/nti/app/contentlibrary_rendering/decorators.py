@@ -9,6 +9,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import os
+
 from zope import component
 from zope import interface
 
@@ -24,6 +26,7 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 from nti.appserver.pyramid_authorization import has_permission
 
 from nti.contentlibrary.interfaces import IContentRendered
+from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
@@ -108,6 +111,7 @@ class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
     """
 
     def _do_decorate_external(self, context, result):
+        # set jobId link
         _links = result.setdefault(LINKS, [])
         package = IRenderableContentPackage(context)
         path = _package_url_path(package, self.request)
@@ -119,3 +123,9 @@ class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
         link.__name__ = ''
         link.__parent__ = context
         _links.append(link)
+        # set index property
+        mapper = IContentUnitHrefMapper(context.OutputRoot, None)
+        if mapper is not None:
+            href = mapper.href
+            result['index'] = os.path.join(href, 'index.html')
+            result['index_jsonp'] = os.path.join(href, 'index.html.jsonp')
