@@ -127,5 +127,7 @@ class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
         mapper = IContentUnitHrefMapper(context.OutputRoot, None)
         if mapper is not None:
             href = mapper.href
-            result['index'] = os.path.join(href, 'index.html')
-            result['index_jsonp'] = os.path.join(href, 'index.html.jsonp')
+            result['root'] = href
+            result['href'] = os.path.join(href, 'index.html')
+            result['index'] = os.path.join(href, 'eclipse-toc.xml')
+            result['index_jsonp'] = os.path.join(href, 'eclipse-toc.xml.jsonp')
