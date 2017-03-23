@@ -75,7 +75,7 @@ class RenderableContentPackagesView(AbstractAuthenticatedView,
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         packages = get_renderable_packages()
-        result['TotalItemCount'] = len(packages)
+        result[TOTAL] = result['TotalItemCount'] = len(packages)
         self._batch_items_iterable(result, packages)
         result[ITEM_COUNT] = len(result[ITEMS])
         return result
