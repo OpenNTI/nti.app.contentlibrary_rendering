@@ -24,6 +24,7 @@ from nti.app.externalization.view_mixins import BatchingUtilsMixin
 
 from nti.app.contentlibrary.views import LibraryPathAdapter
 
+from nti.app.contentlibrary_rendering.utils import get_failed_render_jobs
 from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
 
 from nti.app.contentlibrary_rendering.views import perform_content_validation
@@ -214,6 +215,24 @@ class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         items = result[ITEMS] = get_pending_render_jobs(packages=packages)
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
+
+
+@view_config(name="GetAllFailedRenderJobs")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               context=LibraryPathAdapter,
+               permission=nauth.ACT_NTI_ADMIN)
+class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        data = CaseInsensitiveDict(self.request.params)
+        packages = data.get('ntiid') or data.get('package')
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        items = result[ITEMS] = get_failed_render_jobs(packages=packages)
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 

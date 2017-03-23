@@ -20,13 +20,14 @@ from nti.contentlibrary_rendering.index import IX_STATE
 from nti.contentlibrary_rendering.index import IX_PACKAGE_NTIID
 from nti.contentlibrary_rendering.index import get_contentrenderjob_catalog
 
+from nti.contentlibrary_rendering.interfaces import FAILED
 from nti.contentlibrary_rendering.interfaces import PENDING
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 
 from nti.site.site import get_component_hierarchy_names
 
 
-def get_pending_render_jobs(sites=(), packages=()):
+def query_render_jobs(sites=(), packages=(), status=PENDING):
     if not sites:
         sites = get_component_hierarchy_names()
     elif isinstance(sites, six.string_types):
@@ -35,22 +36,37 @@ def get_pending_render_jobs(sites=(), packages=()):
     if isinstance(packages, six.string_types):
         packages = packages.split()
 
-    intids = component.getUtility(IIntIds)
+   
     catalog = get_contentrenderjob_catalog()
     if catalog is None:  # tests
         return ()
 
     query = {
         IX_SITE: {'any_of': sites},
-        IX_STATE: {'any_of': (PENDING,)}
+        IX_STATE: {'any_of': (status,)}
     }
     if packages:
         query[IX_PACKAGE_NTIID] = {'any_of': packages}
 
+    return catalog.apply(query) or ()
+
+
+def get_pending_render_jobs(sites=(), packages=()):
     result = list()
-    for doc_id in catalog.apply(query) or ():
+    intids = component.getUtility(IIntIds)
+    for doc_id in query_render_jobs(sites, packages, PENDING):
         context = intids.queryObject(doc_id)
         if      IContentPackageRenderJob.providedBy(context) \
             and context.is_pending():
+            result.append(context)
+    return result
+
+def get_failed_render_jobs(sites=(), packages=()):
+    result = list()
+    intids = component.getUtility(IIntIds)
+    for doc_id in query_render_jobs(sites, packages, FAILED):
+        context = intids.queryObject(doc_id)
+        if      IContentPackageRenderJob.providedBy(context) \
+            and context.has_failed():
             result.append(context)
     return result
