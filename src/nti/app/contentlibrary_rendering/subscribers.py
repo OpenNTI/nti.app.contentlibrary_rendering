@@ -15,6 +15,8 @@ from zope import component
 
 from zope.intid.interfaces import IIntIdRemovedEvent
 
+from zc.intid.interfaces import IAfterIdAddedEvent
+
 from nti.app.authentication import get_remote_user
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
@@ -29,6 +31,8 @@ from nti.contentlibrary_rendering.utils import remove_rendered_package
 from nti.coremetadata.interfaces import IObjectPublishedEvent
 
 from nti.ntiids.ntiids import get_provider
+
+from nti.recorder.interfaces import ITransactionRecordHistory
 
 
 @component.adapter(IRenderableContentPackage, IObjectPublishedEvent)
@@ -59,3 +63,9 @@ def _content_location_changed(package, event):
     old_root = event.old_root
     if old_root is not None:
         remove_rendered_package(package, old_root)
+
+
+@component.adapter(IRenderableContentPackage, IAfterIdAddedEvent)
+def _after_id_added_event(package, event):
+    # init record history
+    ITransactionRecordHistory(package)

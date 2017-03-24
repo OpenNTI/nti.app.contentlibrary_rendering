@@ -36,19 +36,23 @@
 	<!-- Subscribers -->
 	<subscriber handler=".subscribers._content_published"
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
-	                 nti.coremetadata.interfaces.IObjectPublishedEvent "/>
+	                 nti.coremetadata.interfaces.IObjectPublishedEvent"/>
 
 	<subscriber handler=".subscribers._content_removed"
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
-	                 zope.intid.interfaces.IIntIdRemovedEvent "/>
+	                 zope.intid.interfaces.IIntIdRemovedEvent"/>
 
 	<subscriber handler=".subscribers._content_package_removed"
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
-	                 nti.contentlibrary.interfaces.IContentPackageRemovedEvent "/>
+	                 nti.contentlibrary.interfaces.IContentPackageRemovedEvent"/>
 
 	<subscriber handler=".subscribers._content_location_changed"
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
-	                 nti.contentlibrary.interfaces.IContentPackageLocationChanged "/>
+	                 nti.contentlibrary.interfaces.IContentPackageLocationChanged"/>
+
+	<subscriber handler=".subscribers._after_id_added_event"
+	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
+	                 zc.intid.interfaces.IAfterIdAddedEvent"/>
 
 	<!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
