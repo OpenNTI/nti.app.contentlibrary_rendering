@@ -21,6 +21,7 @@ from pyramid.view import view_defaults
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.externalization.view_mixins import BatchingUtilsMixin
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
 from nti.app.contentlibrary.views import LibraryPathAdapter
 
@@ -236,6 +237,19 @@ class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
+
+@view_config(name="RenderContentBundle")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=LibraryPathAdapter,
+               permission=nauth.ACT_NTI_ADMIN)
+class RenderContentBundleView(AbstractAuthenticatedView,
+                              ModeledContentUploadRequestUtilsMixin):
+
+    def __call__(self):
+        pass
+    
 
 # queue views
 
