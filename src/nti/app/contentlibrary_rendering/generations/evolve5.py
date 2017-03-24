@@ -9,7 +9,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-generation = 4
+generation = 5
 
 from zope import component
 from zope import interface
@@ -25,6 +25,8 @@ from nti.contentlibrary.utils import get_content_packages
 
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
+
+from nti.recorder import TRX_RECORD_HISTORY_KEY
 
 
 def get_renderable_packages():
@@ -63,8 +65,7 @@ def do_evolve(context):
         for package in get_renderable_packages():
             annotes = IAnnotations(package, None)
             try:
-                meta = annotes.data.pop(u'nti.contentlibrary.rendering.ContentPackageRenderMetadata',
-                                        None)
+                meta = annotes.data.pop(TRX_RECORD_HISTORY_KEY, None)
                 meta.clear()
             except AttributeError:
                 pass
@@ -75,7 +76,7 @@ def do_evolve(context):
 
 def evolve(context):
     """
-    Evolve to gen 4 by removing render metadata (away from annotation storage).
+    Evolve to gen 5 by removing trx history records (away from annotation storage).
     We do not have to retain data in this case (change affects alpha only).
     """
     do_evolve(context)
