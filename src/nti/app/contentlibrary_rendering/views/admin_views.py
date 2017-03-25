@@ -243,9 +243,11 @@ class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
                renderer='rest',
                request_method='POST',
                context=LibraryPathAdapter,
-               permission=nauth.ACT_NTI_ADMIN)
+               permission=nauth.ACT_SYNC_LIBRARY)
 class RenderContentBundleView(AbstractAuthenticatedView,
                               ModeledContentUploadRequestUtilsMixin):
+
+    MAX_SOURCE_SIZE = 524288000 # 500mb
 
     def __call__(self):
         pass
