@@ -43,7 +43,7 @@ class ContentPackageRenderMetadataACLProvider(object):
 
     @Lazy
     def __acl__(self):
-        aces = [ace_allowing(ROLE_ADMIN, ALL_PERMISSIONS, self),
+        aces = [ace_allowing(ROLE_ADMIN, ALL_PERMISSIONS, type(self)),
                 ace_allowing(ROLE_CONTENT_ADMIN, ALL_PERMISSIONS, type(self))]
         return acl_from_aces(aces)
 
@@ -61,7 +61,7 @@ class ContentPackageRenderJobACLProvider(object):
 
     @Lazy
     def __acl__(self):
-        aces = [ace_allowing(ROLE_ADMIN, ALL_PERMISSIONS, self),
+        aces = [ace_allowing(ROLE_ADMIN, ALL_PERMISSIONS, type(self)),
                 ace_allowing(ROLE_CONTENT_ADMIN, ALL_PERMISSIONS, type(self))]
         creator = IPrincipal(self.context.creator, None)
         if creator is not None:
