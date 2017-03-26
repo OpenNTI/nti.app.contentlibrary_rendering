@@ -20,12 +20,7 @@ from nti.property.property import Lazy
 
 
 class FilesystemLocator(BaseFilesystemLocator):
-
-    def _do_locate(self, path, root, context):
-        return BaseFilesystemLocator._do_locate(self, path, root, context)
-
-    def _do_remove(self, bucket):
-        BaseFilesystemLocator._do_remove(self, bucket)
+    pass
 
 
 class S3Locator(BaseS3Locator):
@@ -33,9 +28,3 @@ class S3Locator(BaseS3Locator):
     @Lazy
     def settings(self):
         return component.queryUtility(IApplicationSettings) or {}
-
-    def _do_locate(self, path, root, context, debug=True):
-        return BaseS3Locator._do_locate(self, path, root, context, debug=debug)
-
-    def _do_remove(self, bucket, debug=True):
-        return BaseS3Locator._do_remove(self, bucket, debug=debug)
