@@ -36,7 +36,6 @@ def query_render_jobs(sites=(), packages=(), status=PENDING):
     if isinstance(packages, six.string_types):
         packages = packages.split()
 
-   
     catalog = get_contentrenderjob_catalog()
     if catalog is None:  # tests
         return ()
@@ -60,6 +59,7 @@ def get_pending_render_jobs(sites=(), packages=()):
             and context.is_pending():
             result.append(context)
     return result
+
 
 def get_failed_render_jobs(sites=(), packages=()):
     result = list()
