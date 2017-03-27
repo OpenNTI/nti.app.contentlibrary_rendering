@@ -16,17 +16,20 @@ from zope import interface
 
 from zope.annotation.interfaces import IAnnotations
 
-from zope.component.hooks import site
 from zope.component.hooks import setHooks
+from zope.component.hooks import site as current_site
 
 from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
 
 from nti.contentlibrary.utils import get_content_packages
+from nti.contentlibrary.utils import get_content_package_site
 
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
 from nti.recorder import TRX_RECORD_HISTORY_KEY
+
+from nti.site.hostpolicy import get_host_site
 
 
 def get_renderable_packages():
@@ -48,6 +51,17 @@ class MockDataserver(object):
         return None
 
 
+def remove_annotation(package):
+    annotes = IAnnotations(package, None)
+    try:
+        meta = annotes.data.pop(TRX_RECORD_HISTORY_KEY, None)
+        meta.clear()
+        return True
+    except AttributeError:
+        pass
+    return False
+
+
 def do_evolve(context):
     setHooks()
     conn = context.connection
@@ -58,17 +72,18 @@ def do_evolve(context):
     mock_ds.root = ds_folder
     component.provideUtility(mock_ds, IDataserver)
 
-    with site(ds_folder):
+    with current_site(ds_folder):
         assert component.getSiteManager() == ds_folder.getSiteManager(), \
                "Hooks not installed?"
 
         for package in get_renderable_packages():
-            annotes = IAnnotations(package, None)
-            try:
-                meta = annotes.data.pop(TRX_RECORD_HISTORY_KEY, None)
-                meta.clear()
-            except AttributeError:
-                pass
+            site_name = get_content_package_site(package)
+            if site_name is None:
+                remove_annotation(package)
+            else:
+                site = get_host_site(site_name)
+                with current_site(site):
+                    remove_annotation(package)
 
     component.getGlobalSiteManager().unregisterUtility(mock_ds, IDataserver)
     logger.info('Dataserver evolution %s done.', generation)
