@@ -20,6 +20,8 @@ from pyramid.threadlocal import get_current_request
 
 from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
 from nti.app.contentlibrary_rendering import LIBRARY_ADAPTER
+from nti.app.contentlibrary_rendering import VIEW_LIB_JOB_ERROR
+from nti.app.contentlibrary_rendering import VIEW_LIB_JOB_STATUS
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
@@ -29,12 +31,14 @@ from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
+from nti.contentlibrary_rendering.interfaces import ILibraryRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 
 from nti.externalization.interfaces import StandardExternalFields
+from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.externalization.singleton import SingletonDecorator
@@ -54,8 +58,13 @@ def get_ds2(request=None):
     return result or u"dataserver2"
 
 
+def _library_adapter_path(request=None):
+    path = '/%s/%s' % (get_ds2(request), LIBRARY_ADAPTER)
+    return path
+
+
 def _package_url_path(package, request=None):
-    path = '/%s/%s/%s' % (get_ds2(request), LIBRARY_ADAPTER, package.ntiid)
+    path = '%s/%s' % (_library_adapter_path(request), package.ntiid)
     return path
 
 
@@ -80,7 +89,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
     """
 
     def _predicate(self, context, result):
-        return  self._is_authenticated \
+        return self._is_authenticated \
             and has_permission(ACT_CONTENT_EDIT, context, self.request)
 
     def _render_job_link(self, context, result):
@@ -119,9 +128,9 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
 
 @interface.implementer(IExternalMappingDecorator)
 @component.adapter(IContentPackageRenderJob, IRequest)
-class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
+class _ContentPackageRenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
     """
-    Decorates IRenderableContentPackage with render info.
+    Decorates IContentPackageRenderJob with render info.
     """
 
     def _do_decorate_external(self, context, result):
@@ -145,3 +154,28 @@ class _RenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
             result['href'] = os.path.join(href, 'index.html')
             result['index'] = os.path.join(href, 'eclipse-toc.xml')
             result['index_jsonp'] = os.path.join(href, 'eclipse-toc.xml.jsonp')
+
+
+@component.adapter(ILibraryRenderJob, IRequest)
+@interface.implementer(IExternalObjectDecorator)
+class _LibraryRenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
+    """
+    Decorates ILibraryRenderJob with render info.
+    """
+
+    def _do_decorate_external(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        path = _library_adapter_path(self.request)
+        for rel, name in (('error', VIEW_LIB_JOB_ERROR), 
+                          ('status', VIEW_LIB_JOB_STATUS)):
+            link = Link(path,
+                        rel=rel,
+                        elements=('@@' + name,),
+                        params={'jobId': context.job_id},
+                        ignore_properties_of_target=True)
+            link.__name__ = ''
+            link.__parent__ = context
+            _links.append(link)
+        # remove unused
+        result.pop('Error', None)
+        result.pop('State', None)

@@ -28,9 +28,14 @@
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
 	                 pyramid.interfaces.IRequest" />
 
-	<subscriber factory=".decorators._RenderJobDecorator"
+	<subscriber factory=".decorators._ContentPackageRenderJobDecorator"
 	            provides="nti.externalization.interfaces.IExternalMappingDecorator"
 	            for="nti.contentlibrary_rendering.interfaces.IContentPackageRenderJob
+	                 pyramid.interfaces.IRequest" />
+
+	<subscriber factory=".decorators._LibraryRenderJobDecorator"
+	            provides="nti.externalization.interfaces.IExternalObjectDecorator"
+	            for="nti.contentlibrary_rendering.interfaces.ILibraryRenderJob
 	                 pyramid.interfaces.IRequest" />
 
 	<!-- Subscribers -->

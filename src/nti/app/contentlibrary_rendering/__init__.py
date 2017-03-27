@@ -17,8 +17,11 @@ VIEW_QUERY_JOB = 'QueryRenderJob'
 #: Render jobs
 VIEW_RENDER_JOBS = 'RenderJobs'
 
-#: Redis sync lock name
-SYNC_LOCK_NAME = '/var/libraries/Lock/locator'
+#: Fetch the error of a library render job
+VIEW_LIB_JOB_ERROR = 'RenderJobError'
+
+#: Fetch the status of a library render job
+VIEW_LIB_JOB_STATUS = 'RenderJobStatus'
 
 #: The amount of time for which we will hold the lock during location
 LOCK_TIMEOUT = 5 * 60  # 5 minutes
