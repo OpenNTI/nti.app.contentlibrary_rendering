@@ -70,4 +70,13 @@
 	<!-- Locating -->
 	<utility factory=".locators.FilesystemLocator" />
 
+	<!-- Metadata -->
+	<configure zcml:condition="installed nti.metadata">
+		<subscriber	factory=".predicates._SystemContentRenderMetadata"
+					provides="nti.dataserver.interfaces.IPrincipalMetadataObjects" />
+
+		<subscriber	factory=".predicates._ContentPackageRenderJobs"
+					provides="nti.dataserver.interfaces.IPrincipalMetadataObjects" />
+	</configure>
+	
 </configure>
