@@ -75,7 +75,7 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
         finally:
             os.remove(zip_file)
 
-    def __call__(self):
+    def _do_call(self):
         if      IPublishable.providedBy(self.context) \
             and not IContentRendered.providedBy(self.context):
             raise_json_error(
