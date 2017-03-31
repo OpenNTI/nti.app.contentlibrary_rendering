@@ -78,6 +78,7 @@ class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
             sources = get_all_sources(self.request)
             for name, source in sources.items():
                 # 1. save source
+                name = getattr(source, 'name', None) or name
                 path = os.path.join(tmp_dir, name)
                 transfer_to_native_file(source, path)
                 source = process_source(path)
@@ -86,7 +87,10 @@ class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
                 # 3. move content to library
                 move_content(library, source)
                 # 4. sync
-                synced = update_library(ntiid, source, library=library)
+                synced = update_library(ntiid,
+                                        source, 
+                                        move=False,
+                                        library=library)
                 items[ntiid] = synced
             result[ITEM_COUNT] = result[TOTAL] = len(items)
             return result
