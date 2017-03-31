@@ -39,7 +39,7 @@ from nti.dataserver import authorization as nauth
                renderer='rest',
                name="Export",
                context=IContentPackage,
-               permission=nauth.ACT_SYNC_LIBRARY)
+               permission=nauth.ACT_NTI_ADMIN)
 class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
 
     blocking = True
