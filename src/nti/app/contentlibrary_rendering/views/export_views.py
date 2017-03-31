@@ -42,6 +42,8 @@ from nti.dataserver import authorization as nauth
                permission=nauth.ACT_SYNC_LIBRARY)
 class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
 
+    blocking = True
+
     def _export_fs(self, root):
         tempdir = tempfile.mkdtemp()
         zip_file = os.path.join(tempdir, "export")
