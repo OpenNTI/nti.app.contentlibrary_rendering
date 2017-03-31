@@ -19,7 +19,7 @@ from pyramid import httpexceptions as hexc
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
-from nti.app.base.abstract_views import AbstractAuthenticatedView
+from nti.app.contentlibrary.views.sync_views import _AbstractSyncAllLibrariesView
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
@@ -40,7 +40,7 @@ from nti.dataserver import authorization as nauth
                name="Export",
                context=IContentPackage,
                permission=nauth.ACT_SYNC_LIBRARY)
-class ExportContentPackageContentsView(AbstractAuthenticatedView):
+class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
 
     def _export_fs(self, root):
         tempdir = tempfile.mkdtemp()
