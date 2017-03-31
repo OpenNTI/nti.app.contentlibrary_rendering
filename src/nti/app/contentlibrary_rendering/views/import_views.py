@@ -48,6 +48,7 @@ ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
+
 @view_config(name="Import")
 @view_config(name="ImportContents")
 @view_defaults(route_name='objects.generic.traversal',
@@ -73,10 +74,10 @@ class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         result[ITEMS] = items = {}
-        
         tmp_dir = tempfile.mkdtemp()
         try:
-            for name, source in get_all_sources().items():
+            sources = get_all_sources(self.request)
+            for name, source in sources.items():
                 # 1. save source
                 path = os.path.join(tmp_dir, name)
                 transfer_to_native_file(source, path)
@@ -86,7 +87,7 @@ class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
                 # 3. move content to library
                 move_content(library, source)
                 # 4. sync
-                synced = update_library(ntiid, source)
+                synced = update_library(ntiid, source, library=library)
                 items[ntiid] = synced
             result[ITEM_COUNT] = result[TOTAL] = len(items)
             return result

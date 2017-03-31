@@ -76,7 +76,7 @@ class RenderContentSourceView(AbstractAuthenticatedView,
         provider = data.get('provider') or 'NTI'
         site = data.get('site') or data.get('site_name')
         # process sources
-        sources = get_all_sources(self.request, None)
+        sources = get_all_sources(self.request)
         for name, source in sources.items():
             if source.length >= self.MAX_SOURCE_SIZE:
                 raise_json_error(
