@@ -49,8 +49,7 @@ TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
-@view_config(name="Import")
-@view_config(name="ImportContents")
+@view_config(name="ImportRenderedContent")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='POST',
