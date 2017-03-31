@@ -37,7 +37,6 @@ from nti.dataserver import authorization as nauth
 @view_config(context=IContentPackage)
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
-               request_method='POST',
                name="Export",
                context=IContentPackage,
                permission=nauth.ACT_SYNC_LIBRARY)
@@ -45,9 +44,9 @@ class ExportContentPackageContentsView(AbstractAuthenticatedView):
 
     def _export_fs(self, root):
         tempdir = tempfile.mkdtemp()
-        zip_file = os.path.join(tempdir, "export.zip")
+        zip_file = os.path.join(tempdir, "export")
         shutil.make_archive(zip_file, 'zip', root.absolute_path)
-        return zip_file
+        return zip_file + ".zip"
 
     def _export_boto(self, pkg_key):
         tempdir = tempfile.mkdtemp()
@@ -90,5 +89,5 @@ class ExportContentPackageContentsView(AbstractAuthenticatedView):
             zip_file = self._export_fs(root)
         else: # boto
             key = self.context.key
-            self._export_boto(key)
+            zip_file = self._export_boto(key)
         return self._export_response(zip_file, self.request.response)
