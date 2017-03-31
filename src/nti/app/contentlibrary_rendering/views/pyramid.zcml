@@ -8,6 +8,7 @@
 
 	<pyramid:scan package='.sync_views' />
 	<pyramid:scan package='.admin_views' />
+	<pyramid:scan package='.export_views' />
 	<pyramid:scan package='.publish_views' />
 	<pyramid:scan package='.general_views' />
 
