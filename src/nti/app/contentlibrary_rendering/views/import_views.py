@@ -15,6 +15,9 @@ import tempfile
 
 from zope import component
 
+from zope.component.hooks import getSite
+from zope.component.hooks import site as current_site
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -34,8 +37,11 @@ from nti.cabinet.filer import transfer_to_native_file
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 
+from nti.contentlibrary.utils import get_content_package_site
+
 from nti.contentlibrary_rendering._archive import move_content
 from nti.contentlibrary_rendering._archive import process_source
+from nti.contentlibrary_rendering._archive import remove_content
 from nti.contentlibrary_rendering._archive import update_library
 from nti.contentlibrary_rendering._archive import get_rendered_package_ntiid
 
@@ -43,6 +49,8 @@ from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
+
+from nti.site.hostpolicy import get_host_site
 
 ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
@@ -57,40 +65,61 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
                permission=nauth.ACT_SYNC_LIBRARY)
 class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
 
-    def _do_call(self):
-        library = component.queryUtility(IContentPackageLibrary)
-        if library is None:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Library not available"),
-                        u'code': 'LibraryNotAvailable',
-                    },
-                    None)
+    def _get_site(self, request_site, package):
+        if request_site:
+            site_name = request_site
+        elif package is not None:
+            site_name = get_content_package_site(package)
+        else:
+            site_name = getSite().__name__
+        return site_name
 
+    def _do_call(self):
+        data = self.readInput()
+        request_site = data.get('site')
+        request_library = component.getUtility(IContentPackageLibrary)
+        # preapre results
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         result[ITEMS] = items = {}
+        # process sources
         tmp_dir = tempfile.mkdtemp()
         try:
             sources = get_all_sources(self.request)
             for name, source in sources.items():
-                # 1. save source
+                # 1. process source
                 name = getattr(source, 'name', None) or name
                 path = os.path.join(tmp_dir, name)
                 transfer_to_native_file(source, path)
                 source = process_source(path)
                 # 2. get package ntiid
                 ntiid = get_rendered_package_ntiid(source)
-                # 3. move content to library
-                move_content(library, source)
-                # 4. sync
-                synced = update_library(ntiid,
-                                        source, 
-                                        move=False,
-                                        library=library)
+                # 3. get existing package if any
+                package = request_library.get(ntiid)
+                # 4. get update site
+                site_name = self._get_site(request_site, package)
+                if not site_name:
+                    raise_json_error(
+                            self.request,
+                            hexc.HTTPUnprocessableEntity,
+                            {
+                                u'message': _("Cannot update a global package"),
+                                u'code': 'CannotUpdateGlobalPackage',
+                            },
+                            None)
+                with current_site(get_host_site(site_name)):
+                    # 5. remove content
+                    if package is not None:
+                        remove_content(package)
+                    library = component.getUtility(IContentPackageLibrary)
+                    # 6. move content to library
+                    move_content(library, source)
+                    # 7. sync
+                    synced = update_library(ntiid,
+                                            source,
+                                            move=False,
+                                            library=library)
                 items[ntiid] = synced
             result[ITEM_COUNT] = result[TOTAL] = len(items)
             return result
