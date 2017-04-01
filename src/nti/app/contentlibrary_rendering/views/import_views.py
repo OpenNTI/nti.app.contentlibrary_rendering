@@ -18,8 +18,6 @@ from zope import component
 from zope.component.hooks import getSite
 from zope.component.hooks import site as current_site
 
-from pyramid import httpexceptions as hexc
-
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
@@ -30,8 +28,6 @@ from nti.app.contentlibrary.views import LibraryPathAdapter
 from nti.app.contentlibrary.views.sync_views import _AbstractSyncAllLibrariesView
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
-
-from nti.app.externalization.error import raise_json_error
 
 from nti.cabinet.filer import transfer_to_native_file
 
@@ -58,12 +54,13 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
 @view_config(name="ImportRenderedContent")
+@view_config(name="ImportRenderedContents")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='POST',
                context=LibraryPathAdapter,
                permission=nauth.ACT_SYNC_LIBRARY)
-class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
+class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
 
     def _get_site(self, request_site, package):
         if request_site:
@@ -100,14 +97,7 @@ class ImportContentPackageContentsView(_AbstractSyncAllLibrariesView):
                 # 4. get update site
                 site_name = self._get_site(request_site, package)
                 if not site_name:
-                    raise_json_error(
-                            self.request,
-                            hexc.HTTPUnprocessableEntity,
-                            {
-                                u'message': _("Cannot update a global package"),
-                                u'code': 'CannotUpdateGlobalPackage',
-                            },
-                            None)
+                    raise ValueError(_("Cannot update a global package."))
                 with current_site(get_host_site(site_name)):
                     # 5. remove content
                     if package is not None:

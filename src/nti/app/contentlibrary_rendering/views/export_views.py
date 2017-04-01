@@ -14,30 +14,30 @@ import shutil
 import zipfile
 import tempfile
 
-from pyramid import httpexceptions as hexc
-
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+
+from nti.app.contentlibrary.views import LibraryPathAdapter
 
 from nti.app.contentlibrary.views.sync_views import _AbstractSyncAllLibrariesView
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
-from nti.app.externalization.error import raise_json_error
-
 from nti.coremetadata.interfaces import IPublishable
 
 from nti.contentlibrary.interfaces import IContentPackage
-from nti.contentlibrary.interfaces import IContentRendered 
-from nti.contentlibrary.interfaces import IFilesystemBucket 
+from nti.contentlibrary.interfaces import IContentRendered
+from nti.contentlibrary.interfaces import IFilesystemBucket
 
 from nti.dataserver import authorization as nauth
 
+from nti.ntiids.ntiids import find_object_with_ntiid
 
-@view_config(context=IContentPackage)
+
+@view_config(name="Export")
+@view_config(name="ExportContents")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
-               name="Export",
                context=IContentPackage,
                permission=nauth.ACT_NTI_ADMIN)
 class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
@@ -75,21 +75,36 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
         finally:
             os.remove(zip_file)
 
-    def _do_call(self):
+    def _export_package(self, package):
         if      IPublishable.providedBy(self.context) \
             and not IContentRendered.providedBy(self.context):
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Max file size exceeded"),
-                        u'code': 'MaxFileSizeExceeded',
-                    },
-                    None)
+            raise ValueError(_("Content has not been published."))
         root = getattr(self.context, 'root', None)
         if IFilesystemBucket.providedBy(root):
             zip_file = self._export_fs(root)
-        else: # boto
+        else:  # boto
             key = self.context.key
             zip_file = self._export_boto(key)
         return self._export_response(zip_file, self.request.response)
+
+    def _do_call(self):
+        return self._export_package(self.context)
+
+
+@view_config(name="ExportRenderedContent")
+@view_config(name="ExportRenderedContents")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               context=LibraryPathAdapter,
+               permission=nauth.ACT_NTI_ADMIN)
+class ExportRenderedContentView(ExportContentPackageContentsView):
+
+    def _do_call(self):
+        data = self.readInput()
+        ntiid = data.get('ntiid') or data.get('package')
+        if not ntiid:
+            raise ValueError(_("Invalid package NTIID."))
+        package = find_object_with_ntiid(ntiid)
+        if not IContentPackage.providedBy(package):
+            raise ValueError(_("Object is not a content package."))
+        return self._export_package(package)
