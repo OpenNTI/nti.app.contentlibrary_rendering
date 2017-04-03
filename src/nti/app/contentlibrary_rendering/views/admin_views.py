@@ -221,6 +221,22 @@ class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
         return result
 
 
+@view_config(name="RemoveAllPendingRenderJobs")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=LibraryPathAdapter,
+               permission=nauth.ACT_NTI_ADMIN)
+class RemoveAllPendingRenderJobsView(GetAllPendingRenderJobsView):
+
+    def __call__(self):
+        result = super(RemoveAllPendingRenderJobsView, self).__call__()
+        for job in result[ITEMS]:
+            meta = IContentPackageRenderMetadata(job)
+            meta.removeJob(job)
+        return result
+
+
 @view_config(name="GetAllFailedRenderJobs")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
@@ -239,21 +255,20 @@ class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
         return result
 
 
-@view_config(name="RemoveAllPendingRenderJobs")
+@view_config(name="RemoveAllFailedRenderJobs")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='POST',
                context=LibraryPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
-class RemoveAllPendingRenderJobsView(GetAllPendingRenderJobsView):
+class RemoveAllFailedRenderJobsView(GetAllFailedRenderJobsView):
 
     def __call__(self):
-        result = super(RemoveAllPendingRenderJobsView, self).__call__()
+        result = super(RemoveAllFailedRenderJobsView, self).__call__()
         for job in result[ITEMS]:
             meta = IContentPackageRenderMetadata(job)
             meta.removeJob(job)
         return result
-
 
 # queue views
 
