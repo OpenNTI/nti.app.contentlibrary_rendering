@@ -30,7 +30,7 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
-from nti.metadata import metadata_queue
+from nti.metadata import queue_add
 
 
 def get_renderable_packages():
@@ -52,13 +52,6 @@ class MockDataserver(object):
         return None
 
 
-def add_2_queue(queue, uid):
-    try:
-        queue.add(uid)
-    except TypeError:
-        pass
-
-
 def do_evolve(context):
     setHooks()
     conn = context.connection
@@ -73,8 +66,6 @@ def do_evolve(context):
         assert  component.getSiteManager() == ds_folder.getSiteManager(), \
                 "Hooks not installed?"
 
-        queue = metadata_queue()
-
         lsm = ds_folder.getSiteManager()
         intids = lsm.getUtility(IIntIds)
 
@@ -86,12 +77,12 @@ def do_evolve(context):
             # index metadata
             uid = intids.queryId(meta)
             if uid is not None:
-                add_2_queue.add(queue, uid)
+                queue_add(uid)
             # index jobs
             for job in meta.render_jobs:
                 uid = intids.queryId(job)
                 if uid is not None:
-                    add_2_queue.add(queue, uid)
+                    queue_add(uid)
                     catalog.index_doc(uid, job)
 
     component.getGlobalSiteManager().unregisterUtility(mock_ds, IDataserver)
