@@ -167,6 +167,7 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         return result
 
 
+@view_config(name="ClearJobs")
 @view_config(name="clear_jobs")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
