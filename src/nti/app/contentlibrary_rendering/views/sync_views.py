@@ -36,6 +36,8 @@ from nti.app.renderers.interfaces import INoHrefInResponse
 
 from nti.cabinet import NamedSource
 
+from nti.contentlibrary_rendering import NTI_PROVIDER
+
 from nti.contentlibrary_rendering._archive import get_job_error
 from nti.contentlibrary_rendering._archive import get_job_status
 from nti.contentlibrary_rendering._archive import render_archive
@@ -73,7 +75,7 @@ class RenderContentSourceView(AbstractAuthenticatedView,
         # read params
         data = self.readInput()
         creator = self.remoteUser.username
-        provider = data.get('provider') or 'NTI'
+        provider = data.get('provider') or NTI_PROVIDER
         site = data.get('site') or data.get('site_name')
         # process sources
         sources = get_all_sources(self.request)

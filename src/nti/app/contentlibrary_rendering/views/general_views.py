@@ -30,6 +30,8 @@ from nti.common.string import is_true
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
+from nti.contentlibrary_rendering import NTI_PROVIDER
+ 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
@@ -62,7 +64,7 @@ class RenderContentPackageView(AbstractAuthenticatedView,
     def __call__(self):
         validate_content(self.context, self.request)
         data = self.readInput()
-        provider = data.get('provider') or 'NTI'
+        provider = data.get('provider') or NTI_PROVIDER
         mark_rendered = data.get('MarkRendered') \
                      or data.get('mark_rendered') or 'True'
         job = render_package(self.context,
