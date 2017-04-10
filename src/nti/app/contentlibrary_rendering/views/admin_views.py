@@ -31,12 +31,8 @@ from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
 
 from nti.app.contentlibrary_rendering.views import perform_content_validation
 
-from nti.contentlibrary import RENDERABLE_CONTENT_MIME_TYPES
-
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 from nti.contentlibrary.interfaces import IRenderableContentPackage
-
-from nti.contentlibrary.utils import get_content_packages
 
 from nti.contentlibrary_rendering import QUEUE_NAMES
 
@@ -57,8 +53,11 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
 def get_renderable_packages():
-    packages = get_content_packages(mime_types=RENDERABLE_CONTENT_MIME_TYPES)
-    return packages
+    library = component.queryUtility(IContentPackageLibrary)
+    if library is not None:
+        for package in list(library.contentPackages()):
+            if IRenderableContentPackage.providedBy(package):
+                yield package
 
 
 @view_config(context=LibraryPathAdapter)
@@ -97,8 +96,7 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         result[ITEMS] = items = {}
-        packages = get_renderable_packages()
-        for package in packages:
+        for package in get_renderable_packages():
             ntiid = package.ntiid
             error = perform_content_validation(package)
             if error is not None:
@@ -156,8 +154,8 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         library = component.getUtility(IContentPackageLibrary)
         result[ITEMS] = items = {}
         for package in library.contentPackages:
-            if      not IRenderableContentPackage.providedBy(package) \
-                and self._is_renderable_path(package):
+            if not IRenderableContentPackage.providedBy(package) \
+                    and self._is_renderable_path(package):
                 logger.info('Removing invalid renderable package (%s) (%s)',
                             package.ntiid,
                             package.root.name)
