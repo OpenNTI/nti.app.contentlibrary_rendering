@@ -55,7 +55,7 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 def get_renderable_packages():
     library = component.queryUtility(IContentPackageLibrary)
     if library is not None:
-        for package in list(library.contentPackages()):
+        for package in list(library.contentPackages):
             if IRenderableContentPackage.providedBy(package):
                 yield package
 
@@ -123,8 +123,7 @@ class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
         result.__parent__ = self.request.context
         library = component.getUtility(IContentPackageLibrary)
         result[ITEMS] = items = {}
-        packages = get_renderable_packages()
-        for package in packages:
+        for package in get_renderable_packages():
             logger.info('Removing renderable package (%s)', package.ntiid)
             items[package.ntiid] = package
             library.remove(package, event=True)
@@ -153,9 +152,9 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         result.__parent__ = self.request.context
         library = component.getUtility(IContentPackageLibrary)
         result[ITEMS] = items = {}
-        for package in library.contentPackages:
-            if not IRenderableContentPackage.providedBy(package) \
-                    and self._is_renderable_path(package):
+        for package in list(library.contentPackages):
+            if      not IRenderableContentPackage.providedBy(package) \
+                and self._is_renderable_path(package):
                 logger.info('Removing invalid renderable package (%s) (%s)',
                             package.ntiid,
                             package.root.name)
