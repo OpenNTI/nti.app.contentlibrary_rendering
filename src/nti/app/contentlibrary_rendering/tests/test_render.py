@@ -157,6 +157,27 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents, contains_string('SubsubSection2'))
         assert_that(page_contents, contains_string('basic text'))
         assert_that(page_contents, does_not(contains_string('comment')))
+        
+    def test_render_image(self):
+        new_content = self._get_rst_data('image.rst')
+        rst_dom = self._get_rst_dom(new_content)
+        job_name = 'wowza_image'
+        page_name = 'Section Title'.lower()
+        page_file = self._get_page_filename(job_name, page_name)
+
+        tex_dom = render_document(rst_dom, jobname=job_name)
+        output_dir = tex_dom.userdata['working-dir']
+        output_files = os.listdir(output_dir)
+        assert_that(output_files, has_item('index.html'))
+        assert_that(output_files, has_item('eclipse-toc.xml'))
+        assert_that(output_files, does_not(has_item(page_file)))
+
+        with open('%s/%s' % (output_dir, 'index.html'), 'r') as f:
+            page_contents = f.read()
+
+        assert_that(page_contents, contains_string('<span itemprop="nti-data-markupenabled">'))
+        assert_that(page_contents, 
+                    contains_string('<img crossorigin="anonymous" id="1" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"'))
 
     def test_render_sample(self):
         new_content = self._get_rst_data('sample.rst')
