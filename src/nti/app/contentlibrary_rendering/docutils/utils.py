@@ -76,10 +76,8 @@ def has_access(context, permission=ACT_READ):
     return has_permission(permission, context, principal.id)
 
 
-def process_rst_figure(rst_node, tex_doc, figure=None):
+def process_rst_image(rst_node, tex_doc, parent=None):
     uri = rst_node['uri']
-    figure = figure or tex_doc.createElement('figure')
-
     options = dict()
     if not is_supported_remote_scheme(uri):
         grphx = ntiincludeannotationgraphics()
@@ -93,7 +91,6 @@ def process_rst_figure(rst_node, tex_doc, figure=None):
     value = rst_node.attributes.get('alt', None)
     if value:  # alttext
         grphx.setAttribute('alttext', value)
-        figure.setAttribute('title', value)
 
     # image size
     value = rst_node.attributes.get('size', None)
@@ -115,11 +112,26 @@ def process_rst_figure(rst_node, tex_doc, figure=None):
         options['style'] = value
 
     # add to set lineage
-    figure.append(grphx)
+    if parent is not None:
+        parent.append(grphx)
+    else:
+        grphx.ownerDocument = tex_doc
 
     # process image and return
     if not is_supported_remote_scheme(uri):
         grphx.process_image()
     else:
         grphx.process_options()
+    return grphx
+
+
+def process_rst_figure(rst_node, tex_doc, figure=None):
+    figure = figure or tex_doc.createElement('figure')
+    grphx = process_rst_image(rst_node, tex_doc, figure)
+
+    # set alttext on figure
+    value = rst_node.attributes.get('alt', None)
+    if value:
+        figure.setAttribute('title', value)
+
     return [figure, grphx]

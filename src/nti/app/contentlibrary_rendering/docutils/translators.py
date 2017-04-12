@@ -14,6 +14,7 @@ import os
 from zope import interface
 
 from nti.app.contentlibrary_rendering.docutils.utils import has_access
+from nti.app.contentlibrary_rendering.docutils.utils import process_rst_image
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
@@ -36,6 +37,21 @@ from nti.contentrendering.plastexpackages.ntimedia import ntivideoref
 from nti.contenttypes.presentation.interfaces import INTIVideo
 
 from nti.ntiids.ntiids import find_object_with_ntiid
+
+# image
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class ImageToPlastexNodeTranslator(TranslatorMixin):
+
+    __name__ = "image"
+
+    def do_translate(self, rst_node, tex_doc, tex_parent):
+        result = process_rst_image(rst_node, tex_doc)
+        return result
+
+
+# nticard
 
 
 def get_asset(href):

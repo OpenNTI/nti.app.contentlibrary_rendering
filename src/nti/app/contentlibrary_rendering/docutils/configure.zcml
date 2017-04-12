@@ -10,6 +10,9 @@
 
 	<module module=".directives" />
 
+	<utility factory=".translators.ImageToPlastexNodeTranslator" 
+			 name="image" />
+			 
 	<utility factory=".translators.NTICardToPlastexNodeTranslator" 
 			 name="nticard" />
 
