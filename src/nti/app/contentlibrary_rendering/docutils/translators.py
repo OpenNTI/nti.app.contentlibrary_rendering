@@ -38,6 +38,7 @@ from nti.contenttypes.presentation.interfaces import INTIVideo
 
 from nti.ntiids.ntiids import find_object_with_ntiid
 
+
 # image
 
 
@@ -45,6 +46,18 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 class ImageToPlastexNodeTranslator(TranslatorMixin):
 
     __name__ = "image"
+
+    def process_resource(self, rst_node):
+        uri = rst_node['uri']
+        if not is_supported_remote_scheme(uri):
+            if not os.path.exists(uri):
+                raise ValueError(
+                    'Error in "%s" directive: asset "%" is missing'
+                    % (self.__name__, uri))
+            # save locally
+            with open(uri, "rb") as fp:
+                uri = save_to_course_assets(fp)
+            rst_node['uri'] = uri
 
     def do_translate(self, rst_node, tex_doc, tex_parent):
         result = process_rst_image(rst_node, tex_doc)

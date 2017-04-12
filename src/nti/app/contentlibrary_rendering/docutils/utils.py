@@ -51,12 +51,19 @@ def get_dataserver_asset(uri):
         return get_file_from_cf_io_url(uri)
     return get_file_from_oid_external_link(uri)
 
-
+def get_filename(asset):
+    out_name = getattr(asset, 'filename', None) \
+            or getattr(asset, 'name', None) \
+            or str(asset)
+    out_name = os.path.split(out_name)[1]
+    return out_name
+    
 def save_to_disk(asset, out_dir=None):
     out_dir = out_dir or os.getcwd()
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    path = os.path.join(out_dir, asset.filename)
+    out_name = get_filename(asset)
+    path = os.path.join(out_dir, out_name)
     transfer_to_native_file(asset, path)
     return path
 
@@ -65,7 +72,8 @@ def save_to_course_assets(asset, out_dir=None):
     out_dir = out_dir or os.getcwd()
     out_dir = os.path.join(out_dir, COURSE_ASSETS)
     save_to_disk(asset, out_dir)
-    result = os.path.join(COURSE_ASSETS, asset.filename)
+    out_name = get_filename(asset)
+    result = os.path.join(COURSE_ASSETS, out_name)
     return result
 
 
