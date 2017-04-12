@@ -84,11 +84,10 @@ def process_rst_figure(rst_node, tex_doc, figure=None):
     if not is_supported_remote_scheme(uri):
         grphx = ntiincludeannotationgraphics()
         grphx.setAttribute('file', uri)
-        grphx.setAttribute('options', options)
     else:
         grphx = ntiexternalgraphics()
         grphx.setAttribute('url', uri)
-        grphx.setAttribute('options', options)
+    grphx.setAttribute('options', options)
 
     # alternative text settings
     value = rst_node.attributes.get('alt', None)
