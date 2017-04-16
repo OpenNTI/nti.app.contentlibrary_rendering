@@ -58,9 +58,10 @@ class ImageToPlastexNodeTranslator(TranslatorMixin):
             with open(uri, "rb") as fp:
                 uri = save_to_course_assets(fp)
             rst_node['uri'] = uri
+        return rst_node
 
     def do_translate(self, rst_node, tex_doc, tex_parent):
-        result = process_rst_image(rst_node, tex_doc)
+        result = process_rst_image(self.process_resource(rst_node), tex_doc)
         return result
 
 
