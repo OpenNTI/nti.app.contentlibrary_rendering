@@ -45,4 +45,4 @@ class TestValidators(ContentlibraryRenderingLayerTest):
             content = f.read()
         validator = component.getUtility(IContentValidator, name="text/x-rst")
         warnings = validator.validate(content)
-        assert_that(warnings. is_not(none()))
+        assert_that(warnings, is_not(none()))
