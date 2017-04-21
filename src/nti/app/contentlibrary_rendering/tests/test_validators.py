@@ -17,6 +17,8 @@ import os
 
 from zope import component
 
+from nti.app.contentlibrary_rendering.validators import ReStructuredTextValidator
+
 from nti.contentlibrary.interfaces import IContentValidator
 
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
@@ -43,6 +45,6 @@ class TestValidators(ContentlibraryRenderingLayerTest):
         path = os.path.join(os.path.dirname(__file__), "formats.rst")
         with open(path, 'r') as f:
             content = f.read()
-        validator = component.getUtility(IContentValidator, name="text/x-rst")
+        validator = ReStructuredTextValidator()
         warnings = validator.validate(content)
         assert_that(warnings, is_not(none()))
