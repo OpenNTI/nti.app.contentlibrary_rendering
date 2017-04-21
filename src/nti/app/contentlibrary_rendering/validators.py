@@ -29,27 +29,29 @@ class ReStructuredTextValidator(object):
 
     def _get_settings(self):
         settings = OptionParser(components=(Parser,)).get_default_values()
-        settings.halt_level = 2  # stop at warning
+        settings.halt_level = 3  # stop at error
         settings.report_level = 2  # warnings
         settings.traceback = True
         settings.warning_stream = StringIO()
         settings.character_level_inline_markup = True
         return settings
 
-    def _validate_doc(self, doc):
-        """
-        Validate the document structure
-        """
-        pass
+    def _log_warnings(self, settings):
+        settings.warning_stream.seek(0)
+        warnings = settings.warning_stream.read()
+        if warnings:
+            logger.warn("reStructuredText parsing warnings\n" +
+                        warnings + "\n")
+        return warnings
 
     def _do_validate(self, content, context=None):
         settings = self._get_settings()
         try:
             doc = publish_doctree(content, settings=settings)
             self._validate_doc(doc)
+            self._log_warnings(settings)
         except Exception as e:
-            settings.warning_stream.seek(0)
-            warnings = settings.warning_stream.read()
+            warnings = self._log_warnings(settings)
             exct = RSTContentValidationError(str(e), warnings)
             raise exct
 
