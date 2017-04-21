@@ -47,9 +47,8 @@ class ReStructuredTextValidator(object):
     def _do_validate(self, content, context=None):
         settings = self._get_settings()
         try:
-            doc = publish_doctree(content, settings=settings)
-            self._validate_doc(doc)
-            self._log_warnings(settings)
+            publish_doctree(content, settings=settings)
+            return self._log_warnings(settings)
         except Exception as e:
             warnings = self._log_warnings(settings)
             exct = RSTContentValidationError(str(e), warnings)
@@ -57,4 +56,4 @@ class ReStructuredTextValidator(object):
 
     def validate(self, content=b'', context=None):
         if content:
-            self._do_validate(content)
+            return self._do_validate(content)

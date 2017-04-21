@@ -13,6 +13,8 @@ from hamcrest import assert_that
 from hamcrest import has_property
 does_not = is_not
 
+import os
+
 from zope import component
 
 from nti.contentlibrary.interfaces import IContentValidator
@@ -36,3 +38,11 @@ class TestValidators(ContentlibraryRenderingLayerTest):
                                    ========
                                 """)
             assert_that(e, has_property('Warnings', is_not(none())))
+            
+    def test_warnings(self):
+        path = os.path.join(os.path.dirname(__file__), "formats.rst")
+        with open(path, 'r') as f:
+            content = f.read()
+        validator = component.getUtility(IContentValidator, name="text/x-rst")
+        warnings = validator.validate(content)
+        assert_that(warnings. is_not(none()))
