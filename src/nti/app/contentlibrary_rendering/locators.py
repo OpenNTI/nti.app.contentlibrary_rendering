@@ -11,12 +11,12 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
+from zope.cachedescriptors.property import Lazy
+
 from nti.appserver.interfaces import IApplicationSettings
 
 from nti.contentlibrary_rendering.locators import S3Locator as BaseS3Locator
 from nti.contentlibrary_rendering.locators import FilesystemLocator as BaseFilesystemLocator
-
-from nti.property.property import Lazy
 
 
 class FilesystemLocator(BaseFilesystemLocator):

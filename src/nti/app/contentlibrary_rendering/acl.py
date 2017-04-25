@@ -12,6 +12,8 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from zope.cachedescriptors.property import Lazy
+
 from zope.security.interfaces import IPrincipal
 
 from nti.dataserver.authorization_acl import ace_allowing
@@ -26,8 +28,6 @@ from nti.dataserver.interfaces import IACLProvider
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
-
-from nti.property.property import Lazy
 
 
 @interface.implementer(IACLProvider)
