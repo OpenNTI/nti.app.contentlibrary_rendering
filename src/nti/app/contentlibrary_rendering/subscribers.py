@@ -28,9 +28,9 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 from nti.contentlibrary_rendering.utils import render_package
 from nti.contentlibrary_rendering.utils import remove_rendered_package
 
-from nti.coremetadata.interfaces import IObjectPublishedEvent
-
 from nti.ntiids.ntiids import get_provider
+
+from nti.publishing.interfaces import IObjectPublishedEvent
 
 from nti.recorder.interfaces import ITransactionRecordHistory
 

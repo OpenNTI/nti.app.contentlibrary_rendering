@@ -23,8 +23,6 @@ from nti.app.contentlibrary.views.sync_views import _AbstractSyncAllLibrariesVie
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
-from nti.coremetadata.interfaces import IPublishable
-
 from nti.contentlibrary.interfaces import IContentPackage
 from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IFilesystemBucket
@@ -32,6 +30,8 @@ from nti.contentlibrary.interfaces import IFilesystemBucket
 from nti.dataserver import authorization as nauth
 
 from nti.ntiids.ntiids import find_object_with_ntiid
+
+from nti.publishing.interfaces import IPublishable
 
 
 @view_config(name="Export")
