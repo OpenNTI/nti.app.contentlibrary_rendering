@@ -157,7 +157,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents, contains_string('SubsubSection2'))
         assert_that(page_contents, contains_string('basic text'))
         assert_that(page_contents, does_not(contains_string('comment')))
-        
+
     def test_render_image(self):
         new_content = self._get_rst_data('image.rst')
         rst_dom = self._get_rst_dom(new_content)
@@ -176,7 +176,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
             page_contents = f.read()
 
         assert_that(page_contents, contains_string('<span itemprop="nti-data-markupenabled">'))
-        assert_that(page_contents, 
+        assert_that(page_contents,
                     contains_string('<img crossorigin="anonymous" id="1" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"'))
 
     def test_render_sample(self):
@@ -239,6 +239,14 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents,
                     contains_string('<b class="bfseries"><em><span class="underline">bolditalicunderlined</span></em></b>'))
 
+        # Links
+        assert_that(page_contents,
+                    contains_string('<a href="https://i.redd.it/xj0grctiivty.png">belly scales</a>'))
+        assert_that(page_contents,
+                    contains_string('<a href="https://www.archives.gov/founding-docs/constitution-transcript">Test</a>ing'))
+        assert_that(page_contents,
+                    contains_string('Test<a href="https://www.archives.gov/founding-docs/constitution-transcript">ing</a>'))
+
+
         # images/figures
         # video embed
-        # links

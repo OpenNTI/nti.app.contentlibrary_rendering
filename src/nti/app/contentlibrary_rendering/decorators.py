@@ -166,7 +166,7 @@ class _LibraryRenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _do_decorate_external(self, context, result):
         _links = result.setdefault(LINKS, [])
         path = _library_adapter_path(self.request)
-        for rel, name in (('error', VIEW_LIB_JOB_ERROR), 
+        for rel, name in (('error', VIEW_LIB_JOB_ERROR),
                           ('status', VIEW_LIB_JOB_STATUS)):
             link = Link(path,
                         rel=rel,
