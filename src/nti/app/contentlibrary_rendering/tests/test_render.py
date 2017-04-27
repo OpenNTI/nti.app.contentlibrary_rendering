@@ -245,6 +245,10 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents,
                     contains_string('<a href="https://i.redd.it/xj0grctiivty.png">belly scales</a>'))
         assert_that(page_contents,
+                    contains_string('<a href="https://www.archives.gov/founding-docs/constitution-transcript">Amaz</a>ing'))
+        assert_that(page_contents,
+                    contains_string('Amaz<a href="https://www.archives.gov/founding-docs/constitution-transcript">ing</a>'))
+        assert_that(page_contents,
                     contains_string('<a href="https://www.archives.gov/founding-docs/constitution-transcript">Test</a>ing'))
         assert_that(page_contents,
                     contains_string('Test<a href="https://www.archives.gov/founding-docs/constitution-transcript">ing</a>'))

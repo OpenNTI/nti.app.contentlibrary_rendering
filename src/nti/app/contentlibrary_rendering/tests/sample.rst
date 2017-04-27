@@ -120,6 +120,10 @@ Links
 
 Test\ `ing <https://www.archives.gov/founding-docs/constitution-transcript>`__
 
+`Amaz <https://www.archives.gov/founding-docs/constitution-transcript>`__ing
+
+Amaz\ `ing <https://www.archives.gov/founding-docs/constitution-transcript>`__
+
 -----------------
 Filler for Length
 -----------------
