@@ -253,6 +253,7 @@ class TestRender(ContentlibraryRenderingLayerTest):
         assert_that(page_contents,
                     contains_string('Test<a href="https://www.archives.gov/founding-docs/constitution-transcript">ing</a>'))
 
-
+        assert_that(page_contents,
+                    contains_string('<em>italic</em><b class="bfseries">bold</b> <b class="bfseries">bold</b><em>italic</em>'))
         # images/figures
         # video embed

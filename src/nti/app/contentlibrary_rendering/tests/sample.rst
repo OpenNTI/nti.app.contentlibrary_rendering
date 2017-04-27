@@ -30,6 +30,8 @@ SubsubSection1
 SubsubSection2
 ++++++++++++++
 
+*italic***bold** **bold***italic*
+
 B**OL**D
 
 This paragraph that will have **bold** and *italics* in it. We need to try nesting them like ** bold and *italic***, ***bold/italic***, and *italic and **bold*** (this format does not work).
