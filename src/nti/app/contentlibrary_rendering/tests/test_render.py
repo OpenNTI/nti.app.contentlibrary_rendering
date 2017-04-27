@@ -212,6 +212,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
         # 3. bold
         assert_that(page_contents,
                     contains_string('<b class="bfseries">bold</b>'))
+        assert_that(page_contents,
+                    contains_string('B<b class="bfseries">OL</b>D</p>'))
         # 4. italic
         assert_that(page_contents, contains_string('<em>italics</em>'))
         # 5. underlines
