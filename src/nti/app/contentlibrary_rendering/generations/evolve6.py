@@ -39,13 +39,12 @@ class MockDataserver(object):
 
 
 def remove_queue(name):
-    redis = component.queryUtility(IRedisClient)
-    if redis is not None:
-        try:
-            redis.zremrangebyrank(name, 0, -1)
-            redis.delete(name)
-        except Exception:
-            pass
+    redis = component.getUtility(IRedisClient)
+    try:
+        redis.zremrangebyrank(name, 0, -1)
+        redis.delete(name)
+    except Exception:
+        pass
 
 
 def do_evolve(context):
