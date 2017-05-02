@@ -51,13 +51,15 @@ def get_dataserver_asset(uri):
         return get_file_from_cf_io_url(uri)
     return get_file_from_oid_external_link(uri)
 
+
 def get_filename(asset):
     out_name = getattr(asset, 'filename', None) \
-            or getattr(asset, 'name', None) \
-            or str(asset)
+        or getattr(asset, 'name', None) \
+        or str(asset)
     out_name = os.path.split(out_name)[1]
     return out_name
-    
+
+
 def save_to_disk(asset, out_dir=None):
     out_dir = out_dir or os.getcwd()
     if not os.path.exists(out_dir):
@@ -136,10 +138,8 @@ def process_rst_image(rst_node, tex_doc, parent=None):
 def process_rst_figure(rst_node, tex_doc, figure=None):
     figure = figure or tex_doc.createElement('figure')
     grphx = process_rst_image(rst_node, tex_doc, figure)
-
     # set alttext on figure
     value = rst_node.attributes.get('alt', None)
     if value:
         figure.setAttribute('title', value)
-
     return [figure, grphx]
