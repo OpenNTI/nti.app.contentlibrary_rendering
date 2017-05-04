@@ -25,10 +25,50 @@ from nti.app.contentlibrary_rendering.docutils.nodes import ntivideoref
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
 
+from nti.base._compat import text_
+
 from nti.ntiids.ntiids import is_valid_ntiid_string
 
 
-class NTICard(Directive):
+class TitleCaptionMixin(object):
+
+    def process(self, asset_node, options):
+        if not self.content:
+            return
+        node = nodes.Element()  # anonymous container for parsing
+        self.state.nested_parse(self.content, self.content_offset, node)
+        # title
+        first_node = node[0]
+        if isinstance(first_node, nodes.paragraph):
+            title = text_(first_node.astext())
+            options['title'] = title
+        elif isinstance(first_node, nodes.comment) or len(first_node) == 0:
+            raise self.error(
+                'node title must be a paragraph.',
+                nodes.literal_block(self.block_text, self.block_text),
+                line=self.lineno)
+        # caption
+        caption_node = node[1] if len(node) > 1 else None
+        if caption_node is not None:
+            if isinstance(caption_node, nodes.paragraph):
+                caption = nodes.caption(caption_node.rawsource, '',
+                                        *caption_node.children)
+                caption.source = caption_node.source
+                caption.line = caption_node.line
+                asset_node += caption
+            elif isinstance(caption_node, nodes.comment) or len(caption_node) == 0:
+                raise self.error(
+                    'node caption must be a paragraph.',
+                    nodes.literal_block(self.block_text, self.block_text),
+                    line=self.lineno)
+        if len(node) > 2:
+            raise self.error(
+                'node does not accept mulitple caption paragraphs',
+                nodes.literal_block(self.block_text, self.block_text),
+                line=self.lineno)
+
+
+class NTICard(Directive, TitleCaptionMixin):
 
     has_content = True
     required_arguments = 1
@@ -54,8 +94,6 @@ class NTICard(Directive):
         if not self.options.get('label'):
             label = os.path.split(reference)[1]
             self.options['label'] = 'nticard_%s' % label
-        if not self.options.get('title'):
-            self.options['title'] = self.options['label']
 
         # create node
         nticard_node = nticard(self.block_text, **self.options)
@@ -65,32 +103,15 @@ class NTICard(Directive):
         image = directives.uri(self.options.get('image') or u'')
         nticard_node['image'] = image
 
-        # process caption
-        if self.content:
-            node = nodes.Element()  # anonymous container for parsing
-            self.state.nested_parse(self.content, self.content_offset, node)
-            first_node = node[0]
-            if isinstance(first_node, nodes.paragraph):
-                caption = nodes.caption(first_node.rawsource, '',
-                                        *first_node.children)
-                caption.source = first_node.source
-                caption.line = first_node.line
-                nticard_node += caption
-            elif isinstance(first_node, nodes.comment) or len(first_node) == 0:
-                raise self.error(
-                    'nticard caption must be a paragraph.',
-                    nodes.literal_block(self.block_text, self.block_text),
-                    line=self.lineno)
-
-            if len(node) > 1:
-                raise self.error(
-                    'nticard does not accept mulitple caption paragraphs',
-                    nodes.literal_block(self.block_text, self.block_text),
-                    line=self.lineno)
+        # process caption/title
+        self.process(nticard_node, self.options)
+        if not self.options.get('title'):
+            self.options['title'] = self.options['label']
+        nticard_node['title'] = self.options['title']
         return [nticard_node]
 
 
-class NTIVideo(Directive):
+class NTIVideo(Directive, TitleCaptionMixin):
 
     has_content = True
     required_arguments = 2
@@ -106,9 +127,6 @@ class NTIVideo(Directive):
         service = directives.choice(self.arguments[0], self.supported_services)
         video_id = directives.unchanged_required(self.arguments[1])
 
-        title = self.options.get('title') or (service + ':' + video_id)
-        self.options['title'] = title
-
         creator = self.options.get('creator') or 'system'
         self.options['creator'] = creator
 
@@ -119,29 +137,12 @@ class NTIVideo(Directive):
         ntivideo_node = ntivideo(self.block_text, **self.options)
         ntivideo_node['service'] = service
         ntivideo_node['id'] = video_id
-            
-        # process caption
-        if self.content:
-            node = nodes.Element()  # anonymous container for parsing
-            self.state.nested_parse(self.content, self.content_offset, node)
-            first_node = node[0]
-            if isinstance(first_node, nodes.paragraph):
-                caption = nodes.caption(first_node.rawsource, '',
-                                        *first_node.children)
-                caption.source = first_node.source
-                caption.line = first_node.line
-                ntivideo_node += caption
-            elif isinstance(first_node, nodes.comment) or len(first_node) == 0:
-                raise self.error(
-                    'ntivideo caption must be a paragraph.',
-                    nodes.literal_block(self.block_text, self.block_text),
-                    line=self.lineno)
 
-            if len(node) > 1:
-                raise self.error(
-                    'ntivideo does not accept mulitple caption paragraphs',
-                    nodes.literal_block(self.block_text, self.block_text),
-                    line=self.lineno)
+        # process caption/title
+        self.process(ntivideo_node, self.options)
+        if not self.options.get('title'):
+            self.options['title'] = (service + ':' + video_id)
+        ntivideo_node['title'] = self.options['title']
         return [ntivideo_node]
 
 
@@ -151,7 +152,7 @@ class NTIVideoRef(Directive):
     required_arguments = 1
     optional_arguments = 1
     option_spec = {'visibility': directives.unchanged}
-                    
+
     def run(self):
         ntiid = directives.unchanged_required(self.arguments[0])
         if not is_valid_ntiid_string(ntiid):
