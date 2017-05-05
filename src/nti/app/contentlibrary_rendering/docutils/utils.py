@@ -12,8 +12,6 @@ logger = __import__('logging').getLogger(__name__)
 import os
 from urlparse import urlparse
 
-from zope.security.management import system_user
-
 from nti.app.contentfile.view_mixins import is_oid_external_link
 from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
 
@@ -25,12 +23,6 @@ from nti.cabinet.filer import transfer_to_native_file
 from nti.contentrendering.plastexpackages.ntiexternalgraphics import ntiexternalgraphics
 
 from nti.contentrendering.plastexpackages.ntilatexmacros import ntiincludeannotationgraphics
-
-from nti.coremetadata.utils import current_principal
-
-from nti.dataserver.authorization import ACT_READ
-
-from nti.dataserver.authorization_acl import has_permission
 
 
 #: Content package course assets relative directory
@@ -77,13 +69,6 @@ def save_to_course_assets(asset, out_dir=None):
     out_name = get_filename(asset)
     result = os.path.join(COURSE_ASSETS, out_name)
     return result
-
-
-def has_access(context, permission=ACT_READ):
-    principal = current_principal(False)
-    if principal is None or principal.id == system_user.id:
-        return True
-    return has_permission(permission, context, principal.id)
 
 
 def process_rst_image(rst_node, tex_doc, parent=None):
