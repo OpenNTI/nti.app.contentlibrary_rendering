@@ -27,7 +27,7 @@ from nti.contentlibrary.utils import get_content_package_site
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
-from nti.recorder import TRX_RECORD_HISTORY_KEY
+from nti.recorder.interfaces import TRX_RECORD_HISTORY_KEY
 
 from nti.site.hostpolicy import get_host_site
 
