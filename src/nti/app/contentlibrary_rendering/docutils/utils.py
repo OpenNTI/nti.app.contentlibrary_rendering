@@ -80,6 +80,8 @@ def process_rst_image(rst_node, tex_doc, parent=None):
     else:
         grphx = ntiexternalgraphics()
         grphx.setAttribute('url', uri)
+    # Must set the source to avoid duplicate mappings
+    grphx.argSource = r'%s{%s}' % (grphx.source, uri)
     grphx.setAttribute('options', options)
 
     # alternative text settings
