@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -93,7 +93,7 @@ class QueryJobView(AbstractAuthenticatedView):
         if meta is None:
             logger.warn('No meta found for content package (%s)',
                         self.context.ntiid)
-            raise hexc.HTTPNotFound(_('Content has not been processed.'))
+            raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
 
         if job_id:
             try:
@@ -101,14 +101,14 @@ class QueryJobView(AbstractAuthenticatedView):
             except KeyError:
                 logger.warn('No job found for content package (%s) (%s)',
                             self.context.ntiid, job_id)
-                raise hexc.HTTPNotFound(_('No content found for job key.'))
+                raise hexc.HTTPNotFound(_(u'No content found for job key.'))
         else:
             render_job = meta.mostRecentRenderJob()
 
         if render_job is None:
             logger.warn('No job found for content package (%s)',
                         self.context.ntiid)
-            raise hexc.HTTPNotFound(_('Content has not been processed.'))
+            raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
         return render_job
 
 
@@ -128,7 +128,7 @@ class RenderJobsView(AbstractAuthenticatedView):
         if meta is None:
             logger.warn('No meta found for content package (%s)',
                         self.context.ntiid)
-            raise hexc.HTTPNotFound(_('Content has not been processed.'))
+            raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
         result = LocatedExternalDict()
         result[NTIID] = self.context.ntiid
         result[ITEMS] = items = []
