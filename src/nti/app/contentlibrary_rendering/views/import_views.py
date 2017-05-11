@@ -21,6 +21,8 @@ from zope import component
 from zope.component.hooks import getSite
 from zope.component.hooks import site as current_site
 
+from pyramid import httpexceptions as hexc
+
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
@@ -31,6 +33,8 @@ from nti.app.contentlibrary.views import LibraryPathAdapter
 from nti.app.contentlibrary.views.sync_views import _AbstractSyncAllLibrariesView
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
+
+from nti.app.externalization.error import raise_json_error
 
 from nti.cabinet.filer import transfer_to_native_file
 
@@ -136,7 +140,12 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                 # 4. get update site
                 site_name = self._get_site(request_site, package)
                 if not site_name:
-                    raise ValueError(_("Cannot update a global package."))
+                    raise_json_error(self.request,
+                                     hexc.HTTPUnprocessableEntity,
+                                     {
+                                         'message': _(u"Cannot update a global package."),
+                                     },
+                                     None)
                 with current_site(get_host_site(site_name)):
                     # 5. remove content
                     if package is not None:

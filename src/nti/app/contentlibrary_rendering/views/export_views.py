@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -14,6 +14,8 @@ import shutil
 import zipfile
 import tempfile
 
+from pyramid import httpexceptions as hexc
+
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
@@ -22,6 +24,8 @@ from nti.app.contentlibrary.views import LibraryPathAdapter
 from nti.app.contentlibrary.views.sync_views import _AbstractSyncAllLibrariesView
 
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
+
+from nti.app.externalization.error import raise_json_error
 
 from nti.contentlibrary.interfaces import IContentPackage
 from nti.contentlibrary.interfaces import IContentRendered
@@ -66,9 +70,9 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
     def _export_response(self, zip_file, response):
         try:
             filename = os.path.split(zip_file)[1]
-            response.content_encoding = b'identity'
-            response.content_type = b'application/zip; charset=UTF-8'
-            content_disposition = b'attachment; filename="%s"' % filename
+            response.content_encoding = 'identity'
+            response.content_type = 'application/zip; charset=UTF-8'
+            content_disposition = 'attachment; filename="%s"' % filename
             response.content_disposition = str(content_disposition)
             response.body_file = open(zip_file, "rb")
             return response
@@ -78,7 +82,13 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
     def _export_package(self, package):
         if      IPublishable.providedBy(self.context) \
             and not IContentRendered.providedBy(self.context):
-            raise ValueError(_("Content has not been published."))
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Content has not been published.")
+                             },
+                             None)
+            raise ValueError()
         root = getattr(self.context, 'root', None)
         if IFilesystemBucket.providedBy(root):
             zip_file = self._export_fs(root)
@@ -103,8 +113,19 @@ class ExportRenderedContentView(ExportContentPackageContentsView):
         data = self.readInput()
         ntiid = data.get('ntiid') or data.get('package')
         if not ntiid:
-            raise ValueError(_("Invalid package NTIID."))
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Invalid package NTIID."),
+                                 'field': u'ntiid'
+                             },
+                             None)
         package = find_object_with_ntiid(ntiid)
         if not IContentPackage.providedBy(package):
-            raise ValueError(_("Object is not a content package."))
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Object is not a content package."),
+                             },
+                             None)
         return self._export_package(package)
