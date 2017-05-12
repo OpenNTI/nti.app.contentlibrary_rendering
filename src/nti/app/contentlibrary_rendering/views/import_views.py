@@ -45,7 +45,7 @@ from nti.contentlibrary_rendering._archive import move_content
 from nti.contentlibrary_rendering._archive import process_source
 from nti.contentlibrary_rendering._archive import remove_content
 from nti.contentlibrary_rendering._archive import update_library
-from nti.contentlibrary_rendering._archive import obfuscate_filename
+from nti.contentlibrary_rendering._archive import obfuscate_source
 from nti.contentlibrary_rendering._archive import get_rendered_package_ntiid
 
 from nti.dataserver import authorization as nauth
@@ -86,7 +86,7 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
         transfer_to_native_file(content, path)
         source = process_source(path)
         if obfuscate:
-            source = obfuscate_filename(source)
+            source = obfuscate_source(source)
         return source
 
     def _do_call(self):
