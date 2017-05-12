@@ -72,9 +72,10 @@ def save_to_course_assets(asset, out_dir=None):
 
 
 def process_rst_image(rst_node, tex_doc, parent=None):
-    uri = rst_node['uri']
     options = dict()
-    if not is_supported_remote_scheme(uri):
+    uri = rst_node['uri']
+    remote = not is_supported_remote_scheme(uri) or is_dataserver_asset(uri)
+    if not remote:
         grphx = ntiincludeannotationgraphics()
         grphx.setAttribute('file', uri)
     else:
@@ -115,7 +116,7 @@ def process_rst_image(rst_node, tex_doc, parent=None):
         grphx.ownerDocument = tex_doc
 
     # process image and return
-    if not is_supported_remote_scheme(uri):
+    if not remote:
         grphx.process_image()
     else:
         grphx.process_options()
