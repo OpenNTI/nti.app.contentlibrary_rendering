@@ -55,10 +55,6 @@
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
 	                 nti.contentlibrary.interfaces.IContentPackageLocationChanged"/>
 
-	<subscriber handler=".subscribers._after_id_added_event"
-	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
-	                 zc.intid.interfaces.IAfterIdAddedEvent"/>
-
 	<!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />
