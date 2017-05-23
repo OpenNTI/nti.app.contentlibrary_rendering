@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -32,7 +32,7 @@ def validate_content(package, request):
     if error is not None:
         e, exc_info = error
         data = LocatedExternalDict({
-            u'code': 'ContentValidationError',
+            u'code': u'ContentValidationError',
         })
         if IContentValidationError.providedBy(e):
             error = to_external_object(e, decorate=False)

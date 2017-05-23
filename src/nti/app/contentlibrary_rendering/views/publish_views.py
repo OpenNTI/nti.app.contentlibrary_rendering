@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -67,8 +67,8 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
     """
     A view to unpublish a renderable content package.
     """
-    CONFIRM_CODE = 'RenderableContentPackageUnpublish'
-    CONFIRM_MSG = _('This content has been published to courses. Are you sure you want to unpublish?')
+    CONFIRM_CODE = u'RenderableContentPackageUnpublish'
+    CONFIRM_MSG = _(u'This content has been published to courses. Are you sure you want to unpublish?')
 
     def _ntiids(self, associations):
         for x in associations or ():
