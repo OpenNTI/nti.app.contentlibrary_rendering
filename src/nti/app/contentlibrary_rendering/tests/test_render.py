@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 
 __docformat__ = "restructuredtext en"
 
@@ -108,8 +108,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
     def test_sections(self):
         new_content = self._get_rst_data('sections.rst')
         rst_dom = self._get_rst_dom(new_content)
-        job_name = 'wowza_sections'
-        page_name = 'Section Title'.lower()
+        job_name = u'wowza_sections'
+        page_name = u'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
@@ -136,8 +136,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
     def test_render_basic(self):
         new_content = self._get_rst_data('basic.rst')
         rst_dom = self._get_rst_dom(new_content)
-        job_name = 'wowza_basic'
-        page_name = 'Section Title'.lower()
+        job_name = u'wowza_basic'
+        page_name = u'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
@@ -161,8 +161,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
     def test_render_image(self):
         new_content = self._get_rst_data('image.rst')
         rst_dom = self._get_rst_dom(new_content)
-        job_name = 'wowza_image'
-        page_name = 'Section Title'.lower()
+        job_name = u'wowza_image'
+        page_name = u'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)
@@ -182,8 +182,8 @@ class TestRender(ContentlibraryRenderingLayerTest):
     def test_render_sample(self):
         new_content = self._get_rst_data('sample.rst')
         rst_dom = self._get_rst_dom(new_content)
-        job_name = 'wowza_sample'
-        page_name = 'Section Title'.lower()
+        job_name = u'wowza_sample'
+        page_name = u'Section Title'.lower()
         page_file = self._get_page_filename(job_name, page_name)
 
         tex_dom = render_document(rst_dom, jobname=job_name)

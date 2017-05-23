@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -35,12 +35,12 @@ class TestUtils(ContentlibraryRenderingLayerTest):
     @fudge.patch("nti.contentlibrary_rendering.index.find_interface")
     def test_get_pending_render_jobs(self, mock_fi):
         job = ContentPackageRenderJob()
-        job.state = 'Pending'
-        job.jobId = 'tag:nextthought.com,2011-10:NTI-RenderJob-58'
-        job.package = 'tag:nextthought.com,2011-10:NTI-HTML-58'
+        job.state = u'Pending'
+        job.jobId = u'tag:nextthought.com,2011-10:NTI-RenderJob-58'
+        job.package = u'tag:nextthought.com,2011-10:NTI-HTML-58'
 
         fake_folder = fudge.Fake()
-        fake_folder.__name__ = 'janux.dev'
+        fake_folder.__name__ = u'janux.dev'
         mock_fi.is_callable().with_args().returns(fake_folder)
 
         with mock_dataserver.mock_db_trans(self.ds):

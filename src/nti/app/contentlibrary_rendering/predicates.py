@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -85,7 +85,7 @@ class _ContentPackageRenderJobs(_RenderingObjectsMixin):
                 doc_id = self.intids.queryId(job)
                 if doc_id is not None and doc_id not in seen:
                     creator = getattr(job.creator, 'username', None)
-                    creator = getattr(creator, 'id', creator) or u''
+                    creator = getattr(creator, 'id', creator) or ''
                     seen.add(doc_id)
                     if creator.lower() == user.username.lower():
                         result.append(job)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -21,7 +21,6 @@ from nti.contentlibrary.interfaces import IContentUnitAnnotationUtility
 
 from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 
-from nti.testing.layers import find_test
 from nti.testing.layers import GCLayerMixin
 from nti.testing.layers import ZopeComponentLayer
 from nti.testing.layers import ConfiguringLayerMixin
@@ -67,6 +66,7 @@ class ContentlibraryRenderingTestLayer(ZopeComponentLayer,
     @classmethod
     def testTearDown(cls):
         pass
+
 
 import unittest
 
