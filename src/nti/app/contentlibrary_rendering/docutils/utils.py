@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -46,8 +46,8 @@ def get_dataserver_asset(uri):
 
 def get_filename(asset):
     out_name = getattr(asset, 'filename', None) \
-        or getattr(asset, 'name', None) \
-        or str(asset)
+            or getattr(asset, 'name', None) \
+            or str(asset)
     out_name = os.path.split(out_name)[1]
     return out_name
 
