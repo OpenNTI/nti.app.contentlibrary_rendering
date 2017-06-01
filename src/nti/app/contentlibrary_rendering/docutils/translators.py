@@ -19,7 +19,7 @@ from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
 
-from nti.base._compat import unicode_
+from nti.base._compat import text_
 
 from nti.contentlibrary_rendering.docutils.translators import TranslatorMixin
 
@@ -157,7 +157,7 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
         # process caption /description
         if rst_node.children:
             par = rst_node.children[0]
-            text = unicode_(par.astext())
+            text = text_(par.astext())
             description = incoming_sources_as_plain_text([text])
             result.description = description
 
@@ -185,18 +185,19 @@ class NTIVideoToPlastexNodeTranslator(TranslatorMixin):
         result.append(source)
         source.process_options()
 
-        result.id = rst_node.attributes['label']
+        result.label = rst_node.attributes['label']
         result.title = rst_node.attributes['title']
         result.creator = rst_node.attributes['creator']
+        result.id = 'video_%s' % tex_doc.px_inc_media_counter()
 
         # process caption /description
         if rst_node.children:
             par = rst_node.children[0]
-            text = unicode_(par.astext())
+            text = text_(par.astext())
             description = incoming_sources_as_plain_text([text])
             result.description = description
         else:
-            text = unicode_(result.title)
+            text = text_(result.title)
             description = incoming_sources_as_plain_text([text])
         result.description = description
         return result
