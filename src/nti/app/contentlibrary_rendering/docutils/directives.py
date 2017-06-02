@@ -63,7 +63,7 @@ class TitleCaptionMixin(object):
                     line=self.lineno)
         if len(node) > 2:
             raise self.error(
-                'node does not accept mulitple caption paragraphs',
+                'node does not accept multiple caption paragraphs',
                 nodes.literal_block(self.block_text, self.block_text),
                 line=self.lineno)
 
@@ -114,7 +114,6 @@ class NTICard(Directive, TitleCaptionMixin):
 class NTIVideo(Directive, TitleCaptionMixin):
 
     has_content = True
-    required_arguments = 2
     optional_arguments = 3
     final_argument_whitespace = True
     option_spec = {'label': directives.unchanged,
@@ -124,6 +123,8 @@ class NTIVideo(Directive, TitleCaptionMixin):
     supported_services = ('html5', 'kaltura', 'vimeo', 'youtube')
 
     def run(self):
+        if not self.arguments:
+            raise self.error('A video URL must be supplied.')
         service = directives.choice(self.arguments[0], self.supported_services)
         video_id = directives.unchanged_required(self.arguments[1])
 
