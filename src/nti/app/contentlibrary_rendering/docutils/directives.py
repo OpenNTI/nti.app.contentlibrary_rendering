@@ -144,7 +144,10 @@ class NTIVideo(Directive, TitleCaptionMixin):
         if not self.options.get('title'):
             self.options['title'] = (service + ':' + video_id)
         ntivideo_node['title'] = self.options['title']
-        return [ntivideo_node]
+        # Need to wrap video in par node for anchoring.
+        par_node = nodes.paragraph('')
+        par_node.append(ntivideo_node)
+        return [par_node]
 
 
 class NTIVideoRef(Directive):
