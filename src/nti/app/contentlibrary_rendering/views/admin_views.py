@@ -13,6 +13,10 @@ from requests.structures import CaseInsensitiveDict
 
 from zope import component
 
+from zope.component.hooks import site as current_site
+
+from zope.intid.interfaces import IIntIds
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -38,6 +42,9 @@ from nti.contentlibrary_rendering import QUEUE_NAMES
 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
+from nti.contentlibrary_rendering.index import get_contentrenderjob_catalog
+from nti.contentlibrary_rendering.index import create_contentrenderjob_catalog
+
 from nti.contentlibrary_rendering.processing import get_job_queue
 
 from nti.contentlibrary_rendering.utils import render_package
@@ -46,6 +53,8 @@ from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
+
+from nti.site.hostpolicy import get_all_host_sites
 
 ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
@@ -267,6 +276,49 @@ class RemoveAllFailedRenderJobsView(GetAllFailedRenderJobsView):
             meta = IContentPackageRenderMetadata(job)
             meta.removeJob(job)
         return result
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               name="RebuildContentRenderingJobCatalog",
+               permission=nauth.ACT_NTI_ADMIN)
+class RebuildContentRenderingJobCatalogView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        intids = component.getUtility(IIntIds)
+        # remove indexes
+        catalog = get_contentrenderjob_catalog()
+        for name, index in list(catalog.items()):
+            intids.unregister(index)
+            del catalog[name]
+        # recreate indexes
+        catalog = create_contentrenderjob_catalog(catalog=catalog,
+                                                  family=intids.family)
+        for index in catalog.values():
+            intids.register(index)
+        # reindex
+        seen = set()
+        for host_site in get_all_host_sites():  # check all sites
+            logger.info("Processing site %s", host_site.__name__)
+            with current_site(host_site):
+                library = component.queryUtility(IContentPackageLibrary)
+                packages = library.contentPackages if library else ()
+                for package in list(packages):
+                    if not IRenderableContentPackage.providedBy(package):
+                        continue
+                    meta = IContentPackageRenderMetadata(package)
+                    for job in list(meta.render_jobs):
+                        doc_id = intids.queryId(job)
+                        if doc_id is None or doc_id in seen:
+                            continue
+                        seen.add(doc_id)
+                        catalog.index_doc(doc_id, job)
+        result = LocatedExternalDict()
+        result[ITEM_COUNT] = result[TOTAL] = len(seen)
+        return result
+
 
 # queue views
 
