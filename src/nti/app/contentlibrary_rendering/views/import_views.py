@@ -78,7 +78,7 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
             site_name = getSite().__name__
         return site_name
 
-    def _process_source(self, content, name, path, obfuscate=True):
+    def _process_source(self, content, path, obfuscate=True):
         # seek to 0 in case of a retry
         if hasattr(content, 'seek'):
             content.seek(0)
@@ -111,7 +111,7 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                 # 1. process source
                 name = getattr(source, 'name', None) or name
                 path = os.path.join(tmp_dir, name)
-                source = self._process_source(source, name, path, obfuscate)
+                source = self._process_source(source, path, obfuscate)
                 # 2. get package ntiid
                 ntiid = get_rendered_package_ntiid(source)
                 # 3. get existing package if any
