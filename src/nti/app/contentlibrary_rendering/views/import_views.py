@@ -90,7 +90,7 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
         return source
 
     def _do_call(self):
-        data = self.readInput()
+        data = self.readInput() or self.request.params
         request_site = data.get('site')
         obfuscate = data.get('obfuscate')
         if obfuscate is None: # default to True
@@ -123,11 +123,13 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                                      hexc.HTTPUnprocessableEntity,
                                      {
                                          'message': _(u"Cannot update a global package."),
+                                         'code': 'CannotUpdateGlobalPackage'
                                      },
                                      None)
                 with current_site(get_host_site(site_name)):
                     # 5. remove content
-                    if package is not None:
+                    if      package is not None \
+                        and get_content_package_site(package) == site_name:
                         remove_content(package)
                     library = component.getUtility(IContentPackageLibrary)
                     # 6. move content to library
