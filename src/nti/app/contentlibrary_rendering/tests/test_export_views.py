@@ -34,10 +34,7 @@ class TestExportViews(ApplicationLayerTest):
 
     ntiid = 'tag:nextthought.com,2011-10:OU-HTML-CS1323_F_2015_Intro_to_Computer_Programming.introduction_to_computer_programming'
 
-    @WithSharedApplicationMockDS(testapp=True, users=True)
-    def test_export_contents(self):
-        res = self.testapp.get('/dataserver2/Objects/%s/@@Export' % self.ntiid,
-                               status=200)
+    def _test_export(self, res):
         tmp_dir = tempfile.mkdtemp(dir="/tmp")
         try:
             path = tmp_dir + "/exported.zip"
@@ -48,3 +45,16 @@ class TestExportViews(ApplicationLayerTest):
             assert_that(zipfile.is_zipfile(path), is_(True))
         finally:
             shutil.rmtree(tmp_dir, True)
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_export_contents(self):
+        res = self.testapp.get('/dataserver2/Objects/%s/@@Export' % self.ntiid,
+                               status=200)
+        self._test_export(res)
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_admin_export(self):
+        href = '/dataserver2/Library/@@ExportRenderedContents'
+        res = self.testapp.get(href + "?ntiid=%s" % self.ntiid,
+                               status=200)
+        self._test_export(res)
