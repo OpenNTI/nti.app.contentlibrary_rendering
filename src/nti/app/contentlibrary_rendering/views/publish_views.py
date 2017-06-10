@@ -67,7 +67,7 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
     """
     A view to unpublish a renderable content package.
     """
-    CONFIRM_CODE = u'RenderableContentPackageUnpublish'
+    CONFIRM_CODE = 'RenderableContentPackageUnpublish'
     CONFIRM_MSG = _(u'This content has been published to courses. Are you sure you want to unpublish?')
 
     def _ntiids(self, associations):
@@ -77,8 +77,7 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
             except AttributeError:
                 pass
 
-    def _raise_conflict_error(self, code, message, courses):
-        associations = resolve_content_unit_associations(self.context)
+    def _raise_conflict_error(self, code, message, associations):
         associations = [x for x in self._ntiids(associations)]
         logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
                     self.context.ntiid,
@@ -93,8 +92,8 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
                          hexc.HTTPConflict,
                          {
                              CLASS: 'DestructiveChallenge',
-                             u'message': message,
-                             u'code': code,
+                             'message': message,
+                             'code': code,
                              LINKS: to_external_object(links),
                              MIME_TYPE: 'application/vnd.nextthought.destructivechallenge'
                          },
