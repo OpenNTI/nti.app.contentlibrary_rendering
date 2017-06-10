@@ -80,16 +80,15 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
             os.remove(zip_file)
 
     def _export_package(self, package):
-        if      IPublishable.providedBy(self.context) \
-            and not IContentRendered.providedBy(self.context):
+        if      IPublishable.providedBy(package) \
+            and not IContentRendered.providedBy(package):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
                                  'message': _(u"Content has not been published.")
                              },
                              None)
-            raise ValueError()
-        root = getattr(self.context, 'root', None)
+        root = getattr(package, 'root', None)
         if IFilesystemBucket.providedBy(root):
             zip_file = self._export_fs(root)
         else:  # boto
