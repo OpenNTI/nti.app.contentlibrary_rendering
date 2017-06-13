@@ -7,8 +7,10 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import not_none
 from hamcrest import assert_that
 from hamcrest import has_property
 does_not = is_not
@@ -39,8 +41,9 @@ class TestValidators(ContentlibraryRenderingLayerTest):
             validator.validate(b"""Chapter 1 Title
                                    ========
                                 """)
-            assert_that(e, has_property('Warnings', is_not(none())))
-            
+        assert_that(e.exception.warnings, not_none())
+        assert_that(e.exception.message, is_('Unexpected section title or transition.'))
+
     def test_warnings(self):
         path = os.path.join(os.path.dirname(__file__), "formats.rst")
         with open(path, 'r') as f:
