@@ -24,14 +24,14 @@ from nti.app.contentlibrary_rendering import VIEW_RENDER_JOBS
 from nti.app.contentlibrary_rendering.views import validate_content
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
+from nti.app.externalization.internalization import read_body_as_external_object
+
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
 from nti.common.string import is_true
 
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
-from nti.contentlibrary_rendering import NTI_PROVIDER
- 
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
@@ -42,6 +42,8 @@ from nti.dataserver import authorization as nauth
 from nti.externalization.externalization import StandardExternalFields
 
 from nti.externalization.interfaces import LocatedExternalDict
+
+from nti.ntiids.ntiids import get_provider
 
 ITEMS = StandardExternalFields.ITEMS
 NTIID = StandardExternalFields.NTIID
@@ -57,14 +59,18 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 class RenderContentPackageView(AbstractAuthenticatedView,
                                ModeledContentUploadRequestUtilsMixin):
 
-    def readInput(self, value=None):
-        result = super(RenderContentPackageView, self).readInput(value=value)
-        return CaseInsensitiveDict(result)
+    def readInput(self):
+        if self.request.body:
+            values = read_body_as_external_object(self.request)
+        else:
+            values = self.request.params
+        result = CaseInsensitiveDict(values)
+        return result
 
     def __call__(self):
         validate_content(self.context, self.request)
         data = self.readInput()
-        provider = data.get('provider') or NTI_PROVIDER
+        provider = get_provider(self.context.ntiid)
         mark_rendered = data.get('MarkRendered') \
                      or data.get('mark_rendered') or 'True'
         job = render_package(self.context,
