@@ -7,6 +7,7 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+import time
 from hamcrest import is_
 from hamcrest import is_not
 from hamcrest import assert_that
@@ -16,6 +17,8 @@ does_not = is_not
 
 from nti.contentlibrary.zodb import RenderableContentPackage
 
+from nti.contentlibrary_rendering.interfaces import FAILED
+from nti.contentlibrary_rendering.interfaces import PENDING
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.contentlibrary_rendering.model import ContentPackageRenderJob
@@ -39,7 +42,7 @@ class TestAdminViews(ApplicationLayerTest):
 
     default_origin = 'http://janux.ou.edu'
 
-    def _create_package_and_job(self):
+    def _create_package_and_job(self, state=FAILED):
         href = '/dataserver2/Library'
         package = RenderableContentPackage(title=u'Bleach',
                                            description=u'Manga bleach')
@@ -51,11 +54,11 @@ class TestAdminViews(ApplicationLayerTest):
         ntiid = res.json_body['NTIID']
 
         job = ContentPackageRenderJob()
-        job.state = u'Failed'
+        job.state = state
         job.package = ntiid
         job.provider = u'NTI'
         job.creator = self.default_username
-        job.jobId = u'tag:nextthought.com,2011-10:NTI-RenderJob-58'
+        job.jobId = u'tag:nextthought.com,2011-10:NTI-RenderJob-%s' % time.time()
 
         with mock_dataserver.mock_db_trans(self.ds, site_name='janux.ou.edu'):
             package = find_object_with_ntiid(ntiid)
@@ -70,3 +73,58 @@ class TestAdminViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entries('Total', is_(greater_than_or_equal_to(1)),
                                 'ItemCount', is_(greater_than_or_equal_to(1))))
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_failed_jobs(self):
+        self._create_package_and_job()
+        res = self.testapp.get('/dataserver2/Library/@@GetAllFailedRenderJobs',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
+
+        self.testapp.post('/dataserver2/Library/@@RemoveAllFailedRenderJobs',
+                          status=204)
+
+        res = self.testapp.get('/dataserver2/Library/@@GetAllFailedRenderJobs',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(0),
+                                'ItemCount', is_(0)))
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_pending_jobs(self):
+        self._create_package_and_job(state=PENDING)
+        res = self.testapp.get('/dataserver2/Library/@@GetAllPendingRenderJobs',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
+
+        self.testapp.post('/dataserver2/Library/@@RemoveAllPendingRenderJobs',
+                          status=204)
+
+        res = self.testapp.get('/dataserver2/Library/@@GetAllPendingRenderJobs',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(0),
+                                'ItemCount', is_(0)))
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_remove_all_jobs(self):
+        self._create_package_and_job(state=PENDING)
+        self._create_package_and_job(state=PENDING)
+        res = self.testapp.get('/dataserver2/Library/@@GetAllPendingRenderJobs',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(2)),
+                                'ItemCount', is_(greater_than_or_equal_to(2))))
+
+        self.testapp.post('/dataserver2/Library/@@RemoveAllRenderContentJobs',
+                          status=204)
+
+        res = self.testapp.get('/dataserver2/Library/@@GetAllPendingRenderJobs',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(0),
+                                'ItemCount', is_(0)))

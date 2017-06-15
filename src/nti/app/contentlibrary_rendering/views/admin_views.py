@@ -35,6 +35,8 @@ from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
 
 from nti.app.contentlibrary_rendering.views import perform_content_validation
 
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
@@ -43,7 +45,6 @@ from nti.contentlibrary_rendering import QUEUE_NAMES
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.contentlibrary_rendering.index import get_contentrenderjob_catalog
-from nti.contentlibrary_rendering.index import create_contentrenderjob_catalog
 
 from nti.contentlibrary_rendering.processing import get_job_queue
 
@@ -163,8 +164,8 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         library = component.getUtility(IContentPackageLibrary)
         result[ITEMS] = items = {}
         for package in list(library.contentPackages):
-            if      not IRenderableContentPackage.providedBy(package) \
-                and self._is_renderable_path(package):
+            if not IRenderableContentPackage.providedBy(package) \
+                    and self._is_renderable_path(package):
                 logger.info('Removing invalid renderable package (%s) (%s)',
                             package.ntiid,
                             package.root.name)
@@ -188,10 +189,8 @@ class RemoveContentPackageRenderJobsView(AbstractAuthenticatedView):
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         meta = IContentPackageRenderMetadata(self.context)
-        items = result[ITEMS] = list(meta.render_jobs)
-        result[TOTAL] = result[ITEM_COUNT] = len(items)
         meta.clear()  # clear container
-        return result
+        return hexc.HTTPNoContent()
 
 
 @view_config(name="RemoveAllRenderContentJobs")
@@ -218,8 +217,11 @@ class RemoveAllContentPackageRenderJobsView(AbstractAuthenticatedView):
                permission=nauth.ACT_NTI_ADMIN)
 class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
 
+    def readInput(self):
+        return CaseInsensitiveDict(self.request.params)
+
     def __call__(self):
-        data = CaseInsensitiveDict(self.request.params)
+        data = self.readInput()
         packages = data.get('ntiid') or data.get('package')
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
@@ -235,14 +237,24 @@ class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
                request_method='POST',
                context=LibraryPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
-class RemoveAllPendingRenderJobsView(GetAllPendingRenderJobsView):
+class RemoveAllPendingRenderJobsView(AbstractAuthenticatedView,
+                                     ModeledContentUploadRequestUtilsMixin):
+
+    def readInput(self, value=None):
+        result = CaseInsensitiveDict()
+        if self.request.body:
+            data = super(RemoveAllPendingRenderJobsView, self).readInput(value)
+            result.update(data)
+        return result
 
     def __call__(self):
-        result = super(RemoveAllPendingRenderJobsView, self).__call__()
-        for job in result[ITEMS]:
+        data = self.readInput()
+        packages = data.get('ntiid') or data.get('package')
+        items = get_pending_render_jobs(packages=packages)
+        for job in items or ():
             meta = IContentPackageRenderMetadata(job)
             meta.removeJob(job)
-        return result
+        return hexc.HTTPNoContent()
 
 
 @view_config(name="GetAllFailedRenderJobs")
@@ -252,13 +264,17 @@ class RemoveAllPendingRenderJobsView(GetAllPendingRenderJobsView):
                permission=nauth.ACT_NTI_ADMIN)
 class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
 
+    def readInput(self):
+        return CaseInsensitiveDict(self.request.params)
+
     def __call__(self):
-        data = CaseInsensitiveDict(self.request.params)
+        data = self.readInput()
         packages = data.get('ntiid') or data.get('package')
+        items = get_failed_render_jobs(packages=packages)
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
-        items = result[ITEMS] = get_failed_render_jobs(packages=packages)
+        items = result[ITEMS] = items
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
@@ -269,14 +285,24 @@ class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
                request_method='POST',
                context=LibraryPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
-class RemoveAllFailedRenderJobsView(GetAllFailedRenderJobsView):
+class RemoveAllFailedRenderJobsView(AbstractAuthenticatedView,
+                                    ModeledContentUploadRequestUtilsMixin):
+
+    def readInput(self, value=None):
+        result = CaseInsensitiveDict()
+        if self.request.body:
+            data = super(RemoveAllFailedRenderJobsView, self).readInput(value)
+            result.update(data)
+        return result
 
     def __call__(self):
-        result = super(RemoveAllFailedRenderJobsView, self).__call__()
-        for job in result[ITEMS]:
+        data = self.readInput()
+        packages = data.get('ntiid') or data.get('package')
+        items = get_failed_render_jobs(packages=packages)
+        for job in items or ():
             meta = IContentPackageRenderMetadata(job)
             meta.removeJob(job)
-        return result
+        return hexc.HTTPNoContent()
 
 
 @view_config(context=LibraryPathAdapter)
@@ -289,16 +315,10 @@ class RebuildContentRenderingJobCatalogView(AbstractAuthenticatedView):
 
     def __call__(self):
         intids = component.getUtility(IIntIds)
-        # remove indexes
+        # clear indexes
         catalog = get_contentrenderjob_catalog()
-        for name, index in list(catalog.items()):
-            intids.unregister(index)
-            del catalog[name]
-        # recreate indexes
-        catalog = create_contentrenderjob_catalog(catalog=catalog,
-                                                  family=intids.family)
-        for index in catalog.values():
-            intids.register(index)
+        for index in list(catalog.values()):
+            index.clear()
         # reindex
         seen = set()
         for host_site in get_all_host_sites():  # check all sites
