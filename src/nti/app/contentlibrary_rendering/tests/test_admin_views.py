@@ -65,6 +65,58 @@ class TestAdminViews(ApplicationLayerTest):
             meta = IContentPackageRenderMetadata(package)
             meta[job.jobId] = job
 
+        return ntiid
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_render_packages(self):
+        self._create_package_and_job()
+        res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
+        
+        self.testapp.post('/dataserver2/Library/@@RemoveAllRenderableContentPackages',
+                          status=204)
+
+        res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(0),
+                                'ItemCount', is_(0)))
+
+        self._create_package_and_job()
+        res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
+        
+        self.testapp.post('/dataserver2/Library/@@RemoveInvalidRenderableContentPackages',
+                          status=204)
+
+        res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(0),
+                                'ItemCount', is_(0)))
+        
+        ntiid = self._create_package_and_job()
+        res = self.testapp.get('/dataserver2/Objects/%s/@@RenderJobs' % ntiid,
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
+        
+        self.testapp.post('/dataserver2/Objects/%s/@@ClearJobs' % ntiid,
+                          status=204)
+
+        res = self.testapp.get('/dataserver2/Objects/%s/@@RenderJobs' % ntiid,
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(0),
+                                'ItemCount', is_(0)))
+
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_rebuild_job_catalog(self):
         self._create_package_and_job()

@@ -47,6 +47,7 @@ from nti.ntiids.ntiids import get_provider
 
 ITEMS = StandardExternalFields.ITEMS
 NTIID = StandardExternalFields.NTIID
+TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
@@ -137,9 +138,8 @@ class RenderJobsView(AbstractAuthenticatedView):
             raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
         result = LocatedExternalDict()
         result[NTIID] = self.context.ntiid
-        result[ITEMS] = items = []
-        for job in sorted(meta.render_jobs):
-            items.append(job)
+        result[ITEMS] = items = sorted(meta.render_jobs)
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
 

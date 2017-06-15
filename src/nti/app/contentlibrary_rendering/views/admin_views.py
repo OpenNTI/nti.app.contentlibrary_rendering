@@ -86,7 +86,7 @@ class RenderableContentPackagesView(AbstractAuthenticatedView,
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
-        packages = get_renderable_packages()
+        packages = list(get_renderable_packages())
         result[TOTAL] = result['TotalItemCount'] = len(packages)
         self._batch_items_iterable(result, packages)
         result[ITEM_COUNT] = len(result[ITEMS])
@@ -128,17 +128,11 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
 class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
 
     def __call__(self):
-        result = LocatedExternalDict()
-        result.__name__ = self.request.view_name
-        result.__parent__ = self.request.context
         library = component.getUtility(IContentPackageLibrary)
-        result[ITEMS] = items = {}
         for package in get_renderable_packages():
             logger.info('Removing renderable package (%s)', package.ntiid)
-            items[package.ntiid] = package
             library.remove(package, event=True)
-        result[TOTAL] = result[ITEM_COUNT] = len(items)
-        return result
+        return hexc.HTTPNoContent()
 
 
 @view_config(context=LibraryPathAdapter)
@@ -153,26 +147,22 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
     IRenderableContentPackages.
     """
 
-    def _is_renderable_path(self, package):
-        return package.root is None \
-            or package.root.name.startswith('_authored_')
+    def _is_invalid_renderable(self, package):
+        return (
+            (   not IRenderableContentPackage.providedBy(package)
+             and package.root.name.startswith('_authored_'))
+         or (   IRenderableContentPackage.providedBy(package)
+             and package.root is None)
+        )
 
     def __call__(self):
-        result = LocatedExternalDict()
-        result.__name__ = self.request.view_name
-        result.__parent__ = self.request.context
         library = component.getUtility(IContentPackageLibrary)
-        result[ITEMS] = items = {}
         for package in list(library.contentPackages):
-            if not IRenderableContentPackage.providedBy(package) \
-                    and self._is_renderable_path(package):
-                logger.info('Removing invalid renderable package (%s) (%s)',
-                            package.ntiid,
-                            package.root.name)
-                items[package.ntiid] = package
+            if self._is_invalid_renderable(package):
+                logger.info('Removing invalid renderable package (%s)',
+                            package.ntiid)
                 library.remove(package, event=True)
-        result[TOTAL] = result[ITEM_COUNT] = len(items)
-        return result
+        return hexc.HTTPNoContent()
 
 
 @view_config(name="ClearJobs")
