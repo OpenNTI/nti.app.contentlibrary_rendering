@@ -153,7 +153,8 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
     """
 
     def _is_renderable_path(self, package):
-        return package.root.name.startswith('_authored_')
+        return package.root is None \
+            or package.root.name.startswith('_authored_')
 
     def __call__(self):
         result = LocatedExternalDict()
