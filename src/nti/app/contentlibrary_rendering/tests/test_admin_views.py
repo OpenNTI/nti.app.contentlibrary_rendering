@@ -15,6 +15,8 @@ from hamcrest import has_entries
 from hamcrest import greater_than_or_equal_to
 does_not = is_not
 
+import fudge
+
 from nti.contentlibrary.zodb import RenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import FAILED
@@ -68,7 +70,7 @@ class TestAdminViews(ApplicationLayerTest):
         return ntiid
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
-    def test_render_packages(self):
+    def test_packages(self):
         self._create_package_and_job()
         res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
                                status=200)
@@ -116,6 +118,20 @@ class TestAdminViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entries('Total', is_(0),
                                 'ItemCount', is_(0)))
+
+    
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    @fudge.patch('nti.app.contentlibrary_rendering.views.admin_views.perform_content_validation',
+                 'nti.app.contentlibrary_rendering.views.admin_views.render_package')
+    def test_render_all_packages(self, mock_val, mock_render):
+        self._create_package_and_job()
+        mock_val.is_callable().with_args().returns(None)
+        mock_render.is_callable().with_args().returns(None)
+        res = self.testapp.post('/dataserver2/Library/@@RenderAllContentPackages',
+                                status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_rebuild_job_catalog(self):

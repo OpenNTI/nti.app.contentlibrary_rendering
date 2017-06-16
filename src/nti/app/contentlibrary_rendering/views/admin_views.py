@@ -151,7 +151,7 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         return (
             (   not IRenderableContentPackage.providedBy(package)
              and package.root.name.startswith('_authored_'))
-         or (   IRenderableContentPackage.providedBy(package)
+         or (    IRenderableContentPackage.providedBy(package)
              and package.root is None)
         )
 
