@@ -17,6 +17,10 @@ does_not = is_not
 
 import fudge
 
+from zope import interface
+
+from nti.contentlibrary.interfaces import IContentRendered
+
 from nti.contentlibrary.zodb import RenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import FAILED
@@ -44,7 +48,7 @@ class TestAdminViews(ApplicationLayerTest):
 
     default_origin = 'http://janux.ou.edu'
 
-    def _create_package_and_job(self, state=FAILED):
+    def _create_package_and_job(self, state=FAILED, rendered=False):
         href = '/dataserver2/Library'
         package = RenderableContentPackage(title=u'Bleach',
                                            description=u'Manga bleach')
@@ -54,7 +58,7 @@ class TestAdminViews(ApplicationLayerTest):
 
         res = self.testapp.post_json(href, ext_obj, status=201)
         ntiid = res.json_body['NTIID']
-
+            
         job = ContentPackageRenderJob()
         job.state = state
         job.package = ntiid
@@ -66,6 +70,8 @@ class TestAdminViews(ApplicationLayerTest):
             package = find_object_with_ntiid(ntiid)
             meta = IContentPackageRenderMetadata(package)
             meta[job.jobId] = job
+            if rendered:
+                interface.alsoProvides(package, IContentRendered)
 
         return ntiid
 
@@ -87,13 +93,7 @@ class TestAdminViews(ApplicationLayerTest):
                     has_entries('Total', is_(0),
                                 'ItemCount', is_(0)))
 
-        self._create_package_and_job()
-        res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
-                               status=200)
-        assert_that(res.json_body,
-                    has_entries('Total', is_(greater_than_or_equal_to(1)),
-                                'ItemCount', is_(greater_than_or_equal_to(1))))
-        
+        self._create_package_and_job(rendered=True)
         self.testapp.post('/dataserver2/Library/@@RemoveInvalidRenderableContentPackages',
                           status=204)
 
