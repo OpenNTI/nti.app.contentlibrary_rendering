@@ -37,6 +37,7 @@ from nti.app.contentlibrary_rendering.views import perform_content_validation
 
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
+from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
@@ -152,6 +153,7 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
             (   not IRenderableContentPackage.providedBy(package)
              and package.root.name.startswith('_authored_'))
          or (    IRenderableContentPackage.providedBy(package)
+             and IContentRendered.providedBy(package)
              and package.root is None)
         )
 
