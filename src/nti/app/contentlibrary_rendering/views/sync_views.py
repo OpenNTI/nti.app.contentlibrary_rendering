@@ -34,7 +34,7 @@ from nti.app.externalization.error import raise_json_error
 
 from nti.app.renderers.interfaces import INoHrefInResponse
 
-from nti.cabinet import NamedSource
+from nti.cabinet.mixins import NamedSource
 
 from nti.contentlibrary_rendering import NTI_PROVIDER
 
