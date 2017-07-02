@@ -116,7 +116,7 @@ class ExportRenderedContentView(ExportContentPackageContentsView):
                              hexc.HTTPUnprocessableEntity,
                              {
                                  'message': _(u"Invalid package NTIID."),
-                                 'field': u'ntiid'
+                                 'field': 'ntiid'
                              },
                              None)
         package = find_object_with_ntiid(ntiid)

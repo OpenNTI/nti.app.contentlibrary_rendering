@@ -32,13 +32,13 @@ def validate_content(package, request):
     if error is not None:
         e, exc_info = error
         data = LocatedExternalDict({
-            u'code': u'ContentValidationError',
+            'code': 'ContentValidationError',
         })
         if IContentValidationError.providedBy(e):
             error = to_external_object(e, decorate=False)
             data.update(error)
         else:
-            data['message'] = str(e)
+            data['message'] = repr(e)
 
         raise_json_error(request,
                          hexc.HTTPUnprocessableEntity,

@@ -86,7 +86,7 @@ class RenderContentSourceView(AbstractAuthenticatedView,
                     hexc.HTTPUnprocessableEntity,
                     {
                         'message': _(u"Max file size exceeded"),
-                        'code': u'MaxFileSizeExceeded',
+                        'code': 'MaxFileSizeExceeded',
                     },
                     None)
             filename = getattr(source, 'filename', None) or name
@@ -119,8 +119,8 @@ class LibraryJobStatusView(AbstractAuthenticatedView):
                 hexc.HTTPUnprocessableEntity,
                 {
                     'message': _(u"Must provide a job identifier"),
-                    'field': u'jobId',
-                    'code': u'InvalidJobID',
+                    'field': 'jobId',
+                    'code': 'InvalidJobID',
                 },
                 None)
         status = get_job_status(job_id)
@@ -152,8 +152,8 @@ class LibraryJobErrorView(AbstractAuthenticatedView):
                 hexc.HTTPUnprocessableEntity,
                 {
                     'message': _(u"Must provide a job identifier"),
-                    'field': u'jobId',
-                    'code': u'InvalidJobID',
+                    'field': 'jobId',
+                    'code': 'InvalidJobID',
                 },
                 None)
         error = get_job_error(job_id)

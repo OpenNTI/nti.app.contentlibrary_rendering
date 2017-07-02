@@ -91,11 +91,11 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
         raise_json_error(self.request,
                          hexc.HTTPConflict,
                          {
-                             CLASS: 'DestructiveChallenge',
-                             'message': message,
-                             'code': code,
-                             LINKS: to_external_object(links),
-                             MIME_TYPE: 'application/vnd.nextthought.destructivechallenge'
+                            'code': code,
+                            'message': message,
+                            CLASS: 'DestructiveChallenge',
+                            LINKS: to_external_object(links),
+                            MIME_TYPE: 'application/vnd.nextthought.destructivechallenge'
                          },
                          None)
 
