@@ -70,7 +70,10 @@
 	<subscriber	factory=".predicates._SystemContentRenderMetadata"
 				provides="nti.dataserver.metadata.interfaces.IPrincipalMetadataObjects" />
 
-	<subscriber	factory=".predicates._ContentPackageRenderJobs"
+	<subscriber	factory=".predicates._SystemContentPackageRenderJobs"
+				provides="nti.dataserver.metadata.interfaces.IPrincipalMetadataObjects" />
+
+	<subscriber	factory=".predicates._UserContentPackageRenderJobs"
 				provides="nti.dataserver.metadata.interfaces.IPrincipalMetadataObjects" />
 	
 </configure>

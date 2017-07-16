@@ -9,13 +9,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from functools import partial
-
 from zope import component
-
-from zope.cachedescriptors.property import Lazy
-
-from zope.intid.interfaces import IIntIds
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 from nti.contentlibrary.interfaces import IRenderableContentPackage
@@ -27,66 +21,55 @@ from nti.dataserver.interfaces import ISystemUserPrincipal
 
 from nti.dataserver.metadata.predicates import BasePrincipalObjects
 
-from nti.site.hostpolicy import run_job_in_all_host_sites
-
 
 class _RenderingObjectsMixin(BasePrincipalObjects):
-
-    @Lazy
-    def intids(self):
-        return component.getUtility(IIntIds)
 
     @property
     def library(self):
         return component.queryUtility(IContentPackageLibrary)
 
-    def iter_objects(self):
-        result = []
-        seen = set()
-        run_job_in_all_host_sites(partial(self.iter_items, result, seen))
-        return result
+    @property
+    def metas(self):
+        library = self.library
+        if library is not None:
+            for package in library.contentPackages:
+                if not IRenderableContentPackage.providedBy(package):
+                    continue
+                meta = IContentPackageRenderMetadata(package, None)
+                if meta:
+                    yield meta
 
 
 @component.adapter(ISystemUserPrincipal)
 class _SystemContentRenderMetadata(_RenderingObjectsMixin):
 
-    def iter_items(self, result, seen):
-        library = self.library
-        if library is None:
-            return result
-        for package in library.contentPackages:
-            if not IRenderableContentPackage.providedBy(package):
-                continue
-            meta = IContentPackageRenderMetadata(package, None)
-            if not meta:
-                continue
-            doc_id = self.intids.queryId(meta)
-            if doc_id is not None and doc_id not in seen:
-                seen.add(doc_id)
-                result.append(meta)
+    def iter_objects(self):
+        return self.metas
+
+
+class _ContentPackageRenderJobs(_RenderingObjectsMixin):
+
+    def _predicate(self, _):
+        return False
+
+    def iter_objects(self):
+        result = []
+        for meta in self.metas:
+            for job in meta.render_jobs:
+                if self._predicate(job):
+                    result.append(job)
         return result
+
+
+@component.adapter(ISystemUserPrincipal)
+class _SystemContentPackageRenderJobs(_ContentPackageRenderJobs):
+
+    def _predicate(self, job):
+        return self.is_system_username(self.creator(job))
 
 
 @component.adapter(IUser)
-class _ContentPackageRenderJobs(_RenderingObjectsMixin):
+class _UserContentPackageRenderJobs(_ContentPackageRenderJobs):
 
-    def iter_items(self, result, seen):
-        user = self.user
-        library = self.library
-        if library is None:
-            return result
-        for package in library.contentPackages:
-            if not IRenderableContentPackage.providedBy(package):
-                continue
-            meta = IContentPackageRenderMetadata(package, None)
-            if not meta:
-                continue
-            for job in meta.render_jobs:
-                doc_id = self.intids.queryId(job)
-                if doc_id is not None and doc_id not in seen:
-                    creator = getattr(job.creator, 'username', None)
-                    creator = getattr(creator, 'id', creator) or ''
-                    seen.add(doc_id)
-                    if creator.lower() == user.username.lower():
-                        result.append(job)
-        return result
+    def _predicate(self, job):
+        return self.creator(job) == self.username
