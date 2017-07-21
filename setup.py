@@ -6,7 +6,7 @@ entry_points = {
         'target = nti.app',
     ],
     'console_scripts': [
-        "nti_library_renderer = nti.app.contentlibrary_rendering.scripts.renderer:main",
+        "nti_library_renderer = nti.app.contentlibrary_rendering.scripts.nti_library_renderer:main",
     ]
 }
 
@@ -14,6 +14,7 @@ entry_points = {
 def _read(fname):
     with codecs.open(fname, encoding='utf-8') as f:
         return f.read()
+
 
 setup(
     name='nti.app.contentlibrary_rendering',
