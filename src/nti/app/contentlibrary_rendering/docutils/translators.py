@@ -19,6 +19,13 @@ from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
 
+from nti.assessment.interfaces import IQPoll
+from nti.assessment.interfaces import IQSurvey
+from nti.assessment.interfaces import IQuestion
+from nti.assessment.interfaces import IQAssignment
+from nti.assessment.interfaces import IQEvaluation
+from nti.assessment.interfaces import IQuestionSet
+
 from nti.base._compat import text_
 
 from nti.contentlibrary_rendering.docutils.translators import TranslatorMixin
@@ -32,6 +39,13 @@ from nti.contentrendering.plastexpackages.nticard import incoming_sources_as_pla
 
 from nti.contentrendering.plastexpackages.ntimedia import ntivideo
 from nti.contentrendering.plastexpackages.ntimedia import ntivideoref
+
+from nti.contentrendering_assessment.ntiassessment import napollref
+from nti.contentrendering_assessment.ntiassessment import nasurveyref
+from nti.contentrendering_assessment.ntiassessment import naquestionref
+from nti.contentrendering_assessment.ntiassessment import naassesmentref
+from nti.contentrendering_assessment.ntiassessment import naassignmentref
+from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
 from nti.contenttypes.presentation.interfaces import INTIVideo
 
@@ -222,3 +236,73 @@ class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
         result.to_render = False
         result.visibility = rst_node.attributes['visibility']
         return result
+
+
+# Assessments
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAAssessmentRefToPlastexNodeTranslator(TranslatorMixin):
+
+    __name__ = "naassessmentref"
+
+    provided = IQEvaluation
+    factory = naassesmentref
+
+    def do_translate(self, rst_node, tex_doc, tex_parent):
+        ntiid = rst_node['ntiid']
+        item = find_object_with_ntiid(ntiid)
+        if not self._provided.providedBy(item):
+            raise ValueError(
+                'Error in "%s" directive: evaluation with ntiid "%" is missing'
+                % (self.__name__, ntiid))
+
+        result = self.factory()
+        result.assesment = item
+        result.to_render = False
+        return result
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAQuestionRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "naquestionref"
+
+    provided = IQuestion
+    factory = naquestionref
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAQuestionSetRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "naquestionsetref"
+
+    provided = IQuestionSet
+    factory = naquestionsetref
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAAssignmentRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "naassignmentref"
+
+    provided = IQAssignment
+    factory = naassignmentref
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAPollRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "napollref"
+
+    provided = IQPoll
+    factory = napollref
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NASurveyRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "nasurveyref"
+
+    provided = IQSurvey
+    factory = nasurveyref

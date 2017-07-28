@@ -25,6 +25,26 @@ class TestDirectives(ApplicationLayerTest):
     def test_interface(self):
         from nti.app.contentlibrary_rendering.docutils import directives
         assert_that(directives, validly_provides(IDirectivesModule))
-        assert_that(docutils_directive('nticard', None, None), is_(not_none()))
-        assert_that(docutils_directive('ntivideo', None, None), is_(not_none()))
-        assert_that(docutils_directive('ntivideoref', None, None), is_(not_none()))
+        assert_that(docutils_directive('nticard', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('ntivideo', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('ntivideoref', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('napollref', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('nasurveyref', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('naquestionref', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('naassignmentRef', None, None),
+                    is_(not_none()))
+
+        assert_that(docutils_directive('naquestionsetref', None, None),
+                    is_(not_none()))

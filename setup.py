@@ -40,7 +40,10 @@ setup(
     namespace_packages=['nti', 'nti.app'],
     install_requires=[
         'setuptools',
-        'nti.contentlibrary_rendering'
+        'nti.assessment',
+        'nti.contentlibrary_rendering',
+        'nti.contentrendering',
+        'nti.contentrendering_assessment'
     ],
     entry_points=entry_points,
 )

@@ -22,4 +22,19 @@
 	<utility factory=".translators.NTIVideoRefToPlastexNodeTranslator" 
 			 name="ntivideoref" />
 
+	<utility factory=".translators.NAQuestionRefToPlastexNodeTranslator" 
+			 name="naquestionref" />
+
+	<utility factory=".translators.NAQuestionSetRefToPlastexNodeTranslator" 
+			 name="naquestionsetref" />
+
+	<utility factory=".translators.NAAssignmentRefToPlastexNodeTranslator" 
+			 name="naassignmentRef" />
+
+	<utility factory=".translators.NAPollRefToPlastexNodeTranslator" 
+			 name="napollref" />
+
+	<utility factory=".translators.NASurveyRefToPlastexNodeTranslator" 
+			 name="nasurveyref" />
+
 </configure>

@@ -23,3 +23,27 @@ class ntivideo(General, Element):
 
 class ntivideoref(General, Element):
     pass
+
+
+class naassessmentref(General, Element):
+    pass
+
+
+class naassignmentref(naassessmentref):
+    pass
+
+
+class naquestionsetref(naassessmentref):
+    pass
+
+
+class naquestionref(naassessmentref):
+    pass
+
+
+class nasurveyref(naassessmentref):
+    pass
+
+
+class napollref(naassessmentref):
+    pass

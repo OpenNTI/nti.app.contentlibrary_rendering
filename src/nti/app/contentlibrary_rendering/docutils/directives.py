@@ -20,7 +20,13 @@ from docutils.parsers.rst import directives
 
 from nti.app.contentlibrary_rendering.docutils.nodes import nticard
 from nti.app.contentlibrary_rendering.docutils.nodes import ntivideo
+from nti.app.contentlibrary_rendering.docutils.nodes import napollref
+from nti.app.contentlibrary_rendering.docutils.nodes import nasurveyref
 from nti.app.contentlibrary_rendering.docutils.nodes import ntivideoref
+from nti.app.contentlibrary_rendering.docutils.nodes import naquestionref
+from nti.app.contentlibrary_rendering.docutils.nodes import naassessmentref
+from nti.app.contentlibrary_rendering.docutils.nodes import naassignmentref
+from nti.app.contentlibrary_rendering.docutils.nodes import naquestionsetref
 
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
@@ -170,10 +176,56 @@ class NTIVideoRef(Directive):
         return [node]
 
 
+class NTIAssessmentRef(Directive):
+    
+    has_content = False
+    required_arguments = 1
+    optional_arguments = 1
+    
+    factory = naassessmentref
+
+    def run(self):
+        ntiid = directives.unchanged_required(self.arguments[0])
+        if not is_valid_ntiid_string(ntiid):
+            raise self.error(
+                'Error in "%s" directive: "%s" is not a valid NTIID'
+                % (self.name, ntiid))
+        node = self.factory('', **self.options)
+        node['ntiid'] = ntiid
+        return [node]
+
+
+class NAAssignmentRef(NTIAssessmentRef):
+    factory = naassignmentref
+
+
+class NAQuestionSetRef(NTIAssessmentRef):
+    factory = naquestionsetref
+
+
+class NAQuestionRef(NTIAssessmentRef):
+    factory = naquestionref
+
+
+class NAPollRef(NTIAssessmentRef):
+    factory = napollref
+
+
+class NASurveyRef(NTIAssessmentRef):
+    factory = nasurveyref
+
+
 def register_directives():
+    # media
     directives.register_directive("nticard", NTICard)
     directives.register_directive("ntivideo", NTIVideo)
     directives.register_directive("ntivideoref", NTIVideoRef)
+    # assessments
+    directives.register_directive("napollref", NAPollRef)
+    directives.register_directive("nasurveyref", NASurveyRef)
+    directives.register_directive("naquestionref", NAQuestionRef)
+    directives.register_directive("naassignmentref", NAAssignmentRef)
+    directives.register_directive("naquestionsetref", NAQuestionSetRef)
 register_directives()
 
 
