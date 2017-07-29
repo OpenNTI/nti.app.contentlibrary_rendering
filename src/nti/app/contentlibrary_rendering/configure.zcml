@@ -9,7 +9,8 @@
 	<include package="zope.security" />
 
 	<include package="nti.contentlibrary_rendering" />
-
+	<include package="nti.contentrendering_assessment" />
+	
 	<utility factory=".generations.install._SchemaManager"
 			 name="nti.dataserver-app-contentlibrary-rendering"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
