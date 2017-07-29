@@ -1,0 +1,39 @@
+{
+	"Class": "Question",
+	"CreatedTime": 1501192456.157275,
+	"Creator": "carlos.sanchez@nextthought.com",
+	"Last Modified": 1501192479.124779,
+	"MimeType": "application/vnd.nextthought.naquestion",
+	"NTIID": "tag:nextthought.com,2011-10:NTI-NAQ-BLEACH",
+	"content": "<p>Most powerful</p>",
+	"isLocked": true,
+	"isPublished": true,
+	"ntiid": "tag:nextthought.com,2011-10:NTI-NAQ-BLEACH",
+	"parts": [
+		{
+			"Class": "MultipleChoicePart",
+			"MimeType": "application/vnd.nextthought.assessment.multiplechoicepart",
+			"choices": [
+				"<html><body><p>Ichigo</p></body></html>",
+				"<html><body><p>Aizen</p></body></html>",
+				"<html><body><p>Zaraki</p></body></html>",
+				"<html><body><p>Toshiro</p></body></html>"
+			],
+			"content": "",
+			"explanation": "",
+			"hints": [],
+			"randomized": false,
+			"solutions": [
+				{
+					"Class": "MultipleChoiceSolution",
+					"MimeType": "application/vnd.nextthought.assessment.multiplechoicesolution",
+					"value": 0,
+					"weight": 1.0
+				}
+			],
+			"weight": 1.0
+		}
+	],
+	"publishLastModified": 1501192486.577563,
+	"tags": []
+}

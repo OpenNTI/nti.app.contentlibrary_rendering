@@ -43,7 +43,6 @@ from nti.contentrendering.plastexpackages.ntimedia import ntivideoref
 from nti.contentrendering_assessment.ntiassessment import napollref
 from nti.contentrendering_assessment.ntiassessment import nasurveyref
 from nti.contentrendering_assessment.ntiassessment import naquestionref
-from nti.contentrendering_assessment.ntiassessment import naassesmentref
 from nti.contentrendering_assessment.ntiassessment import naassignmentref
 from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
@@ -246,13 +245,13 @@ class NAAssessmentRefToPlastexNodeTranslator(TranslatorMixin):
 
     __name__ = "naassessmentref"
 
+    factory = None
     provided = IQEvaluation
-    factory = naassesmentref
 
     def do_translate(self, rst_node, tex_doc, tex_parent):
         ntiid = rst_node['ntiid']
         item = find_object_with_ntiid(ntiid)
-        if not self._provided.providedBy(item):
+        if not self.provided.providedBy(item):
             raise ValueError(
                 'Error in "%s" directive: evaluation with ntiid "%" is missing'
                 % (self.__name__, ntiid))

@@ -16,6 +16,8 @@ import fudge
 import shutil
 import tempfile
 
+import simplejson
+
 from nti.cabinet.mixins import SourceFile
 
 from nti.contentlibrary_rendering._render import render_document
@@ -24,18 +26,32 @@ from nti.contentlibrary_rendering.docutils import publish_doctree
 
 from nti.contenttypes.presentation.media import NTIVideo
 
+from nti.externalization.internalization import find_factory_for
+from nti.externalization.internalization import update_from_external_object
+
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 
 class TestTranslators(ApplicationLayerTest):
 
     URL = u'https://en.wikipedia.org/wiki/Ichigo_Kurosaki'
-
+    
     def _ichigo_asset(self):
         result = SourceFile(name=u"ichigo.png")
         name = os.path.join(os.path.dirname(__file__), 'data/ichigo.png')
         with open(name, "rb") as fp:
             result.data = fp.read()
+        return result
+
+    def _question(self):
+        name = os.path.join(os.path.dirname(__file__), 'data/evaluation.json')
+        with open(name, "rb") as fp:
+            data = fp.read()
+        data = data.decode('utf-8') if isinstance(data, bytes) else data
+        ext_obj = simplejson.loads(data)
+        factory = find_factory_for(ext_obj)
+        result = factory()
+        update_from_external_object(result, ext_obj, notify=False)
         return result
 
     def _generate_from_file(self, source):
@@ -102,3 +118,14 @@ class TestTranslators(ApplicationLayerTest):
                     contains_string('<param name="mimeType" value="application/vnd.nextthought.ntivideo"'))
         assert_that(index, 
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
+
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
+    def test_naquestionref(self, mock_fon):
+        question = self._question()
+        mock_fon.is_callable().with_args().returns(question)
+        index, _ = self._generate_from_file('naquestionref.rst')
+        assert_that(index, contains_string('<object class="question"'))
+        assert_that(index, 
+                    contains_string('<param name="type" value="application/vnd.nextthought.naquestion"'))
+        assert_that(index, 
+                    contains_string('<param name="target-ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
