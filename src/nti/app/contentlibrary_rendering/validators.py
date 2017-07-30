@@ -44,7 +44,7 @@ class ReStructuredTextValidator(object):
                         warnings + "\n")
         return warnings
 
-    def _do_validate(self, content, context=None):
+    def _do_validate(self, content, unused_context=None):
         settings = self._get_settings()
         try:
             publish_doctree(content, settings=settings)
@@ -56,4 +56,4 @@ class ReStructuredTextValidator(object):
 
     def validate(self, content=b'', context=None):
         if content:
-            return self._do_validate(content)
+            return self._do_validate(content, context)
