@@ -218,7 +218,7 @@ class GetAllPendingRenderJobsView(AbstractAuthenticatedView):
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
-        items = result[ITEMS] = get_pending_render_jobs(packages=packages)
+        items = result[ITEMS] = get_pending_render_jobs(packages)
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
@@ -242,7 +242,7 @@ class RemoveAllPendingRenderJobsView(AbstractAuthenticatedView,
     def __call__(self):
         data = self.readInput()
         packages = data.get('ntiid') or data.get('package')
-        items = get_pending_render_jobs(packages=packages)
+        items = get_pending_render_jobs(packages)
         for job in items or ():
             meta = IContentPackageRenderMetadata(job)
             meta.removeJob(job)
@@ -262,7 +262,7 @@ class GetAllFailedRenderJobsView(AbstractAuthenticatedView):
     def __call__(self):
         data = self.readInput()
         packages = data.get('ntiid') or data.get('package')
-        items = get_failed_render_jobs(packages=packages)
+        items = get_failed_render_jobs(packages)
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
@@ -290,7 +290,7 @@ class RemoveAllFailedRenderJobsView(AbstractAuthenticatedView,
     def __call__(self):
         data = self.readInput()
         packages = data.get('ntiid') or data.get('package')
-        items = get_failed_render_jobs(packages=packages)
+        items = get_failed_render_jobs(packages)
         for job in items or ():
             meta = IContentPackageRenderMetadata(job)
             meta.removeJob(job)

@@ -27,7 +27,7 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.site.site import get_component_hierarchy_names
 
 
-def query_render_jobs(sites=(), packages=(), status=PENDING):
+def query_render_jobs(packages=(), status=PENDING, sites=()):
     if not sites:
         sites = get_component_hierarchy_names()
     elif isinstance(sites, six.string_types):
@@ -50,10 +50,10 @@ def query_render_jobs(sites=(), packages=(), status=PENDING):
     return catalog.apply(query) or ()
 
 
-def get_pending_render_jobs(sites=(), packages=()):
+def get_pending_render_jobs(packages=(), sites=()):
     result = list()
     intids = component.getUtility(IIntIds)
-    for doc_id in query_render_jobs(sites, packages, PENDING):
+    for doc_id in query_render_jobs(packages, PENDING, sites):
         context = intids.queryObject(doc_id)
         if      IContentPackageRenderJob.providedBy(context) \
             and context.is_pending():
@@ -61,10 +61,10 @@ def get_pending_render_jobs(sites=(), packages=()):
     return result
 
 
-def get_failed_render_jobs(sites=(), packages=()):
+def get_failed_render_jobs(packages=(), sites=()):
     result = list()
     intids = component.getUtility(IIntIds)
-    for doc_id in query_render_jobs(sites, packages, FAILED):
+    for doc_id in query_render_jobs(packages, FAILED, sites):
         context = intids.queryObject(doc_id)
         if      IContentPackageRenderJob.providedBy(context) \
             and context.has_failed():
