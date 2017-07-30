@@ -129,11 +129,17 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
 class RemoveAllRenderableContentPackagesView(AbstractAuthenticatedView):
 
     def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        result[ITEMS] = items = {}
         library = component.getUtility(IContentPackageLibrary)
         for package in get_renderable_packages():
             logger.info('Removing renderable package (%s)', package.ntiid)
+            items[package.ntiid] = package.title
             library.remove(package, event=True)
-        return hexc.HTTPNoContent()
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
 
 
 @view_config(context=LibraryPathAdapter)
@@ -158,13 +164,19 @@ class RemoveInvalidRenderableContentPackagesView(AbstractAuthenticatedView):
         )
 
     def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        result[ITEMS] = items = {}
         library = component.getUtility(IContentPackageLibrary)
         for package in list(library.contentPackages):
             if self._is_invalid_renderable(package):
                 logger.info('Removing invalid renderable package (%s)',
                             package.ntiid)
+                items[package.ntiid] = package.title
                 library.remove(package, event=True)
-        return hexc.HTTPNoContent()
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
 
 
 @view_config(name="ClearJobs")
@@ -314,7 +326,6 @@ class RebuildContentRenderingJobCatalogView(AbstractAuthenticatedView):
         # reindex
         seen = set()
         for host_site in get_all_host_sites():  # check all sites
-            logger.info("Processing site %s", host_site.__name__)
             with current_site(host_site):
                 library = component.queryUtility(IContentPackageLibrary)
                 packages = library.contentPackages if library else ()

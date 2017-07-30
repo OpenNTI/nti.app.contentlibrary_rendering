@@ -84,8 +84,11 @@ class TestAdminViews(ApplicationLayerTest):
                     has_entries('Total', is_(greater_than_or_equal_to(1)),
                                 'ItemCount', is_(greater_than_or_equal_to(1))))
         
-        self.testapp.post('/dataserver2/Library/@@RemoveAllRenderableContentPackages',
-                          status=204)
+        res = self.testapp.post('/dataserver2/Library/@@RemoveAllRenderableContentPackages',
+                                status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(1),
+                                'ItemCount', is_(1)))
 
         res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
                                status=200)
@@ -94,8 +97,11 @@ class TestAdminViews(ApplicationLayerTest):
                                 'ItemCount', is_(0)))
 
         self._create_package_and_job(rendered=True)
-        self.testapp.post('/dataserver2/Library/@@RemoveInvalidRenderableContentPackages',
-                          status=204)
+        res = self.testapp.post('/dataserver2/Library/@@RemoveInvalidRenderableContentPackages',
+                                status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(1),
+                                'ItemCount', is_(1)))
 
         res = self.testapp.get('/dataserver2/Library/@@RenderableContentPackages',
                                status=200)
@@ -118,7 +124,6 @@ class TestAdminViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entries('Total', is_(0),
                                 'ItemCount', is_(0)))
-
     
     @WithSharedApplicationMockDS(testapp=True, users=True)
     @fudge.patch('nti.app.contentlibrary_rendering.views.admin_views.perform_content_validation',
