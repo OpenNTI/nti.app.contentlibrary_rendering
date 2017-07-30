@@ -12,7 +12,6 @@ from hamcrest import none
 from hamcrest import is_not
 from hamcrest import not_none
 from hamcrest import assert_that
-from hamcrest import has_property
 does_not = is_not
 
 import os
@@ -42,7 +41,8 @@ class TestValidators(ContentlibraryRenderingLayerTest):
                                    ========
                                 """)
         assert_that(e.exception.warnings, not_none())
-        assert_that(e.exception.message, is_('Unexpected section title or transition.'))
+        assert_that(e.exception.message, 
+                    is_('Unexpected section title or transition.'))
 
     def test_warnings(self):
         path = os.path.join(os.path.dirname(__file__), "formats.rst")
