@@ -124,8 +124,9 @@ class TestTranslators(ApplicationLayerTest):
         question = self._question()
         mock_fon.is_callable().with_args().returns(question)
         index, _ = self._generate_from_file('naquestionref.rst')
-        assert_that(index, contains_string('<object class="question"'))
         assert_that(index, 
-                    contains_string('<param name="type" value="application/vnd.nextthought.naquestion"'))
+                    contains_string('type="application/vnd.nextthought.naquestion"'))
         assert_that(index, 
-                    contains_string('<param name="target-ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
+                    contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
+        assert_that(index, 
+                    contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))

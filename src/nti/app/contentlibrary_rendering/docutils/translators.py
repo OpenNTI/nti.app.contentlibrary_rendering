@@ -42,7 +42,7 @@ from nti.contentrendering.plastexpackages.ntimedia import ntivideoref
 
 from nti.contentrendering_assessment.ntiassessment import napollref
 from nti.contentrendering_assessment.ntiassessment import nasurveyref
-from nti.contentrendering_assessment.ntiassessment import naquestionref
+from nti.contentrendering_assessment.ntiassessment import naquestion
 from nti.contentrendering_assessment.ntiassessment import naassignmentref
 from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
@@ -268,7 +268,7 @@ class NAQuestionRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslato
     __name__ = "naquestionref"
 
     provided = IQuestion
-    factory = naquestionref
+    factory = naquestion
 
 
 @interface.implementer(IRSTToPlastexNodeTranslator)
