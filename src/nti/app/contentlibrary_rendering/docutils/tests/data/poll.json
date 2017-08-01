@@ -1,0 +1,27 @@
+{
+	"Class": "Question",
+	"MimeType": "application/vnd.nextthought.napoll",
+	"NTIID": "tag:nextthought.com,2011-10:NTI-NAQ-BLEACH",
+	"content": "<p>Most powerful</p>",
+	"disclosure": "termination",
+	"ntiid": "tag:nextthought.com,2011-10:NTI-NAQ-BLEACH",
+	"parts": [
+		{
+			"Class": "MultipleChoicePart",
+			"MimeType": "application/vnd.nextthought.assessment.nongradablemultiplechoicepart",
+			"choices": [
+				"<html><body><p>Ichigo</p></body></html>",
+				"<html><body><p>Aizen</p></body></html>",
+				"<html><body><p>Zaraki</p></body></html>",
+				"<html><body><p>Toshiro</p></body></html>"
+			],
+			"content": "",
+			"explanation": "",
+			"hints": [],
+			"randomized": false,
+			"weight": 1.0
+		}
+	],
+	"publishLastModified": 1501192486.577563,
+	"tags": []
+}

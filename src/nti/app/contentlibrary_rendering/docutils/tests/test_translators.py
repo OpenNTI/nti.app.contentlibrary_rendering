@@ -43,8 +43,8 @@ class TestTranslators(ApplicationLayerTest):
             result.data = fp.read()
         return result
 
-    def _question(self):
-        name = os.path.join(os.path.dirname(__file__), 'data/evaluation.json')
+    def _load_resource(self, resource):
+        name = os.path.join(os.path.dirname(__file__), resource)
         with open(name, "rb") as fp:
             data = fp.read()
         data = data.decode('utf-8') if isinstance(data, bytes) else data
@@ -53,6 +53,12 @@ class TestTranslators(ApplicationLayerTest):
         result = factory()
         update_from_external_object(result, ext_obj, notify=False)
         return result
+
+    def _question(self):
+        return self._load_resource('data/question.json')
+
+    def _poll(self):
+        return self._load_resource('data/poll.json')
 
     def _generate_from_file(self, source):
         index = document = None
