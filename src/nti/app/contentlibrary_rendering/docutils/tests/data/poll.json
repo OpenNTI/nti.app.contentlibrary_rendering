@@ -1,5 +1,5 @@
 {
-	"Class": "Question",
+	"Class": "Poll",
 	"MimeType": "application/vnd.nextthought.napoll",
 	"NTIID": "tag:nextthought.com,2011-10:NTI-NAQ-BLEACH",
 	"content": "<p>Most powerful</p>",
