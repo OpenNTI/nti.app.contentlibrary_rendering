@@ -53,9 +53,9 @@ class TestImportViews(ApplicationLayerTest):
         for data in res.app_iter:
             source.write(data)
         source.seek(0)
-        source = SourceFile("CS1323_F_2015_Intro_to_Computer_Programming.zip",
-                            source.read(),
-                            "application/zip")
+        source = SourceFile(name=u"CS1323_F_2015_Intro_to_Computer_Programming.zip",
+                            data=source.read(),
+                            contentType="application/zip")
         mock_gas.is_callable().with_args().returns({
             "CS1323_F_2015_Intro_to_Computer_Programming.zip": source
         })
