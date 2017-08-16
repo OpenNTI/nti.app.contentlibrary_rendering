@@ -69,7 +69,7 @@ def get_provider():
 
 
 def make_asset_ntiid(nttype, uid):
-    specific = make_specific_safe(uid.upper())
+    specific = make_specific_safe(text_(uid).upper())
     provider = get_provider()
     return make_ntiid(nttype=nttype, 
                       provider=provider, 
