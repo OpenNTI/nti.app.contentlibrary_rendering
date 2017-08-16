@@ -68,12 +68,16 @@ def get_provider():
     return getattr(policy, 'PROVIDER', None) or NTI
 
 
-def make_video_ntiid(uid):
+def make_asset_ntiid(nttype, uid):
     specific = make_specific_safe(uid.upper())
     provider = get_provider()
-    return make_ntiid(provider=provider, 
-                      nttype=NTI_VIDEO, 
+    return make_ntiid(nttype=nttype, 
+                      provider=provider, 
                       specific=specific)
+
+
+def make_video_ntiid(uid):
+    make_asset_ntiid(NTI_VIDEO, uid)
 
 
 # image
@@ -198,6 +202,12 @@ class NTICardToPlastexNodeTranslator(TranslatorMixin):
             text = text_(par.astext())
             description = incoming_sources_as_plain_text([text])
             result.description = description
+
+        uid = rst_node.attributes.get('uid')
+        if uid:
+            nttype = getattr(result, '_ntiid_type', None) or u'NTICard'
+            ntiid = make_asset_ntiid(nttype, uid)
+            result.setAttribute('NTIID', ntiid)
 
         # target ntiid
         result.process_target_ntiid()
