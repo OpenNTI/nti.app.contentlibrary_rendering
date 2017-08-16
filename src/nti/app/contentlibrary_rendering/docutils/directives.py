@@ -80,10 +80,13 @@ class NTICard(Directive, TitleCaptionMixin):
     required_arguments = 1
     optional_arguments = 4
     final_argument_whitespace = True
-    option_spec = {'label': directives.unchanged,
-                   'title': directives.unchanged,
-                   'image': directives.unchanged,
-                   'creator': directives.unchanged}
+    option_spec = {
+        'uid': directives.unchanged,
+        'label': directives.unchanged,
+        'title': directives.unchanged,
+        'image': directives.unchanged,
+        'creator': directives.unchanged
+    }
 
     def run(self):
         # validate reference/href value
@@ -122,9 +125,12 @@ class NTIVideo(Directive, TitleCaptionMixin):
     has_content = True
     optional_arguments = 3
     final_argument_whitespace = True
-    option_spec = {'label': directives.unchanged,
-                   'title': directives.unchanged,
-                   'creator': directives.unchanged}
+    option_spec = {
+        'uid': directives.unchanged,
+        'label': directives.unchanged,
+        'title': directives.unchanged,
+        'creator': directives.unchanged
+    }
 
     supported_services = ('html5', 'kaltura', 'vimeo', 'youtube')
 

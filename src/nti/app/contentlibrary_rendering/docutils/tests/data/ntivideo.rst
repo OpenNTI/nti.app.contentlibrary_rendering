@@ -2,9 +2,11 @@
 Test ntivideo
 =============
 
+
 .. ntivideo:: kaltura 1500101:0_udtp5zmz
-   :label: video_overview_structure_design
    :creator: OU
+   :uid: structure_design_cells
+   :label: video_overview_structure_design
 
    Structure and Design
 

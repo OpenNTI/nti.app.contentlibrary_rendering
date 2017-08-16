@@ -108,6 +108,7 @@ class TestTranslators(ApplicationLayerTest):
         assert_that(index, contains_string('type="application/vnd.nextthought.videosource"'))
         assert_that(index, contains_string('<param name="service" value="kaltura"'))
         assert_that(index, contains_string('<param name="source" value="1500101:0_udtp5zmz"'))
+        assert_that(index, contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NTIVideo-STRUCTURE_DESIGN_CELLS"'))
         
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
     def test_ntivideoref(self, mock_fon):
