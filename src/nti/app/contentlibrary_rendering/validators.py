@@ -19,12 +19,12 @@ from docutils.parsers.rst import Parser
 
 from zope import interface
 
-from nti.contentlibrary.interfaces import IContentValidator
+from nti.app.contentlibrary_rendering.interfaces import IRSTContentValidator
 
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
 
 
-@interface.implementer(IContentValidator)
+@interface.implementer(IRSTContentValidator)
 class ReStructuredTextValidator(object):
 
     def _get_settings(self):
@@ -36,6 +36,10 @@ class ReStructuredTextValidator(object):
         settings.character_level_inline_markup = True
         return settings
 
+    def doctree(self, content, settings=None):
+        settings = settings or self._get_settings()
+        return publish_doctree(content, settings=settings)
+         
     def _log_warnings(self, settings):
         settings.warning_stream.seek(0)
         warnings = settings.warning_stream.read()
@@ -47,7 +51,7 @@ class ReStructuredTextValidator(object):
     def _do_validate(self, content, unused_context=None):
         settings = self._get_settings()
         try:
-            publish_doctree(content, settings=settings)
+            self.doctree(content, settings)
             return self._log_warnings(settings)
         except Exception as e:
             warnings = self._log_warnings(settings)
