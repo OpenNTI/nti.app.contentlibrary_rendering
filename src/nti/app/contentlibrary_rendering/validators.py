@@ -11,6 +11,8 @@ logger = __import__('logging').getLogger(__name__)
 
 from six import StringIO
 
+from docutils.core import publish_doctree
+
 from docutils.frontend import OptionParser
 
 from docutils.parsers.rst import Parser
@@ -18,8 +20,6 @@ from docutils.parsers.rst import Parser
 from zope import interface
 
 from nti.contentlibrary.interfaces import IContentValidator
-
-from nti.contentlibrary_rendering.docutils import publish_doctree
 
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
 
