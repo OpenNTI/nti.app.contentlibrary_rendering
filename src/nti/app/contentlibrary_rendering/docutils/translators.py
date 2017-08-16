@@ -77,7 +77,7 @@ def make_asset_ntiid(nttype, uid):
 
 
 def make_video_ntiid(uid):
-    make_asset_ntiid(NTI_VIDEO, uid)
+    return make_asset_ntiid(NTI_VIDEO, uid)
 
 
 # image
