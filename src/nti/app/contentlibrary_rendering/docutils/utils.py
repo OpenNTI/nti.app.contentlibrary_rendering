@@ -12,17 +12,30 @@ logger = __import__('logging').getLogger(__name__)
 import os
 from urlparse import urlparse
 
+from zope import component
+
 from nti.app.contentfile.view_mixins import is_oid_external_link
 from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
 
 from nti.app.contentfolder.utils import is_cf_io_href
 from nti.app.contentfolder.utils import get_file_from_cf_io_url
 
+from nti.appserver.policies.interfaces import ISitePolicyUserEventListener
+
+from nti.base._compat import text_
+
 from nti.cabinet.filer import transfer_to_native_file
+
+from nti.contentlibrary.utils import NTI
 
 from nti.contentrendering.plastexpackages.ntiexternalgraphics import ntiexternalgraphics
 
 from nti.contentrendering.plastexpackages.ntilatexmacros import ntiincludeannotationgraphics
+
+from nti.contenttypes.presentation import NTI_VIDEO
+
+from nti.ntiids.ntiids import make_ntiid
+from nti.ntiids.ntiids import make_specific_safe
 
 
 #: Content package course assets relative directory
@@ -131,3 +144,23 @@ def process_rst_figure(rst_node, tex_doc, figure=None):
     if value:
         figure.setAttribute('title', value)
     return [figure, grphx]
+
+
+# ntiids
+
+
+def get_provider():
+    policy = component.queryUtility(ISitePolicyUserEventListener)
+    return getattr(policy, 'PROVIDER', None) or NTI
+
+
+def make_asset_ntiid(nttype, uid):
+    specific = make_specific_safe(text_(uid).upper())
+    provider = get_provider()
+    return make_ntiid(nttype=nttype, 
+                      provider=provider, 
+                      specific=specific)
+
+
+def make_video_ntiid(uid):
+    return make_asset_ntiid(NTI_VIDEO, uid)

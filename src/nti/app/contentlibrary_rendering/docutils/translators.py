@@ -11,16 +11,15 @@ logger = __import__('logging').getLogger(__name__)
 
 import os
 
-from zope import component
 from zope import interface
 
+from nti.app.contentlibrary_rendering.docutils.utils import make_video_ntiid
+from nti.app.contentlibrary_rendering.docutils.utils import make_asset_ntiid
 from nti.app.contentlibrary_rendering.docutils.utils import process_rst_image
 from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
-
-from nti.appserver.policies.interfaces import ISitePolicyUserEventListener
 
 from nti.assessment.interfaces import IQPoll
 from nti.assessment.interfaces import IQSurvey
@@ -30,8 +29,6 @@ from nti.assessment.interfaces import IQEvaluation
 from nti.assessment.interfaces import IQuestionSet
 
 from nti.base._compat import text_
-
-from nti.contentlibrary.utils import NTI
 
 from nti.contentlibrary_rendering.docutils.translators import TranslatorMixin
 
@@ -51,33 +48,9 @@ from nti.contentrendering_assessment.ntiassessment import naquestion
 from nti.contentrendering_assessment.ntiassessment import naassignmentref
 from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
-from nti.contenttypes.presentation import NTI_VIDEO
-
 from nti.contenttypes.presentation.interfaces import INTIVideo
 
-from nti.ntiids.ntiids import make_ntiid
-from nti.ntiids.ntiids import make_specific_safe
 from nti.ntiids.ntiids import find_object_with_ntiid
-
-
-# ntiids
-
-
-def get_provider():
-    policy = component.queryUtility(ISitePolicyUserEventListener)
-    return getattr(policy, 'PROVIDER', None) or NTI
-
-
-def make_asset_ntiid(nttype, uid):
-    specific = make_specific_safe(text_(uid).upper())
-    provider = get_provider()
-    return make_ntiid(nttype=nttype, 
-                      provider=provider, 
-                      specific=specific)
-
-
-def make_video_ntiid(uid):
-    return make_asset_ntiid(NTI_VIDEO, uid)
 
 
 # image
