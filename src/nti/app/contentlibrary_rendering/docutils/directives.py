@@ -177,7 +177,7 @@ class NTIVideoRef(Directive):
                 % (self.name, ntiid))
         visibility = self.options.get('visibility') or 'everyone'
         self.options['visibility'] = visibility
-        node = ntivideoref('', **self.options)
+        node = ntivideoref(self.block_text, **self.options)
         node['ntiid'] = ntiid
         return [node]
 
@@ -196,7 +196,7 @@ class NTIAssessmentRef(Directive):
             raise self.error(
                 'Error in "%s" directive: "%s" is not a valid NTIID'
                 % (self.name, ntiid))
-        node = self.factory('', **self.options)
+        node = self.factory(self.block_text, **self.options)
         node['ntiid'] = ntiid
         return [node]
 
