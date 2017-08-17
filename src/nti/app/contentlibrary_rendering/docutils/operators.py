@@ -48,7 +48,7 @@ class RenderablePackageContentOperator(object):
         pass
 
     def _replace_refs(self, pattern, content, salt):
-        for m in re.finditer(pattern, content):
+        for m in re.finditer(pattern, content, re.VERBOSE | re.UNICODE):
             for ntiid in m.groups():  # should only be one
                 salted = hash_ntiid(ntiid, salt)
                 content = re.sub(ntiid, salted, content)
@@ -57,7 +57,7 @@ class RenderablePackageContentOperator(object):
     def _replace_noderefs(self, content, salt):
         for prefix in ('ntivideoref', 'napollref', 'naquestionref',
                        'naassignmentref', 'nasurveyref', 'naquestionsetref'):
-            pattern = r'%s::\s?(.+)' % prefix
+            pattern = r'\.\.[ ]+%s::\s?(.+)' % prefix
             content = self._replace_refs(pattern, content, salt)
         return content
 
