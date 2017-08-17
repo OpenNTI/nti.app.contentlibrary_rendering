@@ -21,14 +21,6 @@ from nti.contentlibrary.interfaces import IContentOperator
 from nti.ntiids.ntiids import hash_ntiid
 
 
-def get_backup(**kwargs):
-    return kwargs.get('backup')
-
-
-def get_salt(**kwargs):
-    return kwargs.get('salt')
-
-
 def directive(name):
     return re.compile(r"""
                       \.\.[ ]+          # explicit markup start
@@ -57,7 +49,7 @@ class RenderablePackageContentOperator(object):
     def _replace_noderefs(self, content, salt):
         for prefix in ('ntivideoref', 'napollref', 'naquestionref',
                        'naassignmentref', 'nasurveyref', 'naquestionsetref'):
-            pattern = r'\.\.[ ]+%s::\s?(.+)' % prefix
+            pattern = r'\.\.[ ]+%s\s?::\s?(.+)' % prefix
             content = self._replace_refs(pattern, content, salt)
         return content
 
@@ -74,10 +66,10 @@ class RenderablePackageContentOperator(object):
     def operate(self, content, unused_context=None, **kwargs):
         if not content:
             return content
-        backup = get_backup(**kwargs)
+        backup = kwargs.get('backup')
         if backup is None or backup:
             return content
-        salt = get_salt(**kwargs)
+        salt = kwargs.get('salt')
         if not salt and not backup:
             return content
         is_bytes = isinstance(content, bytes)
