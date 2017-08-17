@@ -29,6 +29,16 @@ def get_salt(**kwargs):
     return kwargs.get('salt')
 
 
+def directive(name):
+    return re.compile(r"""
+                      \.\.[ ]+          # explicit markup start
+                      (%s)              # directive name
+                      [ ]?              # optional space
+                      ::                # directive delimiter
+                      ([ ]+|$)          # whitespace or end of line
+                      """ % name, re.VERBOSE | re.UNICODE)
+
+
 @interface.implementer(IContentOperator)
 class RenderablePackageContentOperator(object):
 
@@ -44,13 +54,22 @@ class RenderablePackageContentOperator(object):
                 content = re.sub(ntiid, salted, content)
         return content
 
-    def replace_all(self, content, salt):
-        # replace refs
+    def _replace_noderefs(self, content, salt):
         for prefix in ('ntivideoref', 'napollref', 'naquestionref',
                        'naassignmentref', 'nasurveyref', 'naquestionsetref'):
             pattern = r'%s::\s?(.+)' % prefix
             content = self._replace_refs(pattern, content, salt)
         return content
+
+    def _replace_media(self, content, salt):
+        for prefix in ('ntivideoref', 'napollref', 'naquestionref',
+                       'naassignmentref', 'nasurveyref', 'naquestionsetref'):
+            pattern = r'%s::\s?(.+)' % prefix
+            content = self._replace_refs(pattern, content, salt)
+        return content
+
+    def replace_all(self, content, salt):
+        return self._replace_noderefs(content, salt)
 
     def operate(self, content, unused_context=None, **kwargs):
         if not content:
