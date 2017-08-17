@@ -7,6 +7,7 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import contains_string
 
@@ -36,3 +37,11 @@ class TestOperators(unittest.TestCase):
         operator = RenderablePackageContentOperator()
         content = operator.operate(content, backup=False, salt=self.salt)
         assert_that(content, contains_string(salted))
+
+    def test_ntivideo(self):
+        salted = u'8A6EA420B3A27138F0D4E32166843D5CD73FB9483D2A3EAEC87392E69E1230BB_0063'
+        content = text_(self._content('ntivideo.rst'))
+        operator = RenderablePackageContentOperator()
+        content = operator.operate(content, backup=False, salt=self.salt)
+        assert_that(content, contains_string(salted))
+        assert_that(content.split('\n'), has_length(17))
