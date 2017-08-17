@@ -13,6 +13,7 @@ import re
 
 from docutils import statemachine
 
+from zope import component
 from zope import interface
 
 from zope.cachedescriptors.property import Lazy
@@ -23,12 +24,14 @@ from nti.base._compat import text_
 from nti.base._compat import bytes_
 
 from nti.contentlibrary.interfaces import IContentOperator
+from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.ntiids.ntiids import hash_ntiid
 from nti.ntiids.ntiids import get_specific
 
 
 @interface.implementer(IContentOperator)
+@component.adapter(IRenderableContentPackage)
 class RenderablePackageContentOperator(object):
 
     def __init__(self, *args):

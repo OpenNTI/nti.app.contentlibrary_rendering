@@ -37,4 +37,7 @@
 	<utility factory=".translators.NASurveyRefToPlastexNodeTranslator" 
 			 name="nasurveyref" />
 
+	<subscriber	factory=".operators.RenderablePackageContentOperator"
+				provides="nti.contentlibrary.interfaces.IContentOperator" />
+				
 </configure>
