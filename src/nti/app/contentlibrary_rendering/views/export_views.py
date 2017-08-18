@@ -46,8 +46,6 @@ from nti.publishing.interfaces import IPublishable
                permission=nauth.ACT_NTI_ADMIN)
 class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
 
-    blocking = True
-
     def _export_fs(self, root):
         tempdir = tempfile.mkdtemp()
         zip_file = os.path.join(tempdir, "export")
