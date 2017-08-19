@@ -81,14 +81,13 @@ class RenderContentSourceView(AbstractAuthenticatedView,
         sources = get_all_sources(self.request)
         for name, source in sources.items():
             if source.length >= self.MAX_SOURCE_SIZE:
-                raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        'message': _(u"Max file size exceeded"),
-                        'code': 'MaxFileSizeExceeded',
-                    },
-                    None)
+                raise_json_error(self.request,
+                                 hexc.HTTPUnprocessableEntity,
+                                 {
+                                     'message': _(u"Max file size exceeded"),
+                                     'code': 'MaxFileSizeExceeded',
+                                 },
+                                 None)
             filename = getattr(source, 'filename', None) or name
             # save source
             target = NamedSource(filename, source.data)
@@ -114,15 +113,14 @@ class LibraryJobStatusView(AbstractAuthenticatedView):
         data = CaseInsensitiveDict(self.request.params)
         job_id = data.get('jobId') or data.get('job_id')
         if not job_id:
-            raise_json_error(
-                self.request,
-                hexc.HTTPUnprocessableEntity,
-                {
-                    'message': _(u"Must provide a job identifier"),
-                    'field': 'jobId',
-                    'code': 'InvalidJobID',
-                },
-                None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Must provide a job identifier"),
+                                 'field': 'jobId',
+                                 'code': 'InvalidJobID',
+                             },
+                             None)
         status = get_job_status(job_id)
         if status is None:
             raise hexc.HTTPNotFound()
@@ -147,15 +145,14 @@ class LibraryJobErrorView(AbstractAuthenticatedView):
         data = CaseInsensitiveDict(self.request.params)
         job_id = data.get('jobId') or data.get('job_id')
         if not job_id:
-            raise_json_error(
-                self.request,
-                hexc.HTTPUnprocessableEntity,
-                {
-                    'message': _(u"Must provide a job identifier"),
-                    'field': 'jobId',
-                    'code': 'InvalidJobID',
-                },
-                None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Must provide a job identifier"),
+                                 'field': 'jobId',
+                                 'code': 'InvalidJobID',
+                             },
+                             None)
         error = get_job_error(job_id)
         if error is None:
             raise hexc.HTTPNotFound()
