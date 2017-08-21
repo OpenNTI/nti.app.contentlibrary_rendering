@@ -23,6 +23,8 @@ import fudge
 
 from zope import component
 
+from nti.contentlibrary.utils import NTI
+
 from nti.contentlibrary.zodb import RenderableContentPackage
 
 from nti.contentlibrary_rendering.interfaces import IContentTransformer
@@ -93,11 +95,11 @@ class TestRender(ContentlibraryRenderingLayerTest):
 
     def _get_rst_dom(self, rst_source):
         transformer = component.getUtility(IContentTransformer, 'rst')
-        return transformer.transform(rst_source, context=None)
+        return transformer.transform(rst_source, None)
 
     def _get_page_filename(self, job_name, page_name):
         specific = make_specific_safe('%s %s' % (job_name, page_name))
-        ntiid = make_ntiid(provider='NTI', nttype=TYPE_HTML, specific=specific)
+        ntiid = make_ntiid(provider=NTI, nttype=TYPE_HTML, specific=specific)
         filename = safe_filename(ntiid)
         # Rendering also obscures periods/commas.
         filename = filename.replace('.', '_')
