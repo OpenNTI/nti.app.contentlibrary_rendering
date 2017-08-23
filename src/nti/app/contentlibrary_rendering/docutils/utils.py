@@ -12,25 +12,17 @@ logger = __import__('logging').getLogger(__name__)
 import os
 from urlparse import urlparse
 
-from zope import component
-
-from zope.annotation.interfaces import IAnnotations
-
-from zope.component.hooks import getSite
-
 from nti.app.contentfile.view_mixins import is_oid_external_link
 from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
 
 from nti.app.contentfolder.utils import is_cf_io_href
 from nti.app.contentfolder.utils import get_file_from_cf_io_url
 
-from nti.appserver.policies.interfaces import ISitePolicyUserEventListener
+from nti.app.contentlibrary.hostpolicy import get_site_provider
 
 from nti.base._compat import text_
 
 from nti.cabinet.filer import transfer_to_native_file
-
-from nti.contentlibrary import NTI
 
 from nti.contentrendering.plastexpackages.ntiexternalgraphics import ntiexternalgraphics
 
@@ -153,18 +145,9 @@ def process_rst_figure(rst_node, tex_doc, figure=None):
 # ntiids
 
 
-def get_provider():
-    policy = component.queryUtility(ISitePolicyUserEventListener)
-    result = getattr(policy, 'PROVIDER', None)
-    if not result:
-        annontations = IAnnotations(getSite(), {})
-        result = annontations.get('PROVIDER')
-    return result or NTI
-
-
 def make_asset_ntiid(nttype, uid):
     specific = make_specific_safe(text_(uid).upper())
-    provider = get_provider()
+    provider = get_site_provider()
     return make_ntiid(nttype=nttype, 
                       provider=provider, 
                       specific=specific)
