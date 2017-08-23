@@ -14,6 +14,10 @@ from urlparse import urlparse
 
 from zope import component
 
+from zope.annotation.interfaces import IAnnotations
+
+from zope.component.hooks import getSite
+
 from nti.app.contentfile.view_mixins import is_oid_external_link
 from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
 
@@ -26,7 +30,7 @@ from nti.base._compat import text_
 
 from nti.cabinet.filer import transfer_to_native_file
 
-from nti.contentlibrary.utils import NTI
+from nti.contentlibrary import NTI
 
 from nti.contentrendering.plastexpackages.ntiexternalgraphics import ntiexternalgraphics
 
@@ -151,7 +155,11 @@ def process_rst_figure(rst_node, tex_doc, figure=None):
 
 def get_provider():
     policy = component.queryUtility(ISitePolicyUserEventListener)
-    return getattr(policy, 'PROVIDER', None) or NTI
+    result = getattr(policy, 'PROVIDER', None)
+    if not result:
+        annontations = IAnnotations(getSite(), {})
+        result = annontations.get('PROVIDER')
+    return result or NTI
 
 
 def make_asset_ntiid(nttype, uid):

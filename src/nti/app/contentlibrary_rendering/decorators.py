@@ -88,7 +88,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
     Decorates IRenderableContentPackage with render info.
     """
 
-    def _predicate(self, context, result):
+    def _predicate(self, context, unused_result):
         return self._is_authenticated \
             and has_permission(ACT_CONTENT_EDIT, context, self.request)
 

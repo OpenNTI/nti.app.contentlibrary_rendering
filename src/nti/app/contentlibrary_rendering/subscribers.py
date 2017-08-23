@@ -28,7 +28,7 @@ from nti.publishing.interfaces import IObjectPublishedEvent
 
 
 @component.adapter(IRenderableContentPackage, IObjectPublishedEvent)
-def _content_published(package, event):
+def _content_published(package, unused_event=None):
     """
     When a renderable content package is published, render it.
     """
@@ -38,12 +38,12 @@ def _content_published(package, event):
 
 
 @component.adapter(IRenderableContentPackage, IIntIdRemovedEvent)
-def _content_removed(package, event=None):
+def _content_removed(package, unused_event=None):
     remove_rendered_package(package)
 
 
 @component.adapter(IRenderableContentPackage, IContentPackageRemovedEvent)
-def _content_package_removed(package, event=None):
+def _content_package_removed(package, unused_event=None):
     _content_removed(package)
 
 

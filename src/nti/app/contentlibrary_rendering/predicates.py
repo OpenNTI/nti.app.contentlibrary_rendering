@@ -49,7 +49,7 @@ class _SystemContentRenderMetadata(_RenderingObjectsMixin):
 
 class _ContentPackageRenderJobs(_RenderingObjectsMixin):
 
-    def _predicate(self, _):
+    def _predicate(self, unused):
         return False
 
     def iter_objects(self):

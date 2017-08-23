@@ -39,7 +39,6 @@ class PluginPoint(object):
 
     def __init__(self, name):
         self.__name__ = name
-
 PP_CONTENT_RENDERING = PluginPoint('nti.contentrendering')
 
 
