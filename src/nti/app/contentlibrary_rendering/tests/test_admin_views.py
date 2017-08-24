@@ -138,6 +138,18 @@ class TestAdminViews(ApplicationLayerTest):
                     has_entries('Total', is_(greater_than_or_equal_to(1)),
                                 'ItemCount', is_(greater_than_or_equal_to(1))))
 
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    @fudge.patch('nti.app.contentlibrary_rendering.views.admin_views.is_published')
+    def test_unpublish_all_packages(self, mock_isp):
+        self._create_package_and_job()
+        mock_isp.is_callable().with_args().returns(True)
+        res = self.testapp.post('/dataserver2/Library/@@UnpublishAllRenderableContentPackages',
+                                status=200)
+        assert_that(res.json_body,
+                    has_entries('Total', is_(greater_than_or_equal_to(1)),
+                                'ItemCount', is_(greater_than_or_equal_to(1))))
+
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_rebuild_job_catalog(self):
         self._create_package_and_job()

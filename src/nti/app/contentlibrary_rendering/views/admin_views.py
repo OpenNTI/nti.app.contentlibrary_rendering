@@ -12,6 +12,7 @@ logger = __import__('logging').getLogger(__name__)
 from requests.structures import CaseInsensitiveDict
 
 from zope import component
+from zope import lifecycleevent
 
 from zope.component.hooks import site as current_site
 
@@ -56,6 +57,8 @@ from nti.dataserver import authorization as nauth
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 
+from nti.publishing.interfaces import IPublishable
+
 from nti.site.hostpolicy import get_all_host_sites
 
 ITEMS = StandardExternalFields.ITEMS
@@ -69,6 +72,11 @@ def get_renderable_packages():
         for package in list(library.contentPackages):
             if IRenderableContentPackage.providedBy(package):
                 yield package
+
+
+def is_published(package):
+    return not IPublishable.providedBy(package) \
+        or package.is_published()
 
 
 @view_config(context=LibraryPathAdapter)
@@ -116,6 +124,28 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
             else:
                 job = render_package(package, self.remoteUser)
                 items[ntiid] = job
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               name="UnpublishAllRenderableContentPackages",
+               permission=nauth.ACT_NTI_ADMIN)
+class UnpublishAllRenderableContentPackagesView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        result[ITEMS] = items = {}
+        for package in get_renderable_packages():
+            if is_published(package):
+                package.unpublish()
+                lifecycleevent.modified(package)
+                items[package.ntiid] = package.title
         result[TOTAL] = result[ITEM_COUNT] = len(items)
         return result
 
