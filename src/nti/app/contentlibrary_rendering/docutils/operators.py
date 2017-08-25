@@ -58,8 +58,7 @@ class RenderablePackageContentOperator(object):
     
     @Lazy
     def _uid_pattern(self):
-        pattern = re.compile(r'\s*:uid:\s?(.+)', re.VERBOSE | re.UNICODE)
-        return pattern
+        return re.compile(r'\s*:uid:\s?(.+)', re.VERBOSE | re.UNICODE)
 
     def _replace_refs(self, pattern, line, salt):
         m = pattern.match(line)
@@ -101,9 +100,9 @@ class RenderablePackageContentOperator(object):
                 break
         return matched, idx
     
-    def replace_all(self, content, salt):
+    def _replace_all(self, content, salt, result):
         idx = 0
-        result = []
+        modified = False
         input_lines = statemachine.string2lines(content)
         input_lines = statemachine.StringList(input_lines, '<string>')
         while idx < len(input_lines):
@@ -111,11 +110,12 @@ class RenderablePackageContentOperator(object):
             for m in (self._process_node_refs, self._process_media_nodes):
                 matched, idx = m(input_lines, salt, idx, result)
                 if matched:
+                    modified = True
                     break
             if not matched:
                 result.append(input_lines[idx])
             idx += 1
-        return u'\n'.join(result)
+        return modified
 
     def operate(self, content, unused_context=None, **kwargs):
         if not content:
@@ -129,7 +129,9 @@ class RenderablePackageContentOperator(object):
         is_bytes = isinstance(content, bytes)
         content = text_(content) if is_bytes else content
         try:
-            content = self.replace_all(content, salt)
+            result = []
+            if self._replace_all(content, salt, result):
+                content = u'\n'.join(result)
         except Exception:
             logger.exception("Cannot operate on content")
         return bytes_(content) if is_bytes else content
