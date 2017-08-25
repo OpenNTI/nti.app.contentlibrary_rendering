@@ -50,7 +50,7 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
         tempdir = tempfile.mkdtemp()
         zip_file = os.path.join(tempdir, "export")
         shutil.make_archive(zip_file, 'zip', root.absolute_path)
-        return zip_file + ".zip"
+        return (zip_file + ".zip", tempdir)
 
     def _export_boto(self, pkg_key):
         tempdir = tempfile.mkdtemp()
@@ -63,9 +63,9 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
                 zf.writestr(arcname, key.get_contents_as_string())
         finally:
             zf.close()
-        return zip_file
+        return (zip_file, tempdir)
 
-    def _export_response(self, zip_file, response):
+    def _export_response(self, zip_file, tempdir, response):
         try:
             filename = os.path.split(zip_file)[1]
             response.content_encoding = 'identity'
@@ -76,6 +76,7 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
             return response
         finally:
             os.remove(zip_file)
+            shutil.rmtree(tempdir, True)
 
     def _export_package(self, package):
         if      IPublishable.providedBy(package) \
@@ -88,11 +89,11 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
                              None)
         root = getattr(package, 'root', None)
         if IFilesystemBucket.providedBy(root):
-            zip_file = self._export_fs(root)
+            zip_file, tempdir = self._export_fs(root)
         else:  # boto
             key = self.context.key
-            zip_file = self._export_boto(key)
-        return self._export_response(zip_file, self.request.response)
+            zip_file, tempdir = self._export_boto(key)
+        return self._export_response(zip_file, tempdir, self.request.response)
 
     def _do_call(self):
         return self._export_package(self.context)
