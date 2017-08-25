@@ -27,6 +27,7 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 
 from nti.appserver.pyramid_authorization import has_permission
 
+from nti.contentlibrary.interfaces import IContentPackage
 from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 from nti.contentlibrary.interfaces import IRenderableContentPackage
@@ -36,6 +37,9 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderJob
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
+from nti.dataserver.authorization import ACT_SYNC_LIBRARY 
+
+from nti.dataserver.interfaces import IUser
 
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
@@ -179,3 +183,50 @@ class _LibraryRenderJobDecorator(AbstractAuthenticatedRequestAwareDecorator):
         # remove unused
         result.pop('Error', None)
         result.pop('State', None)
+
+
+@component.adapter(IContentPackage, IRequest)
+@interface.implementer(IExternalMappingDecorator)
+class _ContentPackageDecorator(AbstractAuthenticatedRequestAwareDecorator):
+
+    def _predicate(self, context, unused_result):
+        return  self._is_authenticated \
+            and has_permission(ACT_SYNC_LIBRARY, context, self.request)
+
+    def _do_decorate_external(self, context, result):
+        if     not IRenderableContentPackage.providedBy(context) \
+            or IContentRendered.providedBy(context):
+            _links = result.setdefault(LINKS, [])
+            path = _package_url_path(context, self.request)
+            for name, method in (('Export', 'GET'),):
+                link = Link(path,
+                            rel=name,
+                            method=method,
+                            elements=('@@' + name,),
+                            ignore_properties_of_target=True)
+                link.__name__ = ''
+                link.__parent__ = context
+                _links.append(link)
+
+
+@component.adapter(IUser, IRequest)
+@interface.implementer(IExternalMappingDecorator)
+class _UserDecorator(AbstractAuthenticatedRequestAwareDecorator):
+
+    def _predicate(self, context, unused_result):
+        return  self._is_authenticated \
+            and has_permission(ACT_SYNC_LIBRARY, context, self.request)
+
+    def _do_decorate_external(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        path = _library_adapter_path(self.request)
+        for name, method in (('ExportRenderedContent', 'GET'),
+                             ('ImportRenderedContent', 'POST')):
+            link = Link(path,
+                        rel=name,
+                        method=method,
+                        elements=('@@' + name,),
+                        ignore_properties_of_target=True)
+            link.__name__ = ''
+            link.__parent__ = context
+            _links.append(link)
