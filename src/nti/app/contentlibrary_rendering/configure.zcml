@@ -39,6 +39,16 @@
 	            for="nti.contentlibrary_rendering.interfaces.ILibraryRenderJob
 	                 pyramid.interfaces.IRequest" />
 
+	<subscriber factory=".decorators._ContentPackageDecorator"
+	            provides="nti.externalization.interfaces.IExternalMappingDecorator"
+	            for="nti.contentlibrary.interfaces.IContentPackage
+	                 pyramid.interfaces.IRequest" />
+
+	<subscriber factory=".decorators._UserDecorator"
+	            provides="nti.externalization.interfaces.IExternalMappingDecorator"
+	            for="nti.dataserver.interfaces.IUser
+	                 pyramid.interfaces.IRequest" />
+
 	<!-- Subscribers -->
 	<subscriber handler=".subscribers._content_published"
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
