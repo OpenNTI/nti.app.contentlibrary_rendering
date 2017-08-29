@@ -129,7 +129,7 @@ class ExportEditableContentPackageView(ExportContentPackageContentsView):
         if not published or backup is not None or salt is not None:
             backup = is_true(backup)
             salt = salt or str(time.time())
-            return export_content_package(self.context)
+            return export_content_package(self.context, backup, salt)
         return super(ExportEditableContentPackageView, self)._export_package(package)
 
 
