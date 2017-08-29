@@ -10,6 +10,8 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
+import zlib
+import base64
 import shutil
 import tempfile
 
@@ -24,6 +26,7 @@ from pyramid.view import view_config
 from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import get_all_sources
+from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.contentlibrary.views import LibraryPathAdapter
 
@@ -33,11 +36,16 @@ from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
 from nti.app.externalization.error import raise_json_error
 
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
 from nti.cabinet.filer import transfer_to_native_file
 
 from nti.common.string import is_true
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
+from nti.contentlibrary.interfaces import IRenderableContentPackage
+
+from nti.contentlibrary.mixins import ContentPackageImporterMixin
 
 from nti.contentlibrary.utils import get_content_package_site
 
@@ -52,12 +60,18 @@ from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
+from nti.externalization.interfaces import StandardInternalFields
+
+from nti.externalization.proxy import removeAllProxies
 
 from nti.site.hostpolicy import get_host_site
 
 ITEMS = StandardExternalFields.ITEMS
+NTIID = StandardExternalFields.NTIID
 TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
+
+INTERNAL_NTIID = StandardInternalFields.NTIID
 
 
 @view_config(name="ImportRenderedContent")
@@ -93,8 +107,8 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
         data = self.readInput() or self.request.params
         request_site = data.get('site')
         obfuscate = data.get('obfuscate')
-        if obfuscate is None: # default to True
-            obfuscate = True 
+        if obfuscate is None:  # default to True
+            obfuscate = True
         else:
             obfuscate = is_true(obfuscate)
         request_library = component.getUtility(IContentPackageLibrary)
@@ -144,3 +158,32 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
             return result
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+@view_config(name="Import")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=IRenderableContentPackage,
+               permission=nauth.ACT_CONTENT_EDIT)
+class ImportEditableContentsView(AbstractAuthenticatedView,
+                                 ContentPackageImporterMixin,
+                                 ModeledContentUploadRequestUtilsMixin):
+
+    def __call__(self):
+        data = self.readInput()
+        if not data:
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Invalid input data."),
+                             },
+                             None)
+        [data.pop(x, None) for x in (NTIID, INTERNAL_NTIID)]
+        if 'contents' in data:
+            decoded = base64.b64decode(data['contents'])
+            data['contents'] = zlib.decompress(decoded)
+        context = removeAllProxies(self.context)
+        ContentPackageImporterMixin.handle_package(self, context, 
+                                                   data, context)
+        return context

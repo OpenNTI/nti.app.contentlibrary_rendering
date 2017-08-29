@@ -12,6 +12,7 @@ from hamcrest import is_not
 from hamcrest import has_key
 from hamcrest import has_entry
 from hamcrest import assert_that
+from hamcrest import has_property
 does_not = is_not
 
 import os
@@ -23,9 +24,16 @@ from zope import component
 
 from nti.cabinet.mixins import SourceFile
 
+from nti.contentlibrary import RST_MIMETYPE
+
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 
-from nti.contentlibrary.utils import get_content_package_site
+from nti.contentlibrary.utils import operate_encode_content
+from nti.contentlibrary.utils import get_content_package_site 
+
+from nti.contentlibrary.zodb import RenderableContentPackage
+
+from nti.externalization.externalization import to_external_object
 
 from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
 
@@ -76,3 +84,30 @@ class TestImportViews(ApplicationLayerTest):
             path = os.path.join(self.layer.library_path,
                                 'sites', 'janux.ou.edu')
             shutil.rmtree(path, True)
+
+    def _create_package(self):
+        href = '/dataserver2/Library'
+        package = RenderableContentPackage(title=u'Bleach',
+                                           description=u'Manga bleach')
+        package.write_contents('ichigo', RST_MIMETYPE)
+        ext_obj = to_external_object(package)
+        [ext_obj.pop(x, None) for x in ('NTIID','ntiid')]
+
+        res = self.testapp.post_json(href, ext_obj, status=201)
+        return res.json_body['NTIID']
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_import_editable(self):
+        ntiid = self._create_package()
+        href = '/dataserver2/Library/%s/@@Export' % ntiid
+        res = self.testapp.get(href + "?backup=True",
+                               status=200)
+        data = res.json_body
+        data['contents'] = operate_encode_content('rukia', None)
+        href = '/dataserver2/Library/%s/@@Import' % ntiid
+        self.testapp.post_json(href, data, status=200)
+        with mock_dataserver.mock_db_trans(self.ds, site_name='janux.ou.edu'):
+            library = component.getUtility(IContentPackageLibrary)
+            package = library.get(ntiid)
+            assert_that(package, has_property('contents', is_(b'rukia')))
+    
