@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
+import time
 import shutil
 import zipfile
 import tempfile
@@ -27,9 +28,14 @@ from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
 from nti.app.externalization.error import raise_json_error
 
+from nti.common.string import is_true
+
 from nti.contentlibrary.interfaces import IContentPackage
 from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IFilesystemBucket
+from nti.contentlibrary.interfaces import IEditableContentPackage
+
+from nti.contentlibrary.utils import export_content_package
 
 from nti.dataserver import authorization as nauth
 
@@ -38,13 +44,7 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 from nti.publishing.interfaces import IPublishable
 
 
-@view_config(name="Export")
-@view_config(name="ExportContents")
-@view_defaults(route_name='objects.generic.traversal',
-               renderer='rest',
-               context=IContentPackage,
-               permission=nauth.ACT_NTI_ADMIN)
-class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
+class ExportContentPackageMixin(object):
 
     def _export_fs(self, root):
         tempdir = tempfile.mkdtemp()
@@ -79,14 +79,6 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
             shutil.rmtree(tempdir, True)
 
     def _export_package(self, package):
-        if      IPublishable.providedBy(package) \
-            and not IContentRendered.providedBy(package):
-            raise_json_error(self.request,
-                             hexc.HTTPUnprocessableEntity,
-                             {
-                                 'message': _(u"Content has not been published.")
-                             },
-                             None)
         root = getattr(package, 'root', None)
         if IFilesystemBucket.providedBy(root):
             zip_file, tempdir = self._export_fs(root)
@@ -95,14 +87,57 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView):
             zip_file, tempdir = self._export_boto(key)
         return self._export_response(zip_file, tempdir, self.request.response)
 
+
+@view_config(name="Export")
+@view_config(name="ExportContents")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='GET',
+               context=IContentPackage,
+               permission=nauth.ACT_NTI_ADMIN)
+class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView,
+                                       ExportContentPackageMixin):
+
+    def _export_package(self, package):
+        if      IPublishable.providedBy(package) \
+            and not IContentRendered.providedBy(package):
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"Content has not been published.")
+                             },
+                             None)
+        return ExportContentPackageMixin._export_package(self, package)
+
     def _do_call(self):
         return self._export_package(self.context)
+
+
+@view_config(name="Export")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='GET',
+               permission=nauth.ACT_CONTENT_EDIT,
+               context=IEditableContentPackage)
+class ExportEditableContentPackageView(ExportContentPackageContentsView):
+
+    def _export_package(self, package):
+        values = self.readInput()
+        salt = values.get('salt')
+        backup = values.get('backup')
+        published = package.is_published()
+        if not published or backup is not None or salt is not None:
+            backup = is_true(backup)
+            salt = salt or str(time.time())
+            return export_content_package(self.context)
+        return super(ExportEditableContentPackageView, self)._export_package(package)
 
 
 @view_config(name="ExportRenderedContent")
 @view_config(name="ExportRenderedContents")
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
+               request_method='GET',
                context=LibraryPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
 class ExportRenderedContentView(ExportContentPackageContentsView):

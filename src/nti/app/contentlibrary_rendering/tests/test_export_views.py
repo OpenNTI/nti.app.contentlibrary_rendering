@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import is_not
 from hamcrest import assert_that
+from hamcrest import has_entries
 from hamcrest import greater_than
 does_not = is_not
 
@@ -18,6 +19,10 @@ import zipfile
 import tempfile
 
 from nti.cabinet.mixins import get_file_size
+
+from nti.contentlibrary.zodb import RenderableContentPackage
+
+from nti.externalization.externalization import to_external_object
 
 from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
 
@@ -58,3 +63,26 @@ class TestExportViews(ApplicationLayerTest):
         res = self.testapp.get(href + "?ntiid=%s" % self.ntiid,
                                status=200)
         self._test_export(res)
+
+    def _create_package(self):
+        href = '/dataserver2/Library'
+        package = RenderableContentPackage(title=u'Bleach',
+                                           description=u'Manga bleach')
+        ext_obj = to_external_object(package)
+        ext_obj.pop('NTIID', None)
+        ext_obj.pop('ntiid', None)
+
+        res = self.testapp.post_json(href, ext_obj, status=201)
+        return res.json_body['NTIID']
+    
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_export_editable(self):
+        ntiid = self._create_package()
+        href = '/dataserver2/Library/%s/@@Export' % ntiid
+        res = self.testapp.get(href + "?backup=False",
+                               status=200)
+        assert_that(res.json_body,
+                    has_entries('MimeType', 'application/vnd.nextthought.renderablecontentpackage',
+                                'description', 'Manga bleach',
+                                'isPublished', False,
+                                'title', 'Bleach'))
