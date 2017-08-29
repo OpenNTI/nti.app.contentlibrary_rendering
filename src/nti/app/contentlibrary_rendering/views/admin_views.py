@@ -132,6 +132,28 @@ class RenderAllContentPackagesView(AbstractAuthenticatedView):
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='POST',
+               name="PublishAllRenderableContentPackages",
+               permission=nauth.ACT_NTI_ADMIN)
+class PublishAllRenderableContentPackagesView(AbstractAuthenticatedView):
+
+    def __call__(self):
+        result = LocatedExternalDict()
+        result.__name__ = self.request.view_name
+        result.__parent__ = self.request.context
+        result[ITEMS] = items = {}
+        for package in get_renderable_packages():
+            if not is_published(package):
+                package.publish()
+                lifecycleevent.modified(package)
+                items[package.ntiid] = package.title
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result
+
+
+@view_config(context=LibraryPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
                name="UnpublishAllRenderableContentPackages",
                permission=nauth.ACT_NTI_ADMIN)
 class UnpublishAllRenderableContentPackagesView(AbstractAuthenticatedView):
