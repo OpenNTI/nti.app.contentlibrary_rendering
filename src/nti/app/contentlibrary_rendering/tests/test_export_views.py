@@ -79,10 +79,11 @@ class TestExportViews(ApplicationLayerTest):
     def test_export_editable(self):
         ntiid = self._create_package()
         href = '/dataserver2/Library/%s/@@Export' % ntiid
-        res = self.testapp.get(href + "?backup=False",
+        res = self.testapp.get(href + "?backup=False&salt=ichigo",
                                status=200)
         assert_that(res.json_body,
                     has_entries('MimeType', 'application/vnd.nextthought.renderablecontentpackage',
                                 'description', 'Manga bleach',
                                 'isPublished', False,
-                                'title', 'Bleach'))
+                                'title', 'Bleach',
+                                'salt', 'ichigo'))
