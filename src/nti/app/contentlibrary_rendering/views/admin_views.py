@@ -57,6 +57,8 @@ from nti.dataserver import authorization as nauth
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 
+from nti.metadata import queue_add
+            
 from nti.publishing.interfaces import IPublishable
 
 from nti.site.hostpolicy import get_all_host_sites
@@ -369,6 +371,12 @@ class RemoveAllFailedRenderJobsView(AbstractAuthenticatedView,
                permission=nauth.ACT_NTI_ADMIN)
 class RebuildContentRenderingJobCatalogView(AbstractAuthenticatedView):
 
+    def _process_meta(self, job):
+        try:
+            queue_add(job)
+        except ImportError:
+            pass
+
     def __call__(self):
         intids = component.getUtility(IIntIds)
         # clear indexes
@@ -390,6 +398,7 @@ class RebuildContentRenderingJobCatalogView(AbstractAuthenticatedView):
                         if doc_id is None or doc_id in seen:
                             continue
                         seen.add(doc_id)
+                        self._process_meta(job)
                         catalog.index_doc(doc_id, job)
         result = LocatedExternalDict()
         result[ITEM_COUNT] = result[TOTAL] = len(seen)
