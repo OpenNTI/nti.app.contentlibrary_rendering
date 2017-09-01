@@ -66,6 +66,10 @@
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
 	                 nti.contentlibrary.interfaces.IContentPackageLocationChanged"/>
 
+	<subscriber handler=".subscribers._on_editable_content_removed"
+	            for="nti.contentlibrary.interfaces.IEditableContentPackage
+	                 zc.intid.interfaces.IBeforeIdRemovedEvent"/>
+
 	<!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />

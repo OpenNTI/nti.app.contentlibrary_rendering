@@ -28,8 +28,9 @@ from nti.app.contentlibrary_rendering.docutils.nodes import naassessmentref
 from nti.app.contentlibrary_rendering.docutils.nodes import naassignmentref
 from nti.app.contentlibrary_rendering.docutils.nodes import naquestionsetref
 
-from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
+
+from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
 
 from nti.base._compat import text_
 

@@ -16,10 +16,11 @@ from zope import interface
 from nti.app.contentlibrary_rendering.docutils.utils import make_video_ntiid
 from nti.app.contentlibrary_rendering.docutils.utils import make_asset_ntiid
 from nti.app.contentlibrary_rendering.docutils.utils import process_rst_image
-from nti.app.contentlibrary_rendering.docutils.utils import is_dataserver_asset
-from nti.app.contentlibrary_rendering.docutils.utils import get_dataserver_asset
 from nti.app.contentlibrary_rendering.docutils.utils import save_to_course_assets
 from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_scheme
+
+from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
+from nti.app.contentlibrary_rendering.utils import get_dataserver_asset
 
 from nti.assessment.interfaces import IQPoll
 from nti.assessment.interfaces import IQSurvey

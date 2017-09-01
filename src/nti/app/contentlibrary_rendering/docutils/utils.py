@@ -12,11 +12,7 @@ logger = __import__('logging').getLogger(__name__)
 import os
 from urlparse import urlparse
 
-from nti.app.contentfile.view_mixins import is_oid_external_link
-from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
-
-from nti.app.contentfolder.utils import is_cf_io_href
-from nti.app.contentfolder.utils import get_file_from_cf_io_url
+from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
 
 from nti.app.contentlibrary.hostpolicy import get_site_provider
 
@@ -41,16 +37,6 @@ COURSE_ASSETS = 'Images/CourseAssets'
 def is_supported_remote_scheme(uri):
     comps = urlparse(uri)
     return comps.scheme in ('http', 'https')
-
-
-def is_dataserver_asset(uri):
-    return is_cf_io_href(uri) or is_oid_external_link(uri)
-
-
-def get_dataserver_asset(uri):
-    if is_cf_io_href(uri):
-        return get_file_from_cf_io_url(uri)
-    return get_file_from_oid_external_link(uri)
 
 
 def get_filename(asset):
