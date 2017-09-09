@@ -15,11 +15,8 @@ from zope import component
 
 from zope.intid.interfaces import IIntIds
 
-from nti.app.contentfile.view_mixins import is_oid_external_link
-from nti.app.contentfile.view_mixins import get_file_from_oid_external_link
-
-from nti.app.contentfolder.utils import is_cf_io_href
-from nti.app.contentfolder.utils import get_file_from_cf_io_url
+from nti.app.contentfolder.resources import is_internal_file_link
+from nti.app.contentfolder.resources import get_file_from_external_link
 
 from nti.contentlibrary_rendering.index import IX_SITE
 from nti.contentlibrary_rendering.index import IX_STATE
@@ -34,13 +31,11 @@ from nti.site.site import get_component_hierarchy_names
 
 
 def is_dataserver_asset(uri):
-    return is_cf_io_href(uri) or is_oid_external_link(uri)
+    return is_internal_file_link(uri)
 
 
 def get_dataserver_asset(uri):
-    if is_cf_io_href(uri):
-        return get_file_from_cf_io_url(uri)
-    return get_file_from_oid_external_link(uri)
+    return get_file_from_external_link(uri)
 
 
 def query_render_jobs(packages=(), status=PENDING, sites=()):
@@ -71,8 +66,7 @@ def get_pending_render_jobs(packages=(), sites=()):
     intids = component.getUtility(IIntIds)
     for doc_id in query_render_jobs(packages, PENDING, sites):
         context = intids.queryObject(doc_id)
-        if      IContentPackageRenderJob.providedBy(context) \
-            and context.is_pending():
+        if IContentPackageRenderJob.providedBy(context) and context.is_pending():
             result.append(context)
     return result
 
@@ -82,7 +76,6 @@ def get_failed_render_jobs(packages=(), sites=()):
     intids = component.getUtility(IIntIds)
     for doc_id in query_render_jobs(packages, FAILED, sites):
         context = intids.queryObject(doc_id)
-        if      IContentPackageRenderJob.providedBy(context) \
-            and context.has_failed():
+        if IContentPackageRenderJob.providedBy(context) and context.has_failed():
             result.append(context)
     return result
