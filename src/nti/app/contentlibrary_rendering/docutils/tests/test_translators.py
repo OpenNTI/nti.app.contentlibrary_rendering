@@ -123,7 +123,7 @@ class TestTranslators(ApplicationLayerTest):
         assert_that(index, contains_string('<param name="visibility" value="everyone"'))
         assert_that(index, contains_string('<param name="label" value="Ichigo vs Aizen"'))
         assert_that(index, 
-                    contains_string('<param name="mimeType" value="application/vnd.nextthought.ntivideo"'))
+                    contains_string('<param name="targetMimeType" value="application/vnd.nextthought.ntivideo"'))
         assert_that(index, 
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
         # Broken ref
