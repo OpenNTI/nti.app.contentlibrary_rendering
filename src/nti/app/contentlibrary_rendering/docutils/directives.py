@@ -4,12 +4,12 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
+import uuid
 
 from zope import interface
 
@@ -35,6 +35,8 @@ from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
 from nti.base._compat import text_
 
 from nti.ntiids.ntiids import is_valid_ntiid_string
+
+logger = __import__('logging').getLogger(__name__)
 
 
 class TitleCaptionMixin(object):
@@ -167,8 +169,11 @@ class NTIVideoRef(Directive):
 
     has_content = False
     required_arguments = 1
-    optional_arguments = 1
-    option_spec = {'visibility': directives.unchanged}
+    optional_arguments = 2
+    option_spec = {
+        'visibility': directives.unchanged,
+        'uid': directives.unchanged,
+    }
 
     def run(self):
         ntiid = directives.unchanged_required(self.arguments[0])
@@ -176,9 +181,12 @@ class NTIVideoRef(Directive):
             raise self.error(
                 'Error in "%s" directive: "%s" is not a valid NTIID'
                 % (self.name, ntiid))
+        uid = self.options.get('uid') or str(uuid.uuid4())
         visibility = self.options.get('visibility') or 'everyone'
+        self.options['uid'] = uid
         self.options['visibility'] = visibility
         node = ntivideoref(self.block_text, **self.options)
+        node['uid'] = uid
         node['ntiid'] = ntiid
         return [node]
 

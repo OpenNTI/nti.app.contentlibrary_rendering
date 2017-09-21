@@ -241,6 +241,7 @@ class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
     __name__ = "ntivideoref"
 
     def do_translate(self, rst_node, unused_tex_doc, unused_tex_parent):
+        uid = rst_node['uid']
         ntiid = rst_node['ntiid']
         video = find_object_with_ntiid(ntiid)
         if not INTIVideo.providedBy(video):
@@ -251,6 +252,7 @@ class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
             video.title = _(u'Missing video')
 
         result = ntivideoref()
+        result.uid = uid
         result.media = video
         result.poster = None
         result.to_render = False
