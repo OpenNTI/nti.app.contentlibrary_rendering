@@ -4,14 +4,15 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 
 from zope import interface
+
+from nti.app.contentlibrary_rendering import MessageFactory as _
 
 from nti.app.contentlibrary_rendering.docutils.utils import make_video_ntiid
 from nti.app.contentlibrary_rendering.docutils.utils import make_asset_ntiid
@@ -51,7 +52,11 @@ from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
 from nti.contenttypes.presentation.interfaces import INTIVideo
 
+from nti.contenttypes.presentation.media import NTIVideo
+
 from nti.ntiids.ntiids import find_object_with_ntiid
+
+logger = __import__('logging').getLogger(__name__)
 
 
 # image
@@ -239,9 +244,11 @@ class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
         ntiid = rst_node['ntiid']
         video = find_object_with_ntiid(ntiid)
         if not INTIVideo.providedBy(video):
-            raise ValueError(
-                'Error in "%s" directive: video with ntiid "%s" is missing'
-                % (self.__name__, ntiid))
+            logger.error('Error in "%s" directive: video with ntiid "%s" is missing',
+                         self.__name__, ntiid)
+            video = NTIVideo()
+            video.ntiid = ntiid
+            video.title = _(u'Missing video')
 
         result = ntivideoref()
         result.media = video

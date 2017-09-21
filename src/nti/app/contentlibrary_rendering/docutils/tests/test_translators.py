@@ -128,10 +128,8 @@ class TestTranslators(ApplicationLayerTest):
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
         # Broken ref
         mock_fon.is_callable().with_args().returns(None)
-        with self.assertRaises(ValueError) as e:
-            self._generate_from_file('ntivideoref.rst')
-        assert_that(e.exception.message, contains_string("video with ntiid"))
-        assert_that(e.exception.message, contains_string("is missing"))
+        index, _ = self._generate_from_file('ntivideoref.rst')
+        assert_that(index, contains_string("Missing vide"))
 
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
     def test_naquestionref(self, mock_fon):
