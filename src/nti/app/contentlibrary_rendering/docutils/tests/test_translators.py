@@ -118,6 +118,7 @@ class TestTranslators(ApplicationLayerTest):
         media.ntiid = u'tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen'
         mock_fon.is_callable().with_args().returns(media)
         index, _ = self._generate_from_file('ntivideoref.rst')
+        assert_that(index, contains_string('<p uid="BLEACH-Video"'))
         assert_that(index, contains_string('<object class="ntivideoref"'))
         assert_that(index, contains_string('type="application/vnd.nextthought.ntivideoref"'))
         assert_that(index, contains_string('<param name="visibility" value="everyone"'))
