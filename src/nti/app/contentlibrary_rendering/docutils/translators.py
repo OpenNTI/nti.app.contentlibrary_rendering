@@ -240,7 +240,7 @@ class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
         video = find_object_with_ntiid(ntiid)
         if not INTIVideo.providedBy(video):
             raise ValueError(
-                'Error in "%s" directive: video with ntiid "%" is missing'
+                'Error in "%s" directive: video with ntiid "%s" is missing'
                 % (self.__name__, ntiid))
 
         result = ntivideoref()
