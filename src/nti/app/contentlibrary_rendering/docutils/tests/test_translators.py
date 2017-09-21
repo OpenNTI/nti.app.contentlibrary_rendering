@@ -118,15 +118,14 @@ class TestTranslators(ApplicationLayerTest):
         media.ntiid = u'tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen'
         mock_fon.is_callable().with_args().returns(media)
         index, _ = self._generate_from_file('ntivideoref.rst')
-        assert_that(index, contains_string('<object class="ntivideo"'))
-        assert_that(index, contains_string('type="application/vnd.nextthought.ntivideo"'))
-        assert_that(index, contains_string('data-ntiid="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
-        assert_that(index, contains_string('itemprop="presentation-video"'))
+        assert_that(index, contains_string('<object class="ntivideoref"'))
+        assert_that(index, contains_string('type="application/vnd.nextthought.ntivideoref"'))
         assert_that(index, contains_string('<param name="visibility" value="everyone"'))
         assert_that(index, contains_string('<param name="label" value="Ichigo vs Aizen"'))
-        assert_that(index,
+        assert_that(index, 
+                    contains_string('<param name="mimeType" value="application/vnd.nextthought.ntivideo"'))
+        assert_that(index, 
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
-
         # Broken ref
         mock_fon.is_callable().with_args().returns(None)
         with self.assertRaises(ValueError) as e:
