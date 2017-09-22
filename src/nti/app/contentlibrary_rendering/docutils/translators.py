@@ -52,7 +52,7 @@ from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
 from nti.contenttypes.presentation.interfaces import INTIVideo
 
-from nti.contenttypes.presentation.media import NTIVideo
+from nti.contenttypes.presentation import VIDEO_MIME_TYPES
 
 from nti.ntiids.ntiids import find_object_with_ntiid
 
@@ -243,14 +243,19 @@ class NTIVideoRefToPlastexNodeTranslator(TranslatorMixin):
     def do_translate(self, rst_node, unused_tex_doc, unused_tex_parent):
         uid = rst_node['uid']
         ntiid = rst_node['ntiid']
-        video = find_object_with_ntiid(ntiid)
-        if not INTIVideo.providedBy(video):
+        media = find_object_with_ntiid(ntiid)
+        if not INTIVideo.providedBy(media):
             logger.error('Error in "%s" directive: video with ntiid "%s" is missing',
                          self.__name__, ntiid)
-            video = NTIVideo()
-            video.ntiid = ntiid
+            video = ntivideo()
             video.title = _(u'Missing video')
-
+        else:
+            video = ntivideo()
+            video.title = media.title
+        # common fields
+        video.setAttribute('NTIID', ntiid)
+        video.mimetype = VIDEO_MIME_TYPES[0]
+        # prepare result
         result = ntivideoref()
         result.uid = uid
         result.media = video
