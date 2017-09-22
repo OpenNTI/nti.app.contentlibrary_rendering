@@ -123,9 +123,9 @@ class TestTranslators(ApplicationLayerTest):
         assert_that(index, contains_string('type="application/vnd.nextthought.ntivideoref"'))
         assert_that(index, contains_string('<param name="visibility" value="everyone"'))
         assert_that(index, contains_string('<param name="label" value="Ichigo vs Aizen"'))
-        assert_that(index, 
+        assert_that(index,
                     contains_string('<param name="targetMimeType" value="application/vnd.nextthought.ntivideo"'))
-        assert_that(index, 
+        assert_that(index,
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen"'))
         # Broken ref
         mock_fon.is_callable().with_args().returns(None)
