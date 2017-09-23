@@ -10,7 +10,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
-from urlparse import urlparse
+from six.moves import urllib_parse
 
 from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
 
@@ -35,7 +35,7 @@ COURSE_ASSETS = 'Images/CourseAssets'
 
 
 def is_supported_remote_scheme(uri):
-    comps = urlparse(uri)
+    comps = urllib_parse.urlparse(uri)
     return comps.scheme in ('http', 'https')
 
 
