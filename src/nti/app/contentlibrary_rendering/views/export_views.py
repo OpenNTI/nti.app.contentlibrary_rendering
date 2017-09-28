@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import time
@@ -42,6 +41,8 @@ from nti.dataserver import authorization as nauth
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.publishing.interfaces import IPublishable
+
+logger = __import__('logging').getLogger(__name__)
 
 
 class ExportContentPackageMixin(object):
@@ -94,7 +95,7 @@ class ExportContentPackageMixin(object):
                renderer='rest',
                request_method='GET',
                context=IContentPackage,
-               permission=nauth.ACT_NTI_ADMIN)
+               permission=nauth.ACT_CONTENT_EDIT)
 class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView,
                                        ExportContentPackageMixin):
 
@@ -139,7 +140,7 @@ class ExportEditableContentPackageView(ExportContentPackageContentsView):
                renderer='rest',
                request_method='GET',
                context=LibraryPathAdapter,
-               permission=nauth.ACT_NTI_ADMIN)
+               permission=nauth.ACT_CONTENT_EDIT)
 class ExportRenderedContentView(ExportContentPackageContentsView):
 
     def _do_call(self):
