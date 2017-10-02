@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from requests.structures import CaseInsensitiveDict
 
@@ -51,6 +50,8 @@ ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
+logger = __import__('logging').getLogger(__name__)
+
 
 @view_config(name="RenderContentSource")
 @view_defaults(route_name='objects.generic.traversal',
@@ -61,7 +62,7 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 class RenderContentSourceView(AbstractAuthenticatedView,
                               ModeledContentUploadRequestUtilsMixin):
 
-    MAX_SOURCE_SIZE = 524288000  # 500mb
+    MAX_SOURCE_SIZE = 209715200  # 200mb
 
     def readInput(self, value=None):
         result = super(RenderContentSourceView, self).readInput(value)
@@ -90,7 +91,7 @@ class RenderContentSourceView(AbstractAuthenticatedView,
                                  None)
             filename = getattr(source, 'filename', None) or name
             # save source
-            target = NamedSource(filename, source.data)
+            target = NamedSource(name=filename, data=source.data)
             # schedule
             job = render_archive(target,
                                  creator,
