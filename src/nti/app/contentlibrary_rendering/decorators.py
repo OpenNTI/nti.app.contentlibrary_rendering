@@ -4,12 +4,12 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
+import six
 
 from zope import component
 from zope import interface
@@ -45,11 +45,13 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
-from nti.externalization.singleton import SingletonDecorator
+from nti.externalization.singleton import SingletonMetaclass
 
 from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def get_ds2(request=None):
@@ -72,6 +74,7 @@ def _package_url_path(package, request=None):
     return path
 
 
+@six.add_metaclass(SingletonMetaclass)
 @component.adapter(IRenderableContentPackage)
 @interface.implementer(IExternalMappingDecorator)
 class _RenderablePackageDecorator(object):
@@ -79,7 +82,8 @@ class _RenderablePackageDecorator(object):
     Decorates IRenderableContentPackage.
     """
 
-    __metaclass__ = SingletonDecorator
+    def __init__(self, *args):
+        pass
 
     def decorateExternalMapping(self, context, mapping):
         mapping['isRendered'] = IContentRendered.providedBy(context)
@@ -94,7 +98,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
 
     def _predicate(self, context, unused_result):
         return self._is_authenticated \
-            and has_permission(ACT_CONTENT_EDIT, context, self.request)
+           and has_permission(ACT_CONTENT_EDIT, context, self.request)
 
     def _render_job_link(self, context, result):
         meta = IContentPackageRenderMetadata(context, None)
