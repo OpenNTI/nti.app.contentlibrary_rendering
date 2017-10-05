@@ -33,6 +33,8 @@ from nti.app.externalization.error import raise_json_error
 
 from nti.app.renderers.interfaces import INoHrefInResponse
 
+from nti.base._compat import text_
+
 from nti.cabinet.mixins import NamedSource
 
 from nti.contentlibrary_rendering import NTI_PROVIDER
@@ -40,11 +42,17 @@ from nti.contentlibrary_rendering import NTI_PROVIDER
 from nti.contentlibrary_rendering._archive import get_job_error
 from nti.contentlibrary_rendering._archive import get_job_status
 from nti.contentlibrary_rendering._archive import render_archive
+from nti.contentlibrary_rendering._archive import get_job_package_ntiid
+
+from nti.contentlibrary_rendering.interfaces import SUCCESS
 
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
+from nti.externalization.externalization import to_external_object
+
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
@@ -131,6 +139,11 @@ class LibraryJobStatusView(AbstractAuthenticatedView):
         result['jobId'] = job_id
         result['status'] = status
         interface.alsoProvides(result, INoHrefInResponse)
+        if status == SUCCESS:
+            ntiid = get_job_package_ntiid(job_id)
+            package = find_object_with_ntiid(text_(ntiid)) if ntiid else None
+            if package is not None:
+                result['package'] = to_external_object(package, decorate=False)
         return result
 
 
