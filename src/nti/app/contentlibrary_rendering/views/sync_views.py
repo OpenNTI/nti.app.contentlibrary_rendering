@@ -55,6 +55,7 @@ from nti.externalization.externalization import to_external_object
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 ITEMS = StandardExternalFields.ITEMS
+NTIID = StandardExternalFields.NTIID
 TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
@@ -143,7 +144,8 @@ class LibraryJobStatusView(AbstractAuthenticatedView):
             ntiid = get_job_package_ntiid(job_id)
             package = find_object_with_ntiid(text_(ntiid)) if ntiid else None
             if package is not None:
-                result['package'] = to_external_object(package, decorate=False)
+                result[NTIID] = package.ntiid
+                result['Package'] = to_external_object(package)
         return result
 
 
