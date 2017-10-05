@@ -50,12 +50,18 @@ setup(
     install_requires=[
         'setuptools',
         'nti.assessment',
+        'nti.contentlibrary',
         'nti.contentlibrary_rendering',
         'nti.contentrendering',
         'nti.contentrendering_assessment'
     ],
     extras_require={
         'test': TESTS_REQUIRE,
+        'docs': [
+            'Sphinx',
+            'repoze.sphinx.autointerface',
+            'sphinx_rtd_theme',
+        ],
     },
     entry_points=entry_points,
 )
