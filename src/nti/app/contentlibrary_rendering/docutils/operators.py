@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import re
 
@@ -28,6 +27,8 @@ from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.ntiids.ntiids import hash_ntiid
 from nti.ntiids.ntiids import get_specific
+
+logger = __import__('logging').getLogger(__name__)
 
 
 @interface.implementer(IContentOperator)

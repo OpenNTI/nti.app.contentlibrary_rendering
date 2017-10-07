@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from pyramid import httpexceptions as hexc
 
@@ -22,6 +21,8 @@ from nti.contentlibrary.validators import validate_content_package as perform_co
 from nti.externalization.externalization import to_external_object
 
 from nti.externalization.interfaces import LocatedExternalDict
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def validate_content(package, request):

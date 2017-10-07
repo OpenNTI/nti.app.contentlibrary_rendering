@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import shutil
@@ -30,6 +29,8 @@ from nti.contentlibrary_rendering import QUEUE_NAMES
 from nti.contentrendering.utils.chameleon import setupChameleonCache
 
 from nti.dataserver.utils.base_script import create_context
+
+logger = __import__('logging').getLogger(__name__)
 
 
 @interface.implementer(IContained)
