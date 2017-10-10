@@ -104,12 +104,17 @@ class TestTranslators(ApplicationLayerTest):
     def test_ntivdeo(self):
         index, _ = self._generate_from_file('ntivideo.rst')
         assert_that(index, contains_string('<object class="ntivideo"'))
-        assert_that(index, contains_string('<param name="title" value="Structure and Design"'))
+        assert_that(index,
+                    contains_string('<param name="title" value="Structure and Design"'))
         assert_that(index, contains_string('<span class="description">Course'))
-        assert_that(index, contains_string('type="application/vnd.nextthought.videosource"'))
-        assert_that(index, contains_string('<param name="service" value="kaltura"'))
-        assert_that(index, contains_string('<param name="source" value="1500101:0_udtp5zmz"'))
-        assert_that(index, contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NTIVideo-STRUCTURE_DESIGN_CELLS"'))
+        assert_that(index,
+                    contains_string('type="application/vnd.nextthought.videosource"'))
+        assert_that(index,
+                    contains_string('<param name="service" value="kaltura"'))
+        assert_that(index,
+                    contains_string('<param name="source" value="1500101:0_udtp5zmz"'))
+        assert_that(index,
+                    contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NTIVideo-STRUCTURE_DESIGN_CELLS"'))
 
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
     def test_ntivideoref(self, mock_fon):
@@ -121,9 +126,12 @@ class TestTranslators(ApplicationLayerTest):
         index, _ = self._generate_from_file('ntivideoref.rst')
         assert_that(index, contains_string('<p id="BLEACH-Video"'))
         assert_that(index, contains_string('<object class="ntivideoref"'))
-        assert_that(index, contains_string('type="application/vnd.nextthought.ntivideoref"'))
-        assert_that(index, contains_string('<param name="visibility" value="everyone"'))
-        assert_that(index, contains_string('<param name="label" value="Ichigo vs Aizen"'))
+        assert_that(index,
+                    contains_string('type="application/vnd.nextthought.ntivideoref"'))
+        assert_that(index,
+                    contains_string('<param name="visibility" value="everyone"'))
+        assert_that(index,
+                    contains_string('<param name="label" value="Ichigo vs Aizen"'))
         assert_that(index,
                     contains_string('<param name="targetMimeType" value="application/vnd.nextthought.ntivideo"'))
         assert_that(index,
@@ -145,10 +153,15 @@ class TestTranslators(ApplicationLayerTest):
         assert_that(index,
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
 
+        mock_fon.is_callable().with_args().returns(None)
+        index, _ = self._generate_from_file('naquestionref.rst')
+        assert_that(index,
+                    contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
+
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
     def test_napollref(self, mock_fon):
-        question = self._poll()
-        mock_fon.is_callable().with_args().returns(question)
+        poll = self._poll()
+        mock_fon.is_callable().with_args().returns(poll)
         index, _ = self._generate_from_file('napollref.rst')
         assert_that(index,
                     contains_string('type="application/vnd.nextthought.napoll"'))
@@ -156,3 +169,27 @@ class TestTranslators(ApplicationLayerTest):
                     contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
         assert_that(index,
                     contains_string('<param name="ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
+
+        mock_fon.is_callable().with_args().returns(None)
+        index, _ = self._generate_from_file('napollref.rst')
+        assert_that(index,
+                    contains_string('data-ntiid="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH"'))
+
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
+    def test_naquestionsetref(self, mock_fon):
+        questionset = fudge.Fake().has_attr(question_count=10).has_attr(title='Bleach')
+        mock_fon.is_callable().with_args().returns(questionset)
+        index, _ = self._generate_from_file('naquestionsetref.rst')
+        assert_that(index,
+                    contains_string('<param name="type" value="application/vnd.nextthought.naquestionset" />'))
+        assert_that(index,
+                    contains_string('<param name="label" value="Bleach" />'))
+        assert_that(index,
+                    contains_string('<param name="question-count" value="10" />'))
+        assert_that(index,
+                    contains_string('<param name="target-ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH" />'))
+
+        mock_fon.is_callable().with_args().returns(None)
+        index, _ = self._generate_from_file('naquestionsetref.rst')
+        assert_that(index,
+                    contains_string('<param name="label" value="Missing QuestionSet" />'))

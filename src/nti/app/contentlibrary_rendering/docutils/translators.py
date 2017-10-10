@@ -23,6 +23,10 @@ from nti.app.contentlibrary_rendering.docutils.utils import is_supported_remote_
 from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.utils import get_dataserver_asset
 
+from nti.assessment.interfaces import SURVEY_MIME_TYPE
+from nti.assessment.interfaces import ASSIGNMENT_MIME_TYPE
+from nti.assessment.interfaces import QUESTION_SET_MIME_TYPE
+
 from nti.assessment.interfaces import IQPoll
 from nti.assessment.interfaces import IQSurvey
 from nti.assessment.interfaces import IQuestion
@@ -44,9 +48,14 @@ from nti.contentrendering.plastexpackages.nticard import incoming_sources_as_pla
 from nti.contentrendering.plastexpackages.ntimedia import ntivideo
 from nti.contentrendering.plastexpackages.ntimedia import ntivideoref
 
+from nti.contentrendering_assessment.ntiassessment import napoll
+from nti.contentrendering_assessment.ntiassessment import nasurvey
 from nti.contentrendering_assessment.ntiassessment import napollref
-from nti.contentrendering_assessment.ntiassessment import nasurveyref
 from nti.contentrendering_assessment.ntiassessment import naquestion
+from nti.contentrendering_assessment.ntiassessment import nasurveyref
+from nti.contentrendering_assessment.ntiassessment import naassignment
+from nti.contentrendering_assessment.ntiassessment import naquestionref
+from nti.contentrendering_assessment.ntiassessment import naquestionset
 from nti.contentrendering_assessment.ntiassessment import naassignmentref
 from nti.contentrendering_assessment.ntiassessment import naquestionsetref
 
@@ -273,21 +282,25 @@ class NAAssessmentRefToPlastexNodeTranslator(TranslatorMixin):
 
     __name__ = "naassessmentref"
 
-    factory = None
+    ref_factory = None
+    concrete_factory = None
     provided = IQEvaluation
+
+    def prepare(self, ntiid, unused_item=None):
+        assesment = self.concrete_factory()
+        assesment.setAttribute('NTIID', ntiid)
+        result = self.ref_factory()
+        result.to_render = False
+        result.assesment = assesment
+        return result
 
     def do_translate(self, rst_node, unused_tex_doc, unused_tex_parent):
         ntiid = rst_node['ntiid']
         item = find_object_with_ntiid(ntiid)
         if not self.provided.providedBy(item):
-            raise ValueError(
-                'Error in "%s" directive: evaluation with ntiid "%" is missing'
-                % (self.__name__, ntiid))
-
-        result = self.factory()
-        result.assesment = item
-        result.to_render = False
-        return result
+            logger.error('Error in "%s" directive: evaluation with ntiid "%s" is missing',
+                         self.__name__, ntiid)
+        return self.prepare(ntiid, item)
 
 
 @interface.implementer(IRSTToPlastexNodeTranslator)
@@ -296,25 +309,8 @@ class NAQuestionRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslato
     __name__ = "naquestionref"
 
     provided = IQuestion
-    factory = naquestion
-
-
-@interface.implementer(IRSTToPlastexNodeTranslator)
-class NAQuestionSetRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
-
-    __name__ = "naquestionsetref"
-
-    provided = IQuestionSet
-    factory = naquestionsetref
-
-
-@interface.implementer(IRSTToPlastexNodeTranslator)
-class NAAssignmentRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
-
-    __name__ = "naassignmentref"
-
-    provided = IQAssignment
-    factory = naassignmentref
+    ref_factory = naquestionref
+    concrete_factory = naquestion
 
 
 @interface.implementer(IRSTToPlastexNodeTranslator)
@@ -323,7 +319,8 @@ class NAPollRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
     __name__ = "napollref"
 
     provided = IQPoll
-    factory = napollref
+    ref_factory = napollref
+    concrete_factory = napoll
 
 
 @interface.implementer(IRSTToPlastexNodeTranslator)
@@ -332,4 +329,64 @@ class NASurveyRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator)
     __name__ = "nasurveyref"
 
     provided = IQSurvey
-    factory = nasurveyref
+    ref_factory = nasurveyref
+    concrete_factory = nasurvey
+
+    def prepare(self, ntiid, item=None):
+        result = super(NASurveyRefToPlastexNodeTranslator, self).prepare(ntiid, item)
+        assesment = result.assesment
+        if item is None:
+            question_count = 0
+            title = _(u'Missing Survey')
+        else:
+            title = item.title
+            question_count = item.question_count
+        assesment.title = title
+        assesment.mimeType = SURVEY_MIME_TYPE
+        assesment.question_count = question_count
+        return result
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAQuestionSetRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "naquestionsetref"
+
+    provided = IQuestionSet
+    ref_factory = naquestionsetref
+    concrete_factory = naquestionset
+
+    def prepare(self, ntiid, item=None):
+        result = super(NAQuestionSetRefToPlastexNodeTranslator, self).prepare(ntiid, item)
+        assesment = result.assesment
+        if item is None:
+            question_count = 0
+            title = _(u'Missing QuestionSet')
+        else:
+            title = item.title
+            question_count = item.question_count
+        assesment.title = title
+        assesment.mimeType = QUESTION_SET_MIME_TYPE
+        assesment.question_count = question_count
+        return result
+
+
+@interface.implementer(IRSTToPlastexNodeTranslator)
+class NAAssignmentRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTranslator):
+
+    __name__ = "naassignmentref"
+
+    provided = IQAssignment
+    ref_factory = naassignmentref
+    concrete_factory = naassignment
+
+    def prepare(self, ntiid, item=None):
+        result = super(NAQuestionSetRefToPlastexNodeTranslator, self).prepare(ntiid, item)
+        assesment = result.assesment
+        if item is None:
+            title = _(u'Missing Assignment')
+        else:
+            title = item.title
+        assesment.title = title
+        assesment.mimeType = ASSIGNMENT_MIME_TYPE
+        return result
