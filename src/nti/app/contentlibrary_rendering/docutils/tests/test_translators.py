@@ -19,6 +19,11 @@ import tempfile
 
 import simplejson
 
+from zope import interface
+
+from nti.assessment.interfaces import IQAssignment
+from nti.assessment.interfaces import IQuestionSet
+
 from nti.cabinet.mixins import SourceFile
 
 from nti.contentlibrary_rendering._render import render_document
@@ -178,6 +183,7 @@ class TestTranslators(ApplicationLayerTest):
     @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
     def test_naquestionsetref(self, mock_fon):
         questionset = fudge.Fake().has_attr(question_count=10).has_attr(title='Bleach')
+        interface.alsoProvides(questionset, IQuestionSet)
         mock_fon.is_callable().with_args().returns(questionset)
         index, _ = self._generate_from_file('naquestionsetref.rst')
         assert_that(index,
@@ -193,3 +199,21 @@ class TestTranslators(ApplicationLayerTest):
         index, _ = self._generate_from_file('naquestionsetref.rst')
         assert_that(index,
                     contains_string('<param name="label" value="Missing QuestionSet" />'))
+        
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.translators.find_object_with_ntiid')
+    def test_naassignmentref(self, mock_fon):
+        assignment = fudge.Fake().has_attr(title='Bleach')
+        interface.alsoProvides(assignment, IQAssignment)
+        mock_fon.is_callable().with_args().returns(assignment)
+        index, _ = self._generate_from_file('naassignmentref.rst')
+        assert_that(index,
+                    contains_string('<param name="type" value="application/vnd.nextthought.assessment.assignment" />'))
+        assert_that(index,
+                    contains_string('<param name="label" value="Bleach" />'))
+        assert_that(index,
+                    contains_string('<param name="target-ntiid" value="tag:nextthought.com,2011-10:NTI-NAQ-BLEACH" />'))
+
+        mock_fon.is_callable().with_args().returns(None)
+        index, _ = self._generate_from_file('naassignmentref.rst')
+        assert_that(index,
+                    contains_string('<param name="label" value="Missing Assignment" />'))

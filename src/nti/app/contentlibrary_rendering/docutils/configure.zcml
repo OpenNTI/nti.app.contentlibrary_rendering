@@ -27,7 +27,7 @@
 			 name="naquestionsetref" />
 
 	<utility factory=".translators.NAAssignmentRefToPlastexNodeTranslator" 
-			 name="naassignmentRef" />
+			 name="naassignmentref" />
 
 	<utility factory=".translators.NAPollRefToPlastexNodeTranslator" 
 			 name="napollref" />

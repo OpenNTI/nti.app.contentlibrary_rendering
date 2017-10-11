@@ -381,7 +381,7 @@ class NAAssignmentRefToPlastexNodeTranslator(NAAssessmentRefToPlastexNodeTransla
     concrete_factory = naassignment
 
     def prepare(self, ntiid, item=None):
-        result = super(NAQuestionSetRefToPlastexNodeTranslator, self).prepare(ntiid, item)
+        result = super(NAAssignmentRefToPlastexNodeTranslator, self).prepare(ntiid, item)
         assesment = result.assesment
         if item is None:
             title = _(u'Missing Assignment')
