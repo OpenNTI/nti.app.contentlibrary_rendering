@@ -107,11 +107,7 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
     def _do_call(self):
         data = self.readInput() or self.request.params
         request_site = data.get('site')
-        obfuscate = data.get('obfuscate')
-        if obfuscate is None:  # default to True
-            obfuscate = True
-        else:
-            obfuscate = is_true(obfuscate)
+        obfuscate = is_true(data.get('obfuscate'))
         request_library = component.getUtility(IContentPackageLibrary)
         # preapre results
         result = LocatedExternalDict()
