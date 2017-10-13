@@ -28,7 +28,6 @@ from nti.contentlibrary.interfaces import IContentOperator
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
 from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
-from nti.contenttypes.presentation.interfaces import IPresentationAsset
 
 from nti.ntiids.ntiids import hash_ntiid, find_object_with_ntiid
 from nti.ntiids.ntiids import get_specific
