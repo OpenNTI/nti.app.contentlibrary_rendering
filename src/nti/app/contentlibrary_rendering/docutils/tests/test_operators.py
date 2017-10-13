@@ -13,6 +13,7 @@ from hamcrest import assert_that
 from hamcrest import contains_string
 
 import os
+import fudge
 import unittest
 
 from nti.app.contentlibrary_rendering.docutils.operators import RenderablePackageContentOperator
@@ -30,8 +31,10 @@ class TestOperators(unittest.TestCase):
         name = os.path.join(os.path.dirname(__file__), 'data/%s' % source)
         with open(name, "rb") as fp:
             return fp.read()
-        
-    def test_ntivideoref(self):
+
+    @fudge.patch('nti.app.contentlibrary_rendering.docutils.operators.RenderablePackageContentOperator._should_replace_ntiid')
+    def test_ntivideoref(self, replace_ntiid):
+        replace_ntiid.is_callable().returns(True)
         ntiid = u'tag:nextthought.com,2011-10:BLEACH-NTIVideo-Ichigo.vs.Aizen'
         salted = hash_ntiid(ntiid, self.salt)
         content = text_(self._content('ntivideoref.rst'))

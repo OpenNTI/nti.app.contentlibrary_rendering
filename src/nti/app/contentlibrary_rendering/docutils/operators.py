@@ -19,13 +19,18 @@ from zope.cachedescriptors.property import Lazy
 
 from nti.app.contentlibrary_rendering.docutils.utils import make_video_ntiid
 
+from nti.assessment.interfaces import IQEditableEvaluation
+
 from nti.base._compat import text_
 from nti.base._compat import bytes_
 
 from nti.contentlibrary.interfaces import IContentOperator
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 
-from nti.ntiids.ntiids import hash_ntiid
+from nti.contenttypes.presentation.interfaces import IUserCreatedAsset
+from nti.contenttypes.presentation.interfaces import IPresentationAsset
+
+from nti.ntiids.ntiids import hash_ntiid, find_object_with_ntiid
 from nti.ntiids.ntiids import get_specific
 
 logger = __import__('logging').getLogger(__name__)
@@ -56,17 +61,26 @@ class RenderablePackageContentOperator(object):
             pattern = re.compile(pattern, re.VERBOSE | re.UNICODE)
             result.append(pattern)
         return result
-    
+
     @Lazy
     def _uid_pattern(self):
         return re.compile(r'\s*:uid:\s?(.+)', re.VERBOSE | re.UNICODE)
+
+    def _should_replace_ntiid(self, ntiid):
+        """
+        Only salt the ntiid if it is user created.
+        """
+        obj = find_object_with_ntiid(ntiid)
+        return IUserCreatedAsset.providedBy(obj) \
+            or IQEditableEvaluation.providedBy(obj)
 
     def _replace_refs(self, pattern, line, salt):
         m = pattern.match(line)
         if m is not None:
             ntiid = m.groups()[0]
-            salted = hash_ntiid(ntiid, salt)
-            line = re.sub(ntiid, salted, line)
+            if self._should_replace_ntiid(ntiid):
+                salted = hash_ntiid(ntiid, salt)
+                line = re.sub(ntiid, salted, line)
         return bool(m is not None), line
 
     def _process_node_refs(self, input_lines, salt, idx, result):
@@ -100,7 +114,7 @@ class RenderablePackageContentOperator(object):
                     idx = offset
                 break
         return matched, idx
-    
+
     def _replace_all(self, content, salt, result):
         idx = 0
         modified = False
