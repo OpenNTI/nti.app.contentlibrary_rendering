@@ -9,7 +9,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import six
 
 from zope import component
 from zope import interface
@@ -45,7 +44,7 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
-from nti.externalization.singleton import SingletonMetaclass
+from nti.externalization.singleton import Singleton
 
 from nti.links.links import Link
 
@@ -74,16 +73,12 @@ def _package_url_path(package, request=None):
     return path
 
 
-@six.add_metaclass(SingletonMetaclass)
 @component.adapter(IRenderableContentPackage)
 @interface.implementer(IExternalMappingDecorator)
-class _RenderablePackageDecorator(object):
+class _RenderablePackageDecorator(Singleton):
     """
     Decorates IRenderableContentPackage.
     """
-
-    def __init__(self, *args):
-        pass
 
     def decorateExternalMapping(self, context, mapping):
         mapping['isRendered'] = IContentRendered.providedBy(context)
