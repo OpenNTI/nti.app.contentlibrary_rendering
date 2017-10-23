@@ -38,9 +38,13 @@ from nti.contentlibrary.utils import export_content_package
 
 from nti.dataserver import authorization as nauth
 
+from nti.externalization.proxy import removeAllProxies
+
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.publishing.interfaces import IPublishable
+
+from nti.traversal.traversal import find_interface
 
 logger = __import__('logging').getLogger(__name__)
 
@@ -111,7 +115,7 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView,
         return ExportContentPackageMixin._export_package(self, package)
 
     def _do_call(self):
-        return self._export_package(self.context)
+        return self._export_package(removeAllProxies(self.context))
 
 
 @view_config(name="Export")
@@ -155,6 +159,8 @@ class ExportRenderedContentView(ExportContentPackageContentsView):
                              },
                              None)
         package = find_object_with_ntiid(ntiid)
+        package = removeAllProxies(package) if package is not None else None
+        package = find_interface(package, IContentPackage, strict=False)
         if not IContentPackage.providedBy(package):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
