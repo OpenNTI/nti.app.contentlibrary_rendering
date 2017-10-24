@@ -16,9 +16,16 @@ from nti.appserver.interfaces import IApplicationSettings
 
 from nti.contentlibrary_rendering.locators import S3Locator as BaseS3Locator
 from nti.contentlibrary_rendering.locators import FilesystemLocator as BaseFilesystemLocator
+from nti.contentlibrary_rendering.locators import DevFilesystemLocator as DevBaseFilesystemLocator
+
+logger = __import__('logging').getLogger(__name__)
 
 
 class FilesystemLocator(BaseFilesystemLocator):
+    pass
+
+
+class DevFilesystemLocator(DevBaseFilesystemLocator):
     pass
 
 
