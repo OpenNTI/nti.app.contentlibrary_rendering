@@ -17,13 +17,13 @@ does_not = is_not
 
 import fudge
 
-from nti.cabinet.mixins import SourceFile
-
 from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
+
+from nti.cabinet.mixins import SourceFile
 
 
 class TestSyncViews(ApplicationLayerTest):

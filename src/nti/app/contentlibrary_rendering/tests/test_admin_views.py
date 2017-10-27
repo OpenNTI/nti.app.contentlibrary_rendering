@@ -8,7 +8,6 @@ from __future__ import absolute_import
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
-import time
 from hamcrest import is_
 from hamcrest import is_not
 from hamcrest import assert_that
@@ -16,9 +15,17 @@ from hamcrest import has_entries
 from hamcrest import greater_than_or_equal_to
 does_not = is_not
 
+import time
+
 import fudge
 
 from zope import interface
+
+from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
+
+from nti.app.testing.application_webtest import ApplicationLayerTest
+
+from nti.app.testing.decorators import WithSharedApplicationMockDS
 
 from nti.contentlibrary.interfaces import IContentRendered
 
@@ -30,17 +37,11 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 
 from nti.contentlibrary_rendering.model import ContentPackageRenderJob
 
+from nti.dataserver.tests import mock_dataserver
+
 from nti.externalization.externalization import to_external_object
 
 from nti.ntiids.ntiids import find_object_with_ntiid
-
-from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
-
-from nti.app.testing.application_webtest import ApplicationLayerTest
-
-from nti.app.testing.decorators import WithSharedApplicationMockDS
-
-from nti.dataserver.tests import mock_dataserver
 
 
 class TestAdminViews(ApplicationLayerTest):

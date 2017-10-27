@@ -16,9 +16,9 @@ from nti.testing.matchers import validly_provides
 
 from docutils.parsers.rst.directives import directive as docutils_directive
 
-from nti.contentlibrary_rendering.docutils.interfaces import IDirectivesModule
-
 from nti.app.testing.application_webtest import ApplicationLayerTest
+
+from nti.contentlibrary_rendering.docutils.interfaces import IDirectivesModule
 
 
 class TestDirectives(ApplicationLayerTest):

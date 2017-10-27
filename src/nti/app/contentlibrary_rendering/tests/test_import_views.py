@@ -17,11 +17,18 @@ from hamcrest import has_property
 does_not = is_not
 
 import os
-import fudge
 import shutil
 from io import BytesIO
 
+import fudge
+
 from zope import component
+
+from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
+
+from nti.app.testing.application_webtest import ApplicationLayerTest
+
+from nti.app.testing.decorators import WithSharedApplicationMockDS
 
 from nti.cabinet.mixins import SourceFile
 
@@ -34,15 +41,9 @@ from nti.contentlibrary.utils import get_content_package_site
 
 from nti.contentlibrary.zodb import RenderableContentPackage
 
-from nti.externalization.externalization import to_external_object
-
-from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
-
-from nti.app.testing.application_webtest import ApplicationLayerTest
-
-from nti.app.testing.decorators import WithSharedApplicationMockDS
-
 from nti.dataserver.tests import mock_dataserver
+
+from nti.externalization.externalization import to_external_object
 
 
 class TestImportViews(ApplicationLayerTest):

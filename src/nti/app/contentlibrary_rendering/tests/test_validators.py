@@ -19,13 +19,13 @@ import os
 
 from zope import component
 
+from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
+
 from nti.app.contentlibrary_rendering.validators import ReStructuredTextValidator
 
 from nti.contentlibrary.interfaces import IContentValidator
 
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
-
-from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
 
 
 class TestValidators(ContentlibraryRenderingLayerTest):

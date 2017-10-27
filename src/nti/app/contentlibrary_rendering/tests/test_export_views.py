@@ -19,17 +19,17 @@ import shutil
 import zipfile
 import tempfile
 
-from nti.cabinet.mixins import get_file_size
-
-from nti.contentlibrary.zodb import RenderableContentPackage
-
-from nti.externalization.externalization import to_external_object
-
 from nti.app.contentlibrary.tests import PersistentApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
+
+from nti.cabinet.mixins import get_file_size
+
+from nti.contentlibrary.zodb import RenderableContentPackage
+
+from nti.externalization.externalization import to_external_object
 
 
 class TestExportViews(ApplicationLayerTest):

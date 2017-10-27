@@ -19,13 +19,13 @@ from zope import component
 
 from zope.intid.interfaces import IIntIds
 
+from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
+
 from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
 
 from nti.contentlibrary_rendering.index import get_contentrenderjob_catalog
 
 from nti.contentlibrary_rendering.model import ContentPackageRenderJob
-
-from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
 
 from nti.dataserver.tests import mock_dataserver
 

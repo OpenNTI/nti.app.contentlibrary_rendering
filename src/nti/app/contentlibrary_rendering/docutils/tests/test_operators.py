@@ -13,8 +13,9 @@ from hamcrest import assert_that
 from hamcrest import contains_string
 
 import os
-import fudge
 import unittest
+
+import fudge
 
 from nti.app.contentlibrary_rendering.docutils.operators import RenderablePackageContentOperator
 

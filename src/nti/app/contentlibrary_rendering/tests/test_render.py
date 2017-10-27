@@ -19,9 +19,12 @@ from hamcrest import contains_string
 does_not = is_not
 
 import os
+
 import fudge
 
 from zope import component
+
+from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
 
 from nti.contentlibrary.utils import NTI
 
@@ -31,8 +34,6 @@ from nti.contentlibrary_rendering.interfaces import IContentTransformer
 from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadata
 
 from nti.contentlibrary_rendering._render import render_document
-
-from nti.app.contentlibrary_rendering.tests import ContentlibraryRenderingLayerTest
 
 from nti.namedfile.file import safe_filename
 

@@ -13,13 +13,16 @@ from hamcrest import assert_that
 from hamcrest import contains_string
 
 import os
-import fudge
 import shutil
 import tempfile
+
+import fudge
 
 import simplejson
 
 from zope import interface
+
+from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.assessment.interfaces import IQAssignment
 from nti.assessment.interfaces import IQuestionSet
@@ -34,8 +37,6 @@ from nti.contenttypes.presentation.media import NTIVideo
 
 from nti.externalization.internalization import find_factory_for
 from nti.externalization.internalization import update_from_external_object
-
-from nti.app.testing.application_webtest import ApplicationLayerTest
 
 
 class TestTranslators(ApplicationLayerTest):
