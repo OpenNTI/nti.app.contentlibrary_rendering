@@ -29,10 +29,11 @@ from nti.app.externalization.error import raise_json_error
 
 from nti.common.string import is_true
 
+from nti.contentlibrary.interfaces import IContentUnit
 from nti.contentlibrary.interfaces import IContentPackage
 from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IFilesystemBucket
-from nti.contentlibrary.interfaces import IEditableContentPackage
+from nti.contentlibrary.interfaces import IEditableContentUnit
 
 from nti.contentlibrary.utils import export_content_package
 
@@ -98,12 +99,13 @@ class ExportContentPackageMixin(object):
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='GET',
-               context=IContentPackage,
+               context=IContentUnit,
                permission=nauth.ACT_CONTENT_EDIT)
-class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView,
-                                       ExportContentPackageMixin):
+class ExportContentUnitContentsView(_AbstractSyncAllLibrariesView,
+                                    ExportContentPackageMixin):
 
-    def _export_package(self, package):
+    def _export_package(self, unit):
+        package = find_interface(unit, IContentPackage, strict=False)
         if      IPublishable.providedBy(package) \
             and not IContentRendered.providedBy(package):
             raise_json_error(self.request,
@@ -122,20 +124,21 @@ class ExportContentPackageContentsView(_AbstractSyncAllLibrariesView,
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
                request_method='GET',
-               permission=nauth.ACT_CONTENT_EDIT,
-               context=IEditableContentPackage)
-class ExportEditableContentPackageView(ExportContentPackageContentsView):
+               context=IEditableContentUnit,
+               permission=nauth.ACT_CONTENT_EDIT)
+class ExportEditableContentUnitView(ExportContentUnitContentsView):
 
-    def _export_package(self, package):
+    def _export_package(self, unit):
         values = self.readInput()
         salt = values.get('salt')
         backup = values.get('backup')
+        package = find_interface(unit, IContentPackage, strict=False)
         published = package.is_published()
         if not published or backup is not None or salt is not None:
             backup = is_true(backup)
             salt = salt or str(time.time())
             return export_content_package(self.context, backup, salt)
-        return super(ExportEditableContentPackageView, self)._export_package(package)
+        return super(ExportEditableContentUnitView, self)._export_package(package)
 
 
 @view_config(name="ExportRenderedContent")
@@ -145,7 +148,7 @@ class ExportEditableContentPackageView(ExportContentPackageContentsView):
                request_method='GET',
                context=LibraryPathAdapter,
                permission=nauth.ACT_CONTENT_EDIT)
-class ExportRenderedContentView(ExportContentPackageContentsView):
+class ExportRenderedContentView(ExportContentUnitContentsView):
 
     def _do_call(self):
         data = self.readInput()
