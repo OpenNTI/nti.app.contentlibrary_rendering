@@ -70,6 +70,8 @@
 	            for="nti.contentlibrary.interfaces.IEditableContentPackage
 	                 zc.intid.interfaces.IBeforeIdRemovedEvent"/>
 
+	<subscriber handler=".subscribers._on_icon_changes" />
+		
 	<!-- Default -->
 	<utility factory=".validators.ReStructuredTextValidator" />
 	<utility factory=".validators.ReStructuredTextValidator" name="text/x-rst" />

@@ -21,6 +21,8 @@ from nti.app.authentication import get_remote_user
 from nti.app.contentlibrary_rendering.utils import is_dataserver_asset
 from nti.app.contentlibrary_rendering.utils import get_dataserver_asset
 
+from nti.contentfragments.interfaces import IUnicode
+
 from nti.contentlibrary.interfaces import IEditableContentPackage
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 from nti.contentlibrary.interfaces import IContentPackageRemovedEvent
@@ -32,6 +34,8 @@ from nti.contentlibrary_rendering.utils import remove_rendered_package
 from nti.ntiids.ntiids import get_provider
 
 from nti.publishing.interfaces import IObjectPublishedEvent
+
+from nti.schema.interfaces import IBeforeTextAssignedEvent
 
 
 @component.adapter(IRenderableContentPackage, IObjectPublishedEvent)
@@ -61,12 +65,23 @@ def _content_location_changed(package, event):
         remove_rendered_package(package, old_root)
 
 
-@component.adapter(IEditableContentPackage, IBeforeIdRemovedEvent)
-def _on_editable_content_removed(package, unused_event=None):
-    icon = package.icon
+def _remove_icon_association(package, icon=None):
+    icon = icon or package.icon
     if isinstance(icon, six.string_types) and is_dataserver_asset(icon):
         asset = get_dataserver_asset(icon)
         try:
             asset.remove_association(package)
         except AttributeError:
             pass
+
+
+@component.adapter(IEditableContentPackage, IBeforeIdRemovedEvent)
+def _on_editable_content_removed(package, unused_event=None):
+    _remove_icon_association(package)
+
+
+@component.adapter(IUnicode, IEditableContentPackage, IBeforeTextAssignedEvent)
+def _on_icon_changes(unused_new_icon, package, event):
+    if 'icon' != event.name:
+        return
+    _remove_icon_association(package)
