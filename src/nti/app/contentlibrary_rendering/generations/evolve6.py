@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+# pylint: disable=W0212,W0621,W0703
+
 generation = 6
 
 from zope import component
@@ -66,7 +68,7 @@ def do_evolve(context):
         remove_queue(failed_queue)
 
     component.getGlobalSiteManager().unregisterUtility(mock_ds, IDataserver)
-    logger.info('Dataserver evolution %s done.', generation)
+    logger.info('Library rendering evolution %s done.', generation)
 
 
 def evolve(context):
