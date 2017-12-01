@@ -19,10 +19,10 @@ from zope.location.interfaces import IContained
 
 from z3c.autoinclude.zcml import includePluginsDirective
 
-from nti.async.interfaces import IReactorStarted
-from nti.async.interfaces import IReactorStopped
+from nti.app.asynchronous.processor import Processor
 
-from nti.async.utils.processor import Processor
+from nti.asynchronous.interfaces import IReactorStarted
+from nti.asynchronous.interfaces import IReactorStopped
 
 from nti.contentlibrary_rendering import QUEUE_NAMES
 
@@ -59,9 +59,6 @@ def reactor_stopped(context):
 
 
 class Constructor(Processor):
-
-    def set_log_formatter(self, args):
-        super(Constructor, self).set_log_formatter(args)
 
     def extend_context(self, context):
         includePluginsDirective(context, PP_CONTENT_RENDERING)
