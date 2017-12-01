@@ -45,8 +45,16 @@ def _unpickle(data):
     result = pickle.load(bio)
     return result
 
+def _reset_failed(redis_client, name, hash_key):
+    keys = redis_client.pipeline().delete(name) \
+                       .hkeys(hash_key).execute()
+    if keys and keys[1]:
+        redis_client.hdel(hash_key, *keys[1])
+        return keys[1]
+    return ()
 
-def _reset(redis_client, name, hash_key):
+
+def _reset_queue(redis_client, name, hash_key):
     keys = redis_client.pipeline().zremrangebyscore(name, 0, MAX_TIMESTAMP) \
                        .hkeys(hash_key).execute()
     if keys and keys[1]:
@@ -112,12 +120,12 @@ def do_evolve(context, generation=generation):
                 except Exception:
                     logger.error("Cannot execute library rendering job %s",
                                  job)
-            _reset(redis_client, name, hash_key)
+            _reset_queue(redis_client, name, hash_key)
 
             # reset failed
             name += "/failed"
             hash_key = name + '/hash'
-            _reset(redis_client, name, hash_key)
+            _reset_failed(redis_client, name, hash_key)
 
     component.getGlobalSiteManager().unregisterUtility(mock_ds, IDataserver)
     logger.info('Library rendering evolution %s done', generation)
