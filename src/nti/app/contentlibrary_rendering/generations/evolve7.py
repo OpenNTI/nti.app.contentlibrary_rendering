@@ -80,6 +80,7 @@ class MockDataserver(object):
             return resolver.get_object_by_oid(oid, ignore_creator=ignore_creator)
         return None
 
+
 def do_evolve(context, generation=generation):
     setHooks()
     conn = context.connection
@@ -90,15 +91,15 @@ def do_evolve(context, generation=generation):
     mock_ds = MockDataserver()
     mock_ds.root = ds_folder
     component.provideUtility(mock_ds, IDataserver)
-    
+
     with current_site(ds_folder):
         assert component.getSiteManager() == ds_folder.getSiteManager(), \
                "Hooks not installed?"
 
         # set root folder
         mock_ds.root_folder = getSite().__parent__
-           
-        # always load library 
+
+        # always load library
         _load_library()
 
         # process queue/jobs
@@ -109,7 +110,7 @@ def do_evolve(context, generation=generation):
                 try:
                     job()
                 except Exception:
-                    logger.error("Cannot execute library rendering job %s", 
+                    logger.error("Cannot execute library rendering job %s",
                                  job)
             _reset(redis_client, name, hash_key)
 
