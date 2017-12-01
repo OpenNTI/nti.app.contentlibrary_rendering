@@ -50,6 +50,7 @@ setup(
     install_requires=[
         'setuptools',
         'docutils',
+        'nti.app.asynchronous',
         'nti.app.contentlibrary',
         'nti.assessment',
         'nti.async',
