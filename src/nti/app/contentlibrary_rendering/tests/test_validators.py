@@ -25,6 +25,7 @@ from nti.app.contentlibrary_rendering.validators import ReStructuredTextValidato
 
 from nti.contentlibrary.interfaces import IContentValidator
 
+from nti.contentlibrary_rendering.docutils.validators import RSTEmptyCodeBlockError
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
 
 
@@ -42,7 +43,7 @@ class TestValidators(ContentlibraryRenderingLayerTest):
                                    ========
                                 """)
         assert_that(e.exception.warnings, not_none())
-        assert_that(e.exception.message, 
+        assert_that(e.exception.message,
                     is_('Unexpected section title or transition.'))
 
     def test_warnings(self):
@@ -52,3 +53,13 @@ class TestValidators(ContentlibraryRenderingLayerTest):
         validator = ReStructuredTextValidator()
         warnings = validator.validate(content)
         assert_that(warnings, is_not(none()))
+
+    def test_empty_code_blocks(self):
+        s = b"""Test Empty CodeBlock
+
+        .. code-block:: JavaScript
+
+        """
+        validator = component.getUtility(IContentValidator, name="text/x-rst")
+        with self.assertRaises(RSTEmptyCodeBlockError):
+            validator.validate(s)

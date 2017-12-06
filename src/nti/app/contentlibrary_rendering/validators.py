@@ -20,6 +20,8 @@ from zope import interface
 
 from nti.app.contentlibrary_rendering.interfaces import IRSTContentValidator
 
+from nti.contentlibrary_rendering.docutils.validators import MSG_PATTERN
+from nti.contentlibrary_rendering.docutils.validators import RSTEmptyCodeBlockError
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
 
 logger = __import__('logging').getLogger(__name__)
@@ -40,7 +42,7 @@ class ReStructuredTextValidator(object):
     def doctree(self, content, settings=None):
         settings = settings or self._get_settings()
         return publish_doctree(content, settings=settings)
-         
+
     def _log_warnings(self, settings):
         settings.warning_stream.seek(0)
         warnings = settings.warning_stream.read()
@@ -49,6 +51,21 @@ class ReStructuredTextValidator(object):
                         warnings + "\n")
         return warnings
 
+    def is_empty_code_block(self, message):
+        m = MSG_PATTERN.match(message)
+        groups = m.groups() if m else ()
+        return groups \
+           and groups[0] == '(ERROR/3)' \
+           and 'Content block expected' in groups[1]
+
+    def create_rst_error(self, e, warnings):
+        message = str(e)
+        if self.is_empty_code_block(message):
+            result = RSTEmptyCodeBlockError(message, warnings)
+        else:
+            result = RSTContentValidationError(message, warnings)
+        return result
+
     def _do_validate(self, content, unused_context=None):
         settings = self._get_settings()
         try:
@@ -56,7 +73,7 @@ class ReStructuredTextValidator(object):
             return self._log_warnings(settings)
         except Exception as e:
             warnings = self._log_warnings(settings)
-            exct = RSTContentValidationError(str(e), warnings)
+            exct = self.create_rst_error(e, warnings)
             raise exct
 
     def validate(self, content=b'', context=None):
