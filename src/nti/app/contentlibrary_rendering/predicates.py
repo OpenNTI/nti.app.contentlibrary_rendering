@@ -23,7 +23,7 @@ from nti.dataserver.metadata.predicates import BasePrincipalObjects
 logger = __import__('logging').getLogger(__name__)
 
 
-class _RenderingObjectsMixin(BasePrincipalObjects):
+class _RenderingObjectsMixin(BasePrincipalObjects):  # pylint: disable=abstract-method
 
     @property
     def library(self):
@@ -50,7 +50,7 @@ class _SystemContentRenderMetadata(_RenderingObjectsMixin):
 
 class _ContentPackageRenderJobs(_RenderingObjectsMixin):
 
-    def _predicate(self, unused):
+    def _predicate(self, unused_obj):
         return False
 
     def iter_objects(self):
