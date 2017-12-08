@@ -53,7 +53,6 @@ setup(
         'nti.app.asynchronous',
         'nti.app.contentlibrary',
         'nti.assessment',
-        'nti.async',
         'nti.base',
         'nti.common',
         'nti.contentlibrary',
