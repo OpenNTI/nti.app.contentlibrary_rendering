@@ -73,7 +73,7 @@ class Constructor(Processor):
         return context
 
     def conf_packages(self):
-        return (self.conf_package, 'nti.contentlibrary', 'nti.async')
+        return (self.conf_package, 'nti.contentlibrary', 'nti.asynchronous')
 
     def process_args(self, args):
         setattr(args, 'redis', True)
