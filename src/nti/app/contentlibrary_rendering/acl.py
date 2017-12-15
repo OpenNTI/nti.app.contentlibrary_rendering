@@ -19,6 +19,7 @@ from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
 
 from nti.dataserver.authorization import ROLE_ADMIN
+from nti.dataserver.authorization import ROLE_SITE_ADMIN
 from nti.dataserver.authorization import ROLE_CONTENT_ADMIN
 
 from nti.dataserver.interfaces import ALL_PERMISSIONS
@@ -45,6 +46,7 @@ class ContentPackageRenderMetadataACLProvider(object):
     @Lazy
     def __acl__(self):
         aces = [ace_allowing(ROLE_ADMIN, ALL_PERMISSIONS, type(self)),
+                ace_allowing(ROLE_SITE_ADMIN, ALL_PERMISSIONS, type(self)),
                 ace_allowing(ROLE_CONTENT_ADMIN, ALL_PERMISSIONS, type(self))]
         return acl_from_aces(aces)
 
@@ -63,6 +65,7 @@ class ContentPackageRenderJobACLProvider(object):
     @Lazy
     def __acl__(self):
         aces = [ace_allowing(ROLE_ADMIN, ALL_PERMISSIONS, type(self)),
+                ace_allowing(ROLE_SITE_ADMIN, ALL_PERMISSIONS, type(self)),
                 ace_allowing(ROLE_CONTENT_ADMIN, ALL_PERMISSIONS, type(self))]
         creator = IPrincipal(self.context.creator, None)
         if creator is not None:
