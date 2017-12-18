@@ -81,17 +81,7 @@
 	<include package=".docutils" />
 
 	<!-- Locating -->
-	<configure zcml:condition="not-have devmode">
-		<utility factory=".locators.FilesystemLocator" />
-	</configure>
-	<configure zcml:condition="have testmode">
-		<utility factory=".locators.FilesystemLocator" />
-	</configure>
-	<configure zcml:condition="not-have testmode">
-		<configure zcml:condition="have devmode">
-			<utility factory=".locators.DevFilesystemLocator" />
-		</configure>
-	</configure>
+	<utility factory=".locators.FilesystemLocator" />
 
 	<!-- Metadata -->
 	<subscriber	factory=".predicates._SystemContentRenderMetadata"
