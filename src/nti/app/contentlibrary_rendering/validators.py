@@ -74,6 +74,7 @@ class ReStructuredTextValidator(object):
             self.doctree(content, settings)
             return self._log_warnings(settings)
         except Exception as e:
+            logger.exception("While validating RST")
             warnings = self._log_warnings(settings)
             exct = self.create_rst_error(e, warnings)
             raise exct
