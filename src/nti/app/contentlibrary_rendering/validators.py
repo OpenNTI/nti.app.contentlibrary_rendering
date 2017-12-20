@@ -20,6 +20,8 @@ from zope import interface
 
 from nti.app.contentlibrary_rendering.interfaces import IRSTContentValidator
 
+from nti.base._compat import text_
+
 from nti.contentlibrary_rendering.docutils.validators import MSG_PATTERN
 from nti.contentlibrary_rendering.docutils.validators import RSTEmptyCodeBlockError
 from nti.contentlibrary_rendering.docutils.validators import RSTContentValidationError
@@ -47,8 +49,8 @@ class ReStructuredTextValidator(object):
         settings.warning_stream.seek(0)
         warnings = settings.warning_stream.read()
         if warnings:
-            logger.warn("reStructuredText parsing warnings\n" +
-                        warnings + "\n")
+            warnings = text_(warnings)
+            logger.warn("reStructuredText parsing warnings\n %s \n", warnings)
         return warnings
 
     def is_empty_code_block(self, message):
