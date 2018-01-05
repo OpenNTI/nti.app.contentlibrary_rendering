@@ -85,6 +85,7 @@ class RenderablePackageContentOperator(object):
     def _process_node_refs(self, input_lines, salt, idx, result):
         matched = False
         line = input_lines[idx]
+        # pylint: disable=not-an-iterable
         for pattern in self._node_ref_patterns:
             matched, line = self._replace_refs(pattern, line, salt)
             if matched:
@@ -95,6 +96,7 @@ class RenderablePackageContentOperator(object):
     def _process_media_nodes(self, input_lines, salt, idx, result):
         matched = False
         line = input_lines[idx]
+        # pylint: disable=not-an-iterable
         for pattern in self._media_patterns:
             matched = bool(pattern.match(line) is not None)
             if matched:
@@ -102,6 +104,7 @@ class RenderablePackageContentOperator(object):
                 result.append(line)
                 block, _, _ = input_lines.get_indented(idx, strip_indent=False)
                 for _, offset, line in block.xitems():
+                    # pylint: disable=no-member
                     m = self._uid_pattern.search(line)
                     if m is not None:
                         uid = m.groups()[0]
@@ -146,6 +149,6 @@ class RenderablePackageContentOperator(object):
             result = []
             if self._replace_all(content, salt, result):
                 content = u'\n'.join(result)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception("Cannot operate on content")
         return bytes_(content) if is_bytes else content
