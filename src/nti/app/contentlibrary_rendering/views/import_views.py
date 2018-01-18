@@ -144,7 +144,9 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                         remove_content(package)
                     library = component.getUtility(IContentPackageLibrary)
                     # 6. move content to library
-                    move_content(library, source)
+                    bucket = move_content(library, source)
+                    logger.info("Content for package %s moved to %s", 
+                                ntiid, bucket)
                     # 7. sync
                     synced = update_library(ntiid,
                                             source,
