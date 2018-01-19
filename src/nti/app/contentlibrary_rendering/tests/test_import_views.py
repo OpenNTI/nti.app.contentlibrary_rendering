@@ -13,6 +13,7 @@ from hamcrest import is_not
 from hamcrest import has_key
 from hamcrest import has_entry
 from hamcrest import assert_that
+from hamcrest import starts_with
 from hamcrest import has_property
 does_not = is_not
 
@@ -37,7 +38,7 @@ from nti.contentlibrary import RST_MIMETYPE
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 
 from nti.contentlibrary.utils import operate_encode_content
-from nti.contentlibrary.utils import get_content_package_site 
+from nti.contentlibrary.utils import get_content_package_site
 
 from nti.contentlibrary.zodb import RenderableContentPackage
 
@@ -70,6 +71,7 @@ class TestImportViews(ApplicationLayerTest):
             "CS1323_F_2015_Intro_to_Computer_Programming.zip": source
         })
         try:
+            # post new
             res = self.testapp.post_json('/dataserver2/Library/@@ImportRenderedContent',
                                          {'site': 'janux.ou.edu',
                                           'obfuscate': False},
@@ -82,6 +84,18 @@ class TestImportViews(ApplicationLayerTest):
                 package = library.get(self.ntiid)
                 site_name = get_content_package_site(package)
                 assert_that(site_name, is_('janux.ou.edu'))
+
+            # post update
+            source.seek(0)
+            res = self.testapp.post_json('/dataserver2/Library/@@ImportRenderedContent',
+                                         {'site': 'janux.ou.edu',
+                                          'obfuscate': True},
+                                         status=200)
+
+            assert_that(res.json_body,
+                        has_entry('Items',
+                                  has_entry(self.ntiid,
+                                            has_entry('root', starts_with('/sites/janux.ou.edu/_rendered_')))))
         finally:
             path = os.path.join(self.layer.library_path,
                                 'sites', 'janux.ou.edu')
@@ -93,7 +107,8 @@ class TestImportViews(ApplicationLayerTest):
                                            description=u'Manga bleach')
         package.write_contents('ichigo', RST_MIMETYPE)
         ext_obj = to_external_object(package)
-        [ext_obj.pop(x, None) for x in ('NTIID','ntiid')]
+        # pylint: disable=expression-not-assigned
+        [ext_obj.pop(x, None) for x in ('NTIID', 'ntiid')]
 
         res = self.testapp.post_json(href, ext_obj, status=201)
         return res.json_body['NTIID']
@@ -112,4 +127,3 @@ class TestImportViews(ApplicationLayerTest):
             library = component.getUtility(IContentPackageLibrary)
             package = library.get(ntiid)
             assert_that(package, has_property('contents', is_(b'rukia')))
-    
