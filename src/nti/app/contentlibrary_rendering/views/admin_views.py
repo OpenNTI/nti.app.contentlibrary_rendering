@@ -28,8 +28,6 @@ from nti.app.externalization.view_mixins import BatchingUtilsMixin
 
 from nti.app.contentlibrary.views import LibraryPathAdapter
 
-from nti.app.contentlibrary_rendering.views import MessageFactory as _
-
 from nti.app.contentlibrary_rendering.utils import get_failed_render_jobs
 from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
 
@@ -248,6 +246,7 @@ class RemoveContentPackageRenderJobsView(AbstractAuthenticatedView):
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
         meta = IContentPackageRenderMetadata(self.context)
+        # pylint: disable=too-many-function-args
         meta.clear()  # clear container
         return hexc.HTTPNoContent()
 
@@ -265,6 +264,7 @@ class RemoveAllContentPackageRenderJobsView(AbstractAuthenticatedView):
         for package in packages:
             meta = IContentPackageRenderMetadata(package, None)
             if meta:
+                # pylint: disable=too-many-function-args
                 meta.clear()
         return hexc.HTTPNoContent()
 
@@ -312,6 +312,7 @@ class RemoveAllPendingRenderJobsView(AbstractAuthenticatedView,
         items = get_pending_render_jobs(packages)
         for job in items or ():
             meta = IContentPackageRenderMetadata(job)
+            # pylint: disable=too-many-function-args
             meta.removeJob(job)
         return hexc.HTTPNoContent()
 
@@ -360,6 +361,7 @@ class RemoveAllFailedRenderJobsView(AbstractAuthenticatedView,
         items = get_failed_render_jobs(packages)
         for job in items or ():
             meta = IContentPackageRenderMetadata(job)
+            # pylint: disable=too-many-function-args
             meta.removeJob(job)
         return hexc.HTTPNoContent()
 
