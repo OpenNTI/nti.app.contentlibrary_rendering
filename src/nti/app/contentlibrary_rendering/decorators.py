@@ -98,6 +98,7 @@ class _RenderablePackageEditorDecorator(AbstractAuthenticatedRequestAwareDecorat
     def _render_job_link(self, context, result):
         meta = IContentPackageRenderMetadata(context, None)
         if meta is not None:
+            # pylint: disable=too-many-function-args
             latest_job = meta.mostRecentRenderJob()
             if latest_job is not None:
                 # Decorate the job itself along with a link to fetch job
