@@ -23,9 +23,11 @@ from nti.app.contentlibrary_rendering.utils import get_dataserver_asset
 
 from nti.contentfragments.interfaces import IUnicode
 
+from nti.contentlibrary.interfaces import IContentPackage
 from nti.contentlibrary.interfaces import IEditableContentPackage
 from nti.contentlibrary.interfaces import IRenderableContentPackage
 from nti.contentlibrary.interfaces import IContentPackageRemovedEvent
+from nti.contentlibrary.interfaces import IContentPackageDeletedEvent
 from nti.contentlibrary.interfaces import IContentPackageLocationChanged
 
 from nti.contentlibrary_rendering.utils import render_package
@@ -53,6 +55,7 @@ def _content_removed(package, unused_event=None):
     remove_rendered_package(package)
 
 
+@component.adapter(IContentPackage, IContentPackageDeletedEvent)
 @component.adapter(IRenderableContentPackage, IContentPackageRemovedEvent)
 def _content_package_removed(package, unused_event=None):
     _content_removed(package)

@@ -62,6 +62,10 @@
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
 	                 nti.contentlibrary.interfaces.IContentPackageRemovedEvent"/>
 
+	<subscriber handler=".subscribers._content_package_removed"
+	            for="nti.contentlibrary.interfaces.IContentPackage
+	                 nti.contentlibrary.interfaces.IContentPackageDeletedEvent"/>
+
 	<subscriber handler=".subscribers._content_location_changed"
 	            for="nti.contentlibrary.interfaces.IRenderableContentPackage
 	                 nti.contentlibrary.interfaces.IContentPackageLocationChanged"/>
