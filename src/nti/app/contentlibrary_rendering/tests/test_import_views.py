@@ -34,6 +34,7 @@ from nti.app.testing.decorators import WithSharedApplicationMockDS
 from nti.cabinet.mixins import SourceFile
 
 from nti.contentlibrary import RST_MIMETYPE
+from nti.contentlibrary import DELETED_MARKER
 
 from nti.contentlibrary.interfaces import IContentPackageLibrary
 
@@ -78,12 +79,13 @@ class TestImportViews(ApplicationLayerTest):
                                          status=200)
             assert_that(res.json_body,
                         has_entry('Items', has_key(self.ntiid)))
+            old_path = res.json_body['Items'][self.ntiid]['root']
 
             with mock_dataserver.mock_db_trans(self.ds, site_name='janux.ou.edu'):
                 library = component.getUtility(IContentPackageLibrary)
                 package = library.get(self.ntiid)
                 site_name = get_content_package_site(package)
-                assert_that(site_name, is_('janux.ou.edu'))
+                assert_that(site_name, is_('platform.ou.edu'))
 
             # post update
             source.seek(0)
@@ -92,14 +94,15 @@ class TestImportViews(ApplicationLayerTest):
                                           'obfuscate': True},
                                          status=200)
 
-            assert_that(res.json_body,
-                        has_entry('Items',
-                                  has_entry(self.ntiid,
-                                            has_entry('root', starts_with('/sites/janux.ou.edu/_rendered_')))))
+            new_path = res.json_body['Items'][self.ntiid]['root']
+            assert_that(new_path, starts_with('/sites/platform.ou.edu/_rendered_'))
         finally:
-            path = os.path.join(self.layer.library_path,
-                                'sites', 'janux.ou.edu')
-            shutil.rmtree(path, True)
+            old_path = old_path[1:]
+            new_path = new_path[1:]
+            delete_marker = os.path.join(self.layer.library_path, old_path, DELETED_MARKER)
+            os.remove(delete_marker)
+            new_path = os.path.join(self.layer.library_path, new_path)
+            shutil.rmtree(new_path, True)
 
     def _create_package(self):
         href = '/dataserver2/Library'

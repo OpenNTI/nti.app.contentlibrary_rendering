@@ -85,10 +85,10 @@ logger = __import__('logging').getLogger(__name__)
 class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
 
     def _get_site(self, request_site, package):
-        if request_site:
-            site_name = request_site
-        elif package is not None:
+        if package is not None:
             site_name = get_content_package_site(package)
+        elif request_site:
+            site_name = request_site
         else:
             site_name = getSite().__name__
         return site_name
@@ -104,12 +104,25 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
             source = obfuscate_source(source)
         return source
 
+    def _remove_content(self, ntiid, library, source):
+        """
+        Remove all content packages on disk with our ntiid (should only be one).
+        """
+        new_root_name = os.path.basename(source)
+        enumeration = library.enumeration
+        content_packages = (x for x in enumeration.enumerateContentPackages()
+                            if x.ntiid == ntiid)
+        for package in content_packages:
+            # Do not delete the package if we're merging.
+            if package.root.name != new_root_name:
+                remove_content(package)
+
     def _do_call(self):
         data = self.readInput() or self.request.params
         request_site = data.get('site')
         obfuscate = is_true(data.get('obfuscate'))
         request_library = component.getUtility(IContentPackageLibrary)
-        # preapre results
+        # prepare results
         result = LocatedExternalDict()
         result.__name__ = self.request.view_name
         result.__parent__ = self.request.context
@@ -126,8 +139,10 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                 # 2. get package ntiid
                 ntiid = get_rendered_package_ntiid(source)
                 # 3. get existing package if any
-                package = request_library.get(ntiid)
-                # 4. get update site
+                package = request_library[ntiid]
+                logger.info('Importing package (%s) (current_site=%s) (request_site=%s) (obfuscate=%s)',
+                            ntiid, getSite().__name__, request_site, obfuscate)
+                # 4. get update site, preferring package site
                 site_name = self._get_site(request_site, package)
                 if not site_name:
                     raise_json_error(self.request,
@@ -138,14 +153,14 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                                      },
                                      None)
                 with current_site(get_host_site(site_name)):
-                    # 5. remove content
-                    if      package is not None \
-                        and get_content_package_site(package) == site_name:
-                        remove_content(package)
+                    # 5. remove content (before moving new content)
                     library = component.getUtility(IContentPackageLibrary)
+                    logger.info("Removing package (%s) (site=%s)",
+                                ntiid, site_name)
+                    self._remove_content(ntiid, library, source)
                     # 6. move content to library
                     bucket = move_content(library, source)
-                    logger.info("Content for package %s moved to %s", 
+                    logger.info("Content for package %s moved to %s",
                                 ntiid, bucket)
                     # 7. sync
                     synced = update_library(ntiid,
@@ -183,6 +198,6 @@ class ImportEditableContentsView(AbstractAuthenticatedView,
             decoded = base64.b64decode(data['contents'])
             data['contents'] = zlib.decompress(decoded)
         context = removeAllProxies(self.context)
-        ContentPackageImporterMixin.handle_package(self, context, 
+        ContentPackageImporterMixin.handle_package(self, context,
                                                    data, context)
         return context
