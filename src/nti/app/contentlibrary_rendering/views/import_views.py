@@ -65,6 +65,8 @@ from nti.externalization.proxy import removeAllProxies
 
 from nti.site.hostpolicy import get_host_site
 
+from nti.site.site import get_component_hierarchy_names
+
 ITEMS = StandardExternalFields.ITEMS
 NTIID = StandardExternalFields.NTIID
 TOTAL = StandardExternalFields.TOTAL
@@ -84,13 +86,17 @@ logger = __import__('logging').getLogger(__name__)
                permission=nauth.ACT_SYNC_LIBRARY)
 class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
 
+    @property
+    def current_site_name(self):
+        return getSite().__name__
+
     def _get_site(self, request_site, package):
         if package is not None:
             site_name = get_content_package_site(package)
         elif request_site:
             site_name = request_site
         else:
-            site_name = getSite().__name__
+            site_name = self.current_site_name
         return site_name
 
     def _process_source(self, content, path, obfuscate=True):
@@ -110,8 +116,9 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
         """
         new_root_name = os.path.basename(source)
         enumeration = library.enumeration
-        content_packages = (x for x in enumeration.enumerateContentPackages()
-                            if x.ntiid == ntiid)
+        content_packages = (
+            x for x in enumeration.enumerateContentPackages() if x.ntiid == ntiid
+        )
         for package in content_packages:
             # Do not delete the package if we're merging.
             if package.root.name != new_root_name:
@@ -139,9 +146,12 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                 # 2. get package ntiid
                 ntiid = get_rendered_package_ntiid(source)
                 # 3. get existing package if any
-                package = request_library[ntiid]
+                try:
+                    package = request_library[ntiid]
+                except KeyError:
+                    package = None
                 logger.info('Importing package (%s) (current_site=%s) (request_site=%s) (obfuscate=%s)',
-                            ntiid, getSite().__name__, request_site, obfuscate)
+                            ntiid, self.current_site_name, request_site, obfuscate)
                 # 4. get update site, preferring package site
                 site_name = self._get_site(request_site, package)
                 if not site_name:
@@ -150,6 +160,14 @@ class ImportRenderedContentView(_AbstractSyncAllLibrariesView):
                                      {
                                          'message': _(u"Cannot update a global package."),
                                          'code': 'CannotUpdateGlobalPackage'
+                                     },
+                                     None)
+                if site_name not in get_component_hierarchy_names():
+                    raise_json_error(self.request,
+                                     hexc.HTTPUnprocessableEntity,
+                                     {
+                                         'message': _(u"Invalid site."),
+                                         'code': 'InvalidImportSite'
                                      },
                                      None)
                 with current_site(get_host_site(site_name)):
@@ -193,6 +211,7 @@ class ImportEditableContentsView(AbstractAuthenticatedView,
                                  'message': _(u"Invalid input data."),
                              },
                              None)
+        # pylint: disable=expression-not-assigned
         [data.pop(x, None) for x in (NTIID, INTERNAL_NTIID)]
         if 'contents' in data:
             decoded = base64.b64decode(data['contents'])
