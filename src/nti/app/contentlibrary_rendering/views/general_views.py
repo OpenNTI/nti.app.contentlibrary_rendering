@@ -8,12 +8,14 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from requests.structures import CaseInsensitiveDict
-
+# pylint: disable=too-many-function-args
+            
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+
+from requests.structures import CaseInsensitiveDict
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
@@ -22,8 +24,6 @@ from nti.app.contentlibrary_rendering import VIEW_RENDER_JOBS
 
 from nti.app.contentlibrary_rendering.views import validate_content
 from nti.app.contentlibrary_rendering.views import MessageFactory as _
-
-from nti.app.externalization.internalization import read_body_as_external_object
 
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
@@ -61,9 +61,9 @@ logger = __import__('logging').getLogger(__name__)
 class RenderContentPackageView(AbstractAuthenticatedView,
                                ModeledContentUploadRequestUtilsMixin):
 
-    def readInput(self):
+    def readInput(self, value=None):
         if self.request.body:
-            values = read_body_as_external_object(self.request)
+            value = super(RenderContentPackageView, self).readInput(value)
         else:
             values = self.request.params
         result = CaseInsensitiveDict(values)
@@ -72,6 +72,7 @@ class RenderContentPackageView(AbstractAuthenticatedView,
     def __call__(self):
         validate_content(self.context, self.request)
         data = self.readInput()
+        # pylint: disable=no-member
         provider = get_provider(self.context.ntiid)
         mark_rendered = data.get('MarkRendered') \
                      or data.get('mark_rendered') or 'True'
@@ -95,6 +96,7 @@ class QueryJobView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
+        # pylint: disable=no-member
         params = CaseInsensitiveDict(self.request.params)
         job_id = params.get('jobId') or params.get('job_id')
         meta = IContentPackageRenderMetadata(self.context, None)
@@ -132,6 +134,7 @@ class RenderJobsView(AbstractAuthenticatedView):
     """
 
     def __call__(self):
+        # pylint: disable=no-member
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
             logger.warn('No meta found for content package (%s)',
@@ -152,5 +155,6 @@ class RenderJobsView(AbstractAuthenticatedView):
 class RenderJobDeleteView(AbstractAuthenticatedView):
 
     def __call__(self):
+        # pylint: disable=no-member
         del self.context.__parent__[self.context.__name__]
         return hexc.HTTPNoContent()

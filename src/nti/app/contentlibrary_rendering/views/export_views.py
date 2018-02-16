@@ -104,7 +104,7 @@ class ExportContentPackageMixin(object):
 class ExportContentUnitContentsView(_AbstractSyncAllLibrariesView,
                                     ExportContentPackageMixin):
 
-    def _export_package(self, unit):
+    def _export_package(self, unit):  # pylint: disable=arguments-differ
         package = find_interface(unit, IContentPackage, strict=False)
         if      IPublishable.providedBy(package) \
             and not IContentRendered.providedBy(package):
