@@ -8,14 +8,14 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from requests.structures import CaseInsensitiveDict
-
-from zope import interface
-
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+
+from requests.structures import CaseInsensitiveDict
+
+from zope import interface
 
 from nti.app.base.abstract_views import get_all_sources
 from nti.app.base.abstract_views import AbstractAuthenticatedView
@@ -84,6 +84,7 @@ class RenderContentSourceView(AbstractAuthenticatedView,
         result[ITEMS] = items = {}
         # read params
         data = self.readInput()
+        # pylint: disable=no-member
         creator = self.remoteUser.username
         provider = data.get('provider') or NTI_PROVIDER
         site = data.get('site') or data.get('site_name')

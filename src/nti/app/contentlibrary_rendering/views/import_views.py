@@ -14,15 +14,15 @@ import base64
 import shutil
 import tempfile
 
-from zope import component
-
-from zope.component.hooks import getSite
-from zope.component.hooks import site as current_site
-
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+
+from zope import component
+
+from zope.component.hooks import getSite
+from zope.component.hooks import site as current_site
 
 from nti.app.base.abstract_views import get_all_sources
 from nti.app.base.abstract_views import AbstractAuthenticatedView

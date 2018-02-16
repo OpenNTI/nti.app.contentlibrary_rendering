@@ -8,12 +8,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from requests.structures import CaseInsensitiveDict
-
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+
+from requests.structures import CaseInsensitiveDict
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
@@ -54,6 +54,7 @@ class RenderableContentPackagePublishView(AbstractAuthenticatedView):
 
     def __call__(self):
         validate_content(self.context, self.request)
+        # pylint: disable=no-member
         self.context.publish()
         return self.context
 
@@ -79,6 +80,7 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
                 pass
 
     def _raise_conflict_error(self, code, message, associations):
+        # pylint: disable=no-member
         associations = [x for x in self._ntiids(associations)]
         logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
                     self.context.ntiid,
@@ -105,6 +107,7 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
         params = CaseInsensitiveDict(self.request.params)
         force = is_true(params.get('force'))
         if not associations or force:
+            # pylint: disable=no-member
             self.context.unpublish()
         else:
             self._raise_conflict_error(self.CONFIRM_CODE,
