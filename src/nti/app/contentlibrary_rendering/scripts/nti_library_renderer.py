@@ -12,12 +12,12 @@ import os
 import shutil
 import tempfile
 
+from z3c.autoinclude.zcml import includePluginsDirective
+
 from zope import component
 from zope import interface
 
 from zope.location.interfaces import IContained
-
-from z3c.autoinclude.zcml import includePluginsDirective
 
 from nti.app.asynchronous.processor import Processor
 

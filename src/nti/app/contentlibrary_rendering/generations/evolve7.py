@@ -8,8 +8,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=W0212,W0621,W0703
-
 import time
 import zlib
 import pickle
@@ -83,13 +81,13 @@ class MockDataserver(object):
     def get_by_oid(self, oid, ignore_creator=False):
         resolver = component.queryUtility(IOIDResolver)
         if resolver is None:
-            logger.warn("Using dataserver without a proper ISiteManager.")
+            logger.warning("Using dataserver without a proper ISiteManager.")
         else:
             return resolver.get_object_by_oid(oid, ignore_creator=ignore_creator)
         return None
 
 
-def do_evolve(context, generation=generation):
+def do_evolve(context, generation=generation):  # pylint: disable=redefined-outer-name
     setHooks()
     conn = context.connection
 
@@ -117,7 +115,7 @@ def do_evolve(context, generation=generation):
             for job in _all_jobs(redis_client, hash_key):
                 try:
                     job()
-                except Exception:
+                except Exception:  # pylint: disable=broad-except
                     logger.error("Cannot execute library rendering job %s",
                                  job)
             _reset_queue(redis_client, name, hash_key)

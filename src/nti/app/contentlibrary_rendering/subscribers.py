@@ -10,11 +10,11 @@ from __future__ import absolute_import
 
 import six
 
+from zc.intid.interfaces import IBeforeIdRemovedEvent
+
 from zope import component
 
 from zope.intid.interfaces import IIntIdRemovedEvent
-
-from zc.intid.interfaces import IBeforeIdRemovedEvent
 
 from nti.app.authentication import get_remote_user
 

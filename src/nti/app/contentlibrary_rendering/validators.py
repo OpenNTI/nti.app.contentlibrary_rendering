@@ -8,13 +8,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-from six.moves import cStringIO
-
 from docutils.core import publish_doctree
 
 from docutils.frontend import OptionParser
 
 from docutils.parsers.rst import Parser
+
+from six.moves import cStringIO
 
 from zope import interface
 
@@ -50,7 +50,8 @@ class ReStructuredTextValidator(object):
         warnings = settings.warning_stream.read()
         if warnings:
             warnings = text_(warnings)
-            logger.warn("reStructuredText parsing warnings\n %s \n", warnings)
+            logger.warning("reStructuredText parsing warnings\n %s \n",
+                           warnings)
         return warnings
 
     def is_empty_code_block(self, message):
