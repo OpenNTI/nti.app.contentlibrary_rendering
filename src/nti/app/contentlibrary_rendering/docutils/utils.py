@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
+
 from six.moves import urllib_parse
 
 from nti.app.contentlibrary_rendering.utils import is_dataserver_asset

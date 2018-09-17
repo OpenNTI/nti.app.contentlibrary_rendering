@@ -8,8 +8,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# pylint: disable=W0212,W0621,W0703
-
 generation = 6
 
 from zope import component
@@ -35,7 +33,7 @@ class MockDataserver(object):
     def get_by_oid(self, oid, ignore_creator=False):
         resolver = component.queryUtility(IOIDResolver)
         if resolver is None:
-            logger.warn("Using dataserver without a proper ISiteManager.")
+            logger.warning("Using dataserver without a proper ISiteManager.")
         else:
             return resolver.get_object_by_oid(oid, ignore_creator=ignore_creator)
         return None
@@ -46,7 +44,7 @@ def remove_queue(name):
     try:
         redis.zremrangebyrank(name, 0, -1)
         redis.delete(name)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         pass
 
 

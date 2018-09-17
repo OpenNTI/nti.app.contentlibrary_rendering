@@ -38,9 +38,8 @@ from nti.contentlibrary_rendering.utils import render_package
 
 from nti.dataserver import authorization as nauth
 
-from nti.externalization.externalization import StandardExternalFields
-
 from nti.externalization.interfaces import LocatedExternalDict
+from nti.externalization.interfaces import StandardExternalFields
 
 from nti.ntiids.ntiids import get_provider
 
@@ -101,23 +100,23 @@ class QueryJobView(AbstractAuthenticatedView):
         job_id = params.get('jobId') or params.get('job_id')
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
-            logger.warn('No meta found for content package (%s)',
-                        self.context.ntiid)
+            logger.warning('No meta found for content package (%s)',
+                           self.context.ntiid)
             raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
 
         if job_id:
             try:
                 render_job = meta[job_id]
             except KeyError:
-                logger.warn('No job found for content package (%s) (%s)',
-                            self.context.ntiid, job_id)
+                logger.warning('No job found for content package (%s) (%s)',
+                               self.context.ntiid, job_id)
                 raise hexc.HTTPNotFound(_(u'No content found for job key.'))
         else:
             render_job = meta.mostRecentRenderJob()
 
         if render_job is None:
-            logger.warn('No job found for content package (%s)',
-                        self.context.ntiid)
+            logger.warning('No job found for content package (%s)',
+                           self.context.ntiid)
             raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
         return render_job
 
@@ -137,8 +136,8 @@ class RenderJobsView(AbstractAuthenticatedView):
         # pylint: disable=no-member
         meta = IContentPackageRenderMetadata(self.context, None)
         if meta is None:
-            logger.warn('No meta found for content package (%s)',
-                        self.context.ntiid)
+            logger.warning('No meta found for content package (%s)',
+                           self.context.ntiid)
             raise hexc.HTTPNotFound(_(u'Content has not been processed.'))
         result = LocatedExternalDict()
         result[NTIID] = self.context.ntiid

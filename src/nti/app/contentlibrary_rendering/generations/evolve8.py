@@ -35,7 +35,7 @@ class MockDataserver(object):
     def get_by_oid(self, oid, ignore_creator=False):
         resolver = component.queryUtility(IOIDResolver)
         if resolver is None:
-            logger.warn("Using dataserver without a proper ISiteManager.")
+            logger.warning("Using dataserver without a proper ISiteManager.")
         else:
             return resolver.get_object_by_oid(oid, ignore_creator=ignore_creator)
         return None
@@ -58,7 +58,7 @@ def _process_site(current, seen):
                         pass
 
 
-def do_evolve(context, generation=generation):
+def do_evolve(context, generation=generation):  # pylint: disable=redefined-outer-name
     setHooks()
     conn = context.connection
     root = conn.root()

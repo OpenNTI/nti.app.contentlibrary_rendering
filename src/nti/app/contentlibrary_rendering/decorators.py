@@ -10,12 +10,12 @@ from __future__ import absolute_import
 
 import os
 
-from zope import component
-from zope import interface
-
 from pyramid.interfaces import IRequest
 
 from pyramid.threadlocal import get_current_request
+
+from zope import component
+from zope import interface
 
 from nti.app.contentlibrary_rendering import VIEW_QUERY_JOB
 from nti.app.contentlibrary_rendering import LIBRARY_ADAPTER

@@ -33,7 +33,8 @@ from nti.contentlibrary.interfaces import resolve_content_unit_associations
 from nti.dataserver import authorization as nauth
 
 from nti.externalization.externalization import to_external_object
-from nti.externalization.externalization import StandardExternalFields
+
+from nti.externalization.interfaces import StandardExternalFields
 
 from nti.links.links import Link
 
@@ -82,9 +83,9 @@ class RenderableContentPackageUnpublishView(AbstractAuthenticatedView):
     def _raise_conflict_error(self, code, message, associations):
         # pylint: disable=no-member
         associations = [x for x in self._ntiids(associations)]
-        logger.warn('Attempting to unpublish content unit in course(s) (%s) (%s)',
-                    self.context.ntiid,
-                    associations)
+        logger.warning('Attempting to unpublish content unit in course(s) (%s) (%s)',
+                       self.context.ntiid,
+                       associations)
         params = dict(self.request.params)
         params['force'] = True
         links = (
