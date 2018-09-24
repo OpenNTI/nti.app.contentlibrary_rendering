@@ -37,6 +37,7 @@ from nti.contentlibrary_rendering.interfaces import IContentPackageRenderMetadat
 
 from nti.dataserver.authorization import ACT_CONTENT_EDIT
 from nti.dataserver.authorization import ACT_SYNC_LIBRARY 
+from nti.dataserver.authorization import is_admin_or_site_admin
 
 from nti.dataserver.interfaces import IUser
 
@@ -214,8 +215,7 @@ class _ContentPackageDecorator(AbstractAuthenticatedRequestAwareDecorator):
 class _UserDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
     def _predicate(self, context, unused_result):
-        return  self._is_authenticated \
-            and has_permission(ACT_SYNC_LIBRARY, context, self.request)
+        return self._is_authenticated and is_admin_or_site_admin(context)
 
     def _do_decorate_external(self, context, result):
         _links = result.setdefault(LINKS, [])
