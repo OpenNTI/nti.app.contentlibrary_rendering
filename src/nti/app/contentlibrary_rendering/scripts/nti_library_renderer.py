@@ -67,8 +67,7 @@ class Constructor(Processor):
         context = create_context(env_dir,
                                  with_library=True,
                                  plugins=True,
-                                 slugs=True,
-                                 slugs_files=("*content_render.zcml", "*features.zcml"))
+                                 slugs=True)
         self.extend_context(context)
         return context
 
