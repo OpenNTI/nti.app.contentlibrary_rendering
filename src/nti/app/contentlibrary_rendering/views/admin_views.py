@@ -488,7 +488,7 @@ class MarkOrphanedJobsFailedView(AbstractAuthenticatedView):
         seen = set()
         for host_site in get_all_host_sites():
             with current_site(host_site):
-                jobs = get_pending_render_jobs()
+                jobs = get_pending_render_jobs(sites=(host_site.__name__,))
                 for job in jobs or ():
                     if now - job.createdTime < max_duration or job in seen:
                         continue
