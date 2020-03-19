@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import time
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -17,6 +19,8 @@ from requests.structures import CaseInsensitiveDict
 
 from zope import component
 from zope import lifecycleevent
+
+from zope.cachedescriptors.property import Lazy
 
 from zope.component.hooks import site as current_site
 
@@ -32,8 +36,11 @@ from nti.app.contentlibrary_rendering.utils import get_failed_render_jobs
 from nti.app.contentlibrary_rendering.utils import get_pending_render_jobs
 
 from nti.app.contentlibrary_rendering.views import perform_content_validation
+from nti.app.contentlibrary_rendering.views import MessageFactory as _
 
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
+from nti.app.externalization.error import raise_json_error
 
 from nti.contentlibrary.interfaces import IContentRendered
 from nti.contentlibrary.interfaces import IContentPackageLibrary
@@ -440,3 +447,55 @@ class EmptyQueuesView(AbstractAuthenticatedView):
             queue = get_job_queue(name)
             queue.empty()
         return hexc.HTTPNoContent()
+
+
+@view_config(route_name='objects.generic.traversal',
+             renderer='rest',
+             request_method='POST',
+             context=LibraryPathAdapter,
+             name='MarkOrphanedJobsFailed',
+             permission=nauth.ACT_NTI_ADMIN)
+class MarkOrphanedJobsFailedView(AbstractAuthenticatedView):
+    """
+    Mark pending jobs as failed if they have been running for
+    more than a specific time (one hour by default).
+    """
+    @Lazy
+    def _params(self):
+        return CaseInsensitiveDict(self.request.params)
+
+    @Lazy
+    def max_rendering_duration(self):
+        duration = self._params.get('max_rendering_duration', 60*60)
+        try:
+            duration = float(duration)
+        except ValueError:
+            duration = None
+
+        if duration is None or duration <= 0:
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                 'message': _(u"max_rendering_duration should be positive number."),
+                             },
+                             None)
+        return duration
+
+    def __call__(self):
+        max_duration = self.max_rendering_duration
+        now = time.time()
+
+        seen = set()
+        for host_site in get_all_host_sites():
+            with current_site(host_site):
+                jobs = get_pending_render_jobs()
+                for job in jobs or ():
+                    if now - job.createdTime < max_duration or job in seen:
+                        continue
+
+                    seen.add(job)
+                    job.update_to_failed_state("Rendering time takes too long (equals to or more than {} seconds).".format(max_duration))
+
+        result = LocatedExternalDict()
+        result[ITEM_COUNT] = result[TOTAL] = len(seen)
+        return result
