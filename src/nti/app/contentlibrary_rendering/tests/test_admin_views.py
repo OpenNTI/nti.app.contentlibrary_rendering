@@ -50,7 +50,7 @@ class TestAdminViews(ApplicationLayerTest):
 
     default_origin = 'http://janux.ou.edu'
 
-    def _create_package_and_job(self, state=FAILED, rendered=False):
+    def _create_package_and_job(self, state=FAILED, rendered=False, createdTime=None):
         href = '/dataserver2/Library'
         package = RenderableContentPackage(title=u'Bleach',
                                            description=u'Manga bleach')
@@ -67,6 +67,8 @@ class TestAdminViews(ApplicationLayerTest):
         job.provider = u'NTI'
         job.creator = self.default_username
         job.jobId = u'tag:nextthought.com,2011-10:NTI-RenderJob-%s' % time.time()
+        if createdTime is not None:
+            job.createdTime = createdTime
 
         with mock_dataserver.mock_db_trans(self.ds, site_name='janux.ou.edu'):
             package = find_object_with_ntiid(ntiid)
@@ -215,3 +217,33 @@ class TestAdminViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entries('Total', is_(0),
                                 'ItemCount', is_(0)))
+
+    @WithSharedApplicationMockDS(testapp=True, users=True)
+    def test_mark_orphaned_jobs_failed(self):
+        url = '/dataserver2/Library/@@MarkOrphanedJobsFailed'
+        self._create_package_and_job(state=PENDING, createdTime=1)
+        self._create_package_and_job(state=PENDING, createdTime=2)
+        res = self.testapp.post(url, status=200)
+        assert_that(res.json_body, has_entries('Total', is_(2),
+                                               'ItemCount', is_(2)))
+
+        res = self.testapp.post(url, status=200)
+        assert_that(res.json_body, has_entries('Total', is_(0),
+                                               'ItemCount', is_(0)))
+
+        self._create_package_and_job(state=PENDING, createdTime=time.time()-60)
+        res = self.testapp.post(url, status=200)
+        assert_that(res.json_body, has_entries('Total', is_(0),
+                                               'ItemCount', is_(0)))
+
+        res = self.testapp.post(url + '?max_rendering_duration=5', status=200)
+        assert_that(res.json_body, has_entries('Total', is_(1),
+                                               'ItemCount', is_(1)))
+        res = self.testapp.post(url + '?max_rendering_duration=5', status=200)
+        assert_that(res.json_body, has_entries('Total', is_(0),
+                                               'ItemCount', is_(0)))
+
+        res = self.testapp.post(url + '?max_rendering_duration=0', status=422)
+        assert_that(res.json_body, has_entries({'message': 'max_rendering_duration should be positive number.'}))
+        res = self.testapp.post(url + '?max_rendering_duration=-1', status=422)
+        assert_that(res.json_body, has_entries({'message': 'max_rendering_duration should be positive number.'}))
